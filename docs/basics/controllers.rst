@@ -4,7 +4,7 @@ ResourceControllers
 ===================
 
 While the ``Resource`` hands off work to your domain logic,
-``PhlyRestfully\ResourceController`` mediates between the incoming request and
+``ZF\Rest\ResourceController`` mediates between the incoming request and
 the ``Resource``, as well as ensures an appropriate response payload is created
 and returned.
 
@@ -30,10 +30,10 @@ following:
                 $events->setIdentifiers('PasteResource`);
                 $events->attach($persistence);
 
-                $resource    = new PhlyRestfully\Resource();
+                $resource    = new ZF\Rest\Resource();
                 $resource->setEventManager($events);
 
-                $controller = new PhlyRestfully\ResourceController('PasteController`);
+                $controller = new ZF\Rest\ResourceController('PasteController`);
                 $controller->setResource($resource);
                 $controller->setRoute('paste/api');
                 $controller->setCollectionName('pastes');
@@ -61,9 +61,9 @@ Essentially, three steps are taken:
   ``Resource`` instance and some configuration.
 
 Considering that most ``ResourceController`` instances follow the same pattern,
-PhlyRestfully provides an abstract factory for controllers that does the work
+ZFRest provides an abstract factory for controllers that does the work
 for you. To use it, you will provide a ``resources`` subkey in your
-``phlyrestfully`` configuration, with controller name/configuration pairs. As an
+``zf-rest`` configuration, with controller name/configuration pairs. As an
 example:
 
 .. code-block:: php
@@ -72,16 +72,16 @@ example:
     // In a module's configuration, or the autoloadable configuration of your
     // application:
     return array(
-        'phlyrestfully' => array(
+        'zf-rest' => array(
             'resources' => array(
                 // Key is the service name for the controller; value is
                 // configuration
                 'MyApi\Controller\Contacts' => array(
                     // Name of the controller class to use, if other than
-                    // PhlyRestfully\ResourceController. Must extend
-                    // PhlyRestfully\ResourceController, however, to be valid.
+                    // ZF\Rest\ResourceController. Must extend
+                    // ZF\Rest\ResourceController, however, to be valid.
                     // (OPTIONAL)
-                    'controller_class' => 'PhlyRestfully\ResourceController',
+                    'controller_class' => 'ZF\Rest\ResourceController',
 
                     // Event identifier for the resource controller. By default,
                     // the resource name is used; you can use a different
@@ -104,7 +104,7 @@ example:
                     // Accept criteria (which accept headers will be allowed)
                     // (OPTIONAL)
                     'accept_criteria' => array(
-                        'PhlyRestfully\View\RestfulJsonModel' => array(
+                        'ZF\Rest\View\RestfulJsonModel' => array(
                             'application/json',
                             'text/json',
                         ),

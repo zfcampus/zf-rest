@@ -16,7 +16,7 @@ collection know when to stop).
 
 This gets tedious very quickly.
 
-Fortunately, PhlyRestfully can automate the process for you, assuming you are
+Fortunately, ZFRest can automate the process for you, assuming you are
 willing to use ``Zend\Paginator`` to help do some of the heavy lifting.
 
 Paginators
@@ -27,7 +27,7 @@ is a general purpose component for paginating collections of data. It requires
 only that you specify the number of items per page of data, and the current
 page.
 
-The integration within PhlyRestfully for ``Zend\Paginator`` uses a "page" query
+The integration within ZFRest for ``Zend\Paginator`` uses a "page" query
 string variable to indicate the current page. You set the page size during
 configuration:
 
@@ -35,7 +35,7 @@ configuration:
     :linenos:
 
     return array(
-        'phlyrestfully' => array(
+        'zf-rest' => array(
             'resources' => array(
                 'Paste\ApiController' => array(
                     // ...
@@ -47,7 +47,7 @@ configuration:
     );
 
 All you need to do, then, is return a ``Zend\Paginator\Paginator`` instance from
-your resource listener (or an extension of that class), and PhlyRestfully will
+your resource listener (or an extension of that class), and ZFRest will
 then generate appropriate relational links.
 
 For example, if we consider the :ref:`walkthrough example <basics.example>`, if
@@ -78,7 +78,7 @@ indicated page 17, our response would include the following links:
         // ...
     }
 
-Again, this functionality is built-in to PhlyRestfully; all you need to do is
+Again, this functionality is built-in to ZFRest; all you need to do is
 return a ``Paginator`` instance, and set the ``page_size`` configuration for
 your resource controller.
 
@@ -111,7 +111,7 @@ creates a "prev" relational link based on some calculated offset.
         // ... calculate $someOffset ...
 
         $links = $collection->getLinks();
-        $prev  = new \PhlyRestfully\Link('prev');
+        $prev  = new \ZF\Rest\Link('prev');
         $prev->setRoute(
             'paste/api',
             array(),
@@ -174,7 +174,7 @@ your resource controller:
     :linenos:
 
     return array(
-        'phlyrestfully' => array(
+        'zf-rest' => array(
             'resources' => array(
                 'Paste\ApiController' => array(
                     // ... 

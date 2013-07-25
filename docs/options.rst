@@ -1,4 +1,4 @@
-.. _phlyrestfully.options:
+.. _zfrest.options:
 
 Whitelisting HTTP Methods
 =========================
@@ -41,7 +41,7 @@ What happens if a malicious user tries something else? You should respond with a
     HTTP/1.1 405 Not Allowed
     Allow: GET, POST
 
-PhlyRestfully bakes this into its ``PhlyRestfully\ResourceController``
+ZFRest bakes this into its ``ZF\Rest\ResourceController``
 implementation, allowing you to specify via configuration which methods are
 allowed both for collections and individual resources handled by the controller.
 

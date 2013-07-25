@@ -4,12 +4,12 @@ Hydrators
 =========
 
 ``Zend\Stdlib\Hydrator`` offers a general-purpose solution for mapping arrays to
-objects (hydration) and objects to arrays (extraction). In PhlyRestfully,
+objects (hydration) and objects to arrays (extraction). In ZFRest,
 hydrators are used during rendering for this second operation, extraction, so
 that resources may be represented via JSON.
 
-Within PhlyRestfully, ``PhlyRestfully\View\JsonRenderer`` delegates to
-``PhlyRestfully\Plugin\HalLinks`` in order to return a representation of a
+Within ZFRest, ``ZF\Rest\View\JsonRenderer`` delegates to
+``ZF\Rest\Plugin\HalLinks`` in order to return a representation of a
 resource or collection. This was done to allow you, the user, to override how
 rendering is accomplished if desired; you can extend the ``HalLinks`` plugin and
 register your own version as a controller plugin and view helper.
@@ -96,13 +96,13 @@ Configuration-driven hydrator maps
 You can specify hydrators to use with the objects you return from your resources
 via configuration, and you can specify both a map of class/hydrator service
 pairs as well as a default hydrator to use as a fallback. As an example,
-consider the following `config/autoload/phlyrestfully.global.php` file:
+consider the following `config/autoload/zf-rest.global.php` file:
 
 .. code-block:: php
     :linenos:
 
     return array(
-        'phlyrestfully' => array(
+        'zf-rest' => array(
             'renderer' => array(
                 'default_hydrator' => 'ArraySerializable',
                 'hydrators' => array(

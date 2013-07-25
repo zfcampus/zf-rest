@@ -5,14 +5,14 @@ Metadata Mapping
 
 If you have been reading the reference guide sequentially, almost every page has
 referred to this one at some point. The reason is that, for purposes of
-flexibility, PhlyRestfully has needed to provide a low-level, configurable
+flexibility, ZFRest has needed to provide a low-level, configurable
 mechanism that solves the problems of:
 
 - ensuring resources have the correct "self" relational link
 - ensuring resources are extracted to a JSON representation correctly
 - ensuring that embedded resources are rendered as embedded HAL resources
 
-To achieve this in a simpler fashion, PhlyRestfully provides the ability to
+To achieve this in a simpler fashion, ZFRest provides the ability to
 create a "metadata map." The metadata map maps a class to a set of "rules" that
 define whether the class represents a resource or collection, the information
 necessary to generate a "self" relational link, and a hydrator to use to extract
@@ -25,7 +25,7 @@ the :ref:`embedded resources section <ref/embedding-resources>`:
     :linenos:
 
     return array(
-        'phlyrestfully' => array(
+        'zf-rest' => array(
             'metadata_map' => array(
                 'User' => array(
                     'hydrator'        => 'ObjectProperty',

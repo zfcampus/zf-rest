@@ -1,4 +1,4 @@
-.. _phlyrestfully.error-reporting:
+.. _zfrest.error-reporting:
 
 Error Reporting
 ===============
@@ -11,7 +11,7 @@ REST advocates indicate that HTTP response status codes should be used, but
 little has been done to standardize on the response format.
 
 For JSON APIs, though, two formats are starting to achieve large adoption:
-``vnd.error`` and ``API-Problem``. In PhlyRestfully, I have provided support for
+``vnd.error`` and ``API-Problem``. In ZFRest, I have provided support for
 returning ``Api-Problem`` payloads.
 
 API-Problem
@@ -46,13 +46,13 @@ custom error types, so long as you have a description of them to link to. You
 can provide as little or as much detail as you want, and even decide what
 information to expose based on environment.
 
-PhlyRestfully Choices
----------------------
+ZFRest Choices
+--------------
 
 The specification indicates that every error needs to include a "describedBy"
 field, pointing to a URI with more information on the problem type. Often, when
 you start a project, you may not want to worry about this up front -- the HTTP
-status code may be enough to begin. As such, PhlyRestfully assumes that if you
+status code may be enough to begin. As such, ZFRest assumes that if you
 do not provide a "describedBy" field, it will link to the URI describing the
 HTTP status codes.
 

@@ -1,12 +1,9 @@
 <?php
 /**
- * @link      https://github.com/weierophinney/PhlyRestfully for the canonical source repository
- * @copyright Copyright (c) 2013 Matthew Weier O'Phinney
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2-Clause
- * @package   PhlyRestfully
  */
 
-namespace PhlyRestfully;
+namespace ZF\Rest;
 
 use Zend\Stdlib\Hydrator\HydratorInterface;
 use Zend\Stdlib\Hydrator\HydratorPluginManager;
@@ -41,29 +38,29 @@ class Module
     /**
      * Retrieve Service Manager configuration
      *
-     * Defines PhlyRestfully\RestfulJsonStrategy service factory.
+     * Defines ZF\Rest\RestfulJsonStrategy service factory.
      *
      * @return array
      */
     public function getServiceConfig()
     {
         return array('factories' => array(
-            'PhlyRestfully\ApiProblemListener' => function ($services) {
+            'ZF\Rest\ApiProblemListener' => function ($services) {
                 $config = array();
                 if ($services->has('config')) {
                     $config = $services->get('config');
                 }
 
                 $filter = null;
-                if (isset($config['phlyrestfully'])
-                    && isset($config['phlyrestfully']['accept_filter'])
+                if (isset($config['zf-rest'])
+                    && isset($config['zf-rest']['accept_filter'])
                 ) {
-                    $filter = $config['phlyrestfully']['accept_filter'];
+                    $filter = $config['zf-rest']['accept_filter'];
                 }
 
                 return new Listener\ApiProblemListener($filter);
             },
-            'PhlyRestfully\MetadataMap' => function ($services) {
+            'ZF\Rest\MetadataMap' => function ($services) {
                 $config = array();
                 if ($services->has('config')) {
                     $config = $services->get('config');
@@ -76,16 +73,16 @@ class Module
                 }
 
                 $map = array();
-                if (isset($config['phlyrestfully'])
-                    && isset($config['phlyrestfully']['metadata_map'])
-                    && is_array($config['phlyrestfully']['metadata_map'])
+                if (isset($config['zf-rest'])
+                    && isset($config['zf-rest']['metadata_map'])
+                    && is_array($config['zf-rest']['metadata_map'])
                 ) {
-                    $map = $config['phlyrestfully']['metadata_map'];
+                    $map = $config['zf-rest']['metadata_map'];
                 }
 
                 return new MetadataMap($map, $hydrators);
             },
-            'PhlyRestfully\JsonRenderer' => function ($services) {
+            'ZF\Rest\JsonRenderer' => function ($services) {
                 $helpers  = $services->get('ViewHelperManager');
                 $config   = $services->get('Config');
 
@@ -102,8 +99,8 @@ class Module
 
                 return $renderer;
             },
-            'PhlyRestfully\RestfulJsonStrategy' => function ($services) {
-                $renderer = $services->get('PhlyRestfully\JsonRenderer');
+            'ZF\Rest\RestfulJsonStrategy' => function ($services) {
+                $renderer = $services->get('ZF\Rest\JsonRenderer');
                 return new View\RestfulJsonStrategy($renderer);
             },
         ));
@@ -141,7 +138,7 @@ class Module
 
                 $services        = $helpers->getServiceLocator();
                 $config          = $services->get('Config');
-                $metadataMap     = $services->get('PhlyRestfully\MetadataMap');
+                $metadataMap     = $services->get('ZF\Rest\MetadataMap');
                 $hydrators       = $metadataMap->getHydratorManager();
 
                 $helper          = new Plugin\HalLinks($hydrators);
@@ -149,10 +146,10 @@ class Module
                 $helper->setServerUrlHelper($serverUrlHelper);
                 $helper->setUrlHelper($urlHelper);
 
-                if (isset($config['phlyrestfully'])
-                    && isset($config['phlyrestfully']['renderer'])
+                if (isset($config['zf-rest'])
+                    && isset($config['zf-rest']['renderer'])
                 ) {
-                    $config = $config['phlyrestfully']['renderer'];
+                    $config = $config['zf-rest']['renderer'];
 
                     if (isset($config['default_hydrator'])) {
                         $hydratorServiceName = $config['default_hydrator'];
@@ -197,11 +194,11 @@ class Module
         $events   = $app->getEventManager();
         $events->attach('render', array($this, 'onRender'), 100);
         $sharedEvents = $events->getSharedManager();
-        $sharedEvents->attach('PhlyRestfully\ResourceController', 'dispatch', function($e) use ($services) {
+        $sharedEvents->attach('ZF\Rest\ResourceController', 'dispatch', function($e) use ($services) {
             $eventManager = $e->getApplication()->getEventManager();
-            $eventManager->attach($services->get('PhlyRestfully\ApiProblemListener'));
+            $eventManager->attach($services->get('ZF\Rest\ApiProblemListener'));
         }, 300);
-        $sharedEvents->attachAggregate($services->get('PhlyRestfully\ResourceParametersListener'));
+        $sharedEvents->attachAggregate($services->get('ZF\Rest\ResourceParametersListener'));
     }
 
     /**
@@ -221,7 +218,7 @@ class Module
         $app                 = $e->getTarget();
         $services            = $app->getServiceManager();
         $view                = $services->get('View');
-        $restfulJsonStrategy = $services->get('PhlyRestfully\RestfulJsonStrategy');
+        $restfulJsonStrategy = $services->get('ZF\Rest\RestfulJsonStrategy');
         $events              = $view->getEventManager();
 
         // register at high priority, to "beat" normal json strategy registered

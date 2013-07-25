@@ -33,9 +33,9 @@ you are using a previous version, you will need to manually implement the
 
     namespace Paste;
 
-    use PhlyRestfully\Exception\CreationException;
-    use PhlyRestfully\Exception\DomainException;
-    use PhlyRestfully\ResourceEvent;
+    use ZF\Rest\Exception\CreationException;
+    use ZF\Rest\Exception\DomainException;
+    use ZF\Rest\ResourceEvent;
     use Zend\EventManager\AbstractListenerAggregate;
     use Zend\EventManager\EventManagerInterface;
 
@@ -127,13 +127,13 @@ example, we'll ignore that for now. The import route is ``paste/api``, which is
 our RESTful endpoint.
 
 Next, let's define the controller configuration. Again, inside our module
-configuration, we'll add configuration, this time under the ``phlyrestfully``
+configuration, we'll add configuration, this time under the ``zf-rest``
 key and its ``resources`` subkey.
 
 .. code-block:: php
     :linenos:
 
-    'phlyrestfully' => array(
+    'zf-rest' => array(
         'resources' => array(
             'Paste\ApiController' => array(
                 'identifier'              => 'Pastes',

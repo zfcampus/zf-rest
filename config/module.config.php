@@ -1,27 +1,24 @@
 <?php
 /**
- * @link      https://github.com/weierophinney/PhlyRestfully for the canonical source repository
- * @copyright Copyright (c) 2013 Matthew Weier O'Phinney
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2-Clause
- * @package   PhlyRestfully
  */
 
 return array(
-    'phlyrestfully'        => array(
+    'zf-rest' => array(
         'renderer'         => array(),
         'resources'        => array(),
-        'controller_class' => 'PhlyRestfully\ResourceController',
+        'controller_class' => 'ZF\Rest\ResourceController',
     ),
 
     'service_manager' => array(
         'invokables' => array(
-            'PhlyRestfully\ResourceParametersListener' => 'PhlyRestfully\Listener\ResourceParametersListener',
+            'ZF\Rest\ResourceParametersListener' => 'ZF\Rest\Listener\ResourceParametersListener',
         ),
     ),
 
     'controllers' => array(
         'abstract_factories' => array(
-            'PhlyRestfully\Factory\ResourceControllerFactory'
+            'ZF\Rest\Factory\ResourceControllerFactory'
         )
     ),
 

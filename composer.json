@@ -1,5 +1,5 @@
 {
-    "name": "phly/phly-restfully",
+    "name": "zfcampus/zf-rest",
     "description": "ZF2 Module providing structure for RESTful resources",
     "type": "library",
     "license": "BSD-2-Clause",
@@ -9,14 +9,7 @@
         "module",
         "rest"
     ],
-    "homepage": "https://github.com/weierophinney/PhlyRestfully",
-    "authors": [
-        {
-            "name": "Matthew Weier O'Phinney",
-            "email": "matthew@weierophinney.net",
-            "homepage": "http://mwop.net/"
-        }
-    ],
+    "homepage": "https://bitbucket.org/zendframework/zfrest",
     "repositories": [
         {
             "type": "composer",
@@ -43,8 +36,8 @@
     },
     "autoload": {
         "psr-0": {
-            "PhlyRestfully\\": "src/",
-            "PhlyRestfullyTest\\": "test/"
+            "ZF\\Rest\\": "src/ZF/",
+            "ZFTest\\": "test/"
         },
         "classmap": [
             "./"

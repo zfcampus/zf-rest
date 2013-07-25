@@ -1,12 +1,9 @@
 <?php
 /**
- * @link      https://github.com/weierophinney/PhlyRestfully for the canonical source repository
- * @copyright Copyright (c) 2013 Matthew Weier O'Phinney
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2-Clause
- * @package   PhlyRestfully
  */
 
-namespace PhlyRestfullyTest;
+namespace ZFTest;
 
 use Zend\Loader\AutoloaderFactory;
 use RuntimeException;
@@ -51,7 +48,7 @@ class Bootstrap
                 'Zend\Loader\StandardAutoloader' => array(
                     'autoregister_zf' => true,
                     'namespaces' => array(
-                        'PhlyRestfully' => __DIR__ . '/../src/PhlyRestfully/',
+                        'ZF\Rest' => __DIR__ . '/../src/ZF/Rest/',
                         __NAMESPACE__ => __DIR__ . '/' . __NAMESPACE__,
                     ),
                 ),

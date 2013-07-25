@@ -7,7 +7,7 @@ At times, you may want to embed resources inside other resources. As an example,
 consider a "user" resource: it may need to embed several addresses, multiple
 phone numbers, etc.:
 
-:ref:`HAL <phlyrestfully.hal-primer>` dictates the structure for the
+:ref:`HAL <zfrest.hal-primer>` dictates the structure for the
 representation:
 
 .. code-block:: json
