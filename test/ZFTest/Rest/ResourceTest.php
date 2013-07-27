@@ -6,14 +6,14 @@
 namespace ZFTest\Rest;
 
 use ArrayIterator;
-use ZF\Rest\ApiProblem;
-use ZF\Rest\Resource;
 use PHPUnit_Framework_TestCase as TestCase;
 use stdClass;
 use Zend\EventManager\EventManager;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\ArrayObject;
 use Zend\Stdlib\Parameters;
+use ZF\ApiProblem\ApiProblem;
+use ZF\Rest\Resource;
 
 /**
  * @subpackage UnitTest
