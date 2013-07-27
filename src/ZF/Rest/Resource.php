@@ -10,6 +10,8 @@ use Zend\EventManager\EventManager;
 use Zend\EventManager\EventManagerInterface;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
+use ZF\ApiProblem\ApiProblem;
+use ZF\Hal\HalCollection;
 
 /**
  * Base resource class

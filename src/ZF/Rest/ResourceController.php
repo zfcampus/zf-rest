@@ -9,6 +9,11 @@ use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractRestfulController;
 use Zend\Mvc\MvcEvent;
 use Zend\Paginator\Paginator;
+use ZF\ApiProblem\ApiProblem;
+use ZF\ApiProblem\Exception\DomainException;
+use ZF\Hal\HalCollection;
+use ZF\Hal\HalResource;
+use ZF\Hal\View\RestfulJsonModel;
 
 /**
  * Controller for handling resources.
@@ -39,7 +44,7 @@ class ResourceController extends AbstractRestfulController
      * @var array
      */
     protected $acceptCriteria = array(
-        'ZF\Rest\View\RestfulJsonModel' => array(
+        'ZF\Hal\View\RestfulJsonModel' => array(
             '*/json',
         ),
     );
@@ -208,7 +213,7 @@ class ResourceController extends AbstractRestfulController
     /**
      * Returns the resource
      *
-     * @throws Exception\DomainException If no resource has been set
+     * @throws DomainException If no resource has been set
      *
      * @return ResourceInterface
      */
@@ -216,7 +221,7 @@ class ResourceController extends AbstractRestfulController
     {
         if ($this->resource === null) {
 
-            throw new Exception\DomainException('No resource has been set.');
+            throw new DomainException('No resource has been set.');
         }
 
         return $this->resource;
@@ -257,19 +262,19 @@ class ResourceController extends AbstractRestfulController
      *
      * @param  MvcEvent $e
      * @return mixed
-     * @throws Exception\DomainException
+     * @throws DomainException
      */
     public function onDispatch(MvcEvent $e)
     {
         if (!$this->resource) {
-            throw new Exception\DomainException(sprintf(
+            throw new DomainException(sprintf(
                 '%s requires that a %s\ResourceInterface object is composed; none provided',
                 __CLASS__, __NAMESPACE__
             ));
         }
 
         if (!$this->route) {
-            throw new Exception\DomainException(sprintf(
+            throw new DomainException(sprintf(
                 '%s requires that a route name for the resource is composed; none provided',
                 __CLASS__
             ));
@@ -293,7 +298,7 @@ class ResourceController extends AbstractRestfulController
         $viewModel = $this->acceptableViewModelSelector($this->acceptCriteria);
         $viewModel->setVariables(array('payload' => $return));
 
-        if ($viewModel instanceof View\RestfulJsonModel) {
+        if ($viewModel instanceof RestfulJsonModel) {
             $viewModel->setTerminal(true);
         }
 

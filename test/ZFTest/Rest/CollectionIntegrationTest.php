@@ -5,11 +5,6 @@
 
 namespace ZFTest\Rest;
 
-use ZF\Rest\Plugin\HalLinks;
-use ZF\Rest\Resource;
-use ZF\Rest\ResourceController;
-use ZF\Rest\View\RestfulJsonModel;
-use ZF\Rest\View\RestfulJsonRenderer;
 use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Http\PhpEnvironment\Response;
@@ -26,6 +21,12 @@ use Zend\Uri;
 use Zend\View\HelperPluginManager;
 use Zend\View\Helper\ServerUrl as ServerUrlHelper;
 use Zend\View\Helper\Url as UrlHelper;
+use ZF\ApiProblem\View\ApiProblemRenderer;
+use ZF\Hal\Plugin\HalLinks;
+use ZF\Hal\View\RestfulJsonModel;
+use ZF\Hal\View\RestfulJsonRenderer;
+use ZF\Rest\Resource;
+use ZF\Rest\ResourceController;
 
 /**
  * @subpackage UnitTest
@@ -65,7 +66,7 @@ class CollectionIntegrationTest extends TestCase
     public function setUpRenderer()
     {
         $this->setupHelpers();
-        $this->renderer = $renderer = new RestfulJsonRenderer();
+        $this->renderer = $renderer = new RestfulJsonRenderer(new ApiProblemRenderer());
         $renderer->setHelperPluginManager($this->helpers);
     }
 
@@ -200,7 +201,7 @@ class CollectionIntegrationTest extends TestCase
             ));
         });
         $result = $this->controller->dispatch($this->request, $this->response);
-        $this->assertInstanceOf('ZF\Rest\View\RestfulJsonModel', $result);
+        $this->assertInstanceOf('ZF\Hal\View\RestfulJsonModel', $result);
 
         $json = $this->renderer->render($result);
         $payload = json_decode($json, true);
@@ -266,7 +267,7 @@ class CollectionIntegrationTest extends TestCase
         $controller->setEvent($this->getEvent());
 
         $result = $controller->dispatch($this->request, $this->response);
-        $this->assertInstanceOf('ZF\Rest\View\RestfulJsonModel', $result);
+        $this->assertInstanceOf('ZF\Hal\View\RestfulJsonModel', $result);
 
         $json = $this->renderer->render($result);
         $payload = json_decode($json, true);

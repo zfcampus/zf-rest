@@ -5,14 +5,6 @@
 
 namespace ZFTest\Rest;
 
-use ZF\Rest\HalCollection;
-use ZF\Rest\HalResource;
-use ZF\Rest\Link;
-use ZF\Rest\Plugin\HalLinks;
-use ZF\Rest\Resource;
-use ZF\Rest\ResourceController;
-use ZF\Rest\View\RestfulJsonModel;
-use ZF\Rest\View\RestfulJsonRenderer;
 use PHPUnit_Framework_TestCase as TestCase;
 use ReflectionObject;
 use Zend\Http\Request;
@@ -21,6 +13,15 @@ use Zend\Mvc\Router\Http\TreeRouteStack;
 use Zend\View\HelperPluginManager;
 use Zend\View\Helper\ServerUrl as ServerUrlHelper;
 use Zend\View\Helper\Url as UrlHelper;
+use ZF\ApiProblem\View\ApiProblemRenderer;
+use ZF\Hal\HalCollection;
+use ZF\Hal\HalResource;
+use ZF\Hal\Link;
+use ZF\Hal\Plugin\HalLinks;
+use ZF\Hal\View\RestfulJsonModel;
+use ZF\Hal\View\RestfulJsonRenderer;
+use ZF\Rest\Resource;
+use ZF\Rest\ResourceController;
 
 /**
  * @subpackage UnitTest
@@ -65,7 +66,7 @@ class ChildResourcesIntegrationTest extends TestCase
         if (!$this->helpers) {
             $this->setupHelpers();
         }
-        $this->renderer = $renderer = new RestfulJsonRenderer();
+        $this->renderer = $renderer = new RestfulJsonRenderer(new ApiProblemRenderer());
         $renderer->setHelperPluginManager($this->helpers);
     }
 
@@ -154,94 +155,6 @@ class ChildResourcesIntegrationTest extends TestCase
         return $collection;
     }
 
-    public function testParentResourceRendersAsExpected()
-    {
-        $uri = 'http://localhost.localdomain/api/parent/anakin';
-        $request = new Request();
-        $request->setUri($uri);
-        $matches = $this->router->match($request);
-        $this->assertInstanceOf('Zend\Mvc\Router\RouteMatch', $matches);
-        $this->assertEquals('anakin', $matches->getParam('parent'));
-        $this->assertEquals('parent', $matches->getMatchedRouteName());
-
-        // Emulate url helper factory and inject route matches
-        $this->helpers->get('url')->setRouteMatch($matches);
-
-        $parent = $this->setUpParentResource();
-        $model  = new RestfulJsonModel();
-        $model->setPayload($parent);
-
-        $json = $this->renderer->render($model);
-        $test = json_decode($json);
-        $this->assertObjectHasAttribute('_links', $test);
-        $this->assertObjectHasAttribute('self', $test->_links);
-        $this->assertObjectHasAttribute('href', $test->_links->self);
-        $this->assertEquals('http://localhost.localdomain/api/parent/anakin', $test->_links->self->href);
-    }
-
-    public function testChildResourceRendersAsExpected()
-    {
-        $uri = 'http://localhost.localdomain/api/parent/anakin/child/luke';
-        $request = new Request();
-        $request->setUri($uri);
-        $matches = $this->router->match($request);
-        $this->assertInstanceOf('Zend\Mvc\Router\RouteMatch', $matches);
-        $this->assertEquals('anakin', $matches->getParam('parent'));
-        $this->assertEquals('luke', $matches->getParam('child'));
-        $this->assertEquals('parent/child', $matches->getMatchedRouteName());
-
-        // Emulate url helper factory and inject route matches
-        $this->helpers->get('url')->setRouteMatch($matches);
-
-        $child = $this->setUpChildResource('luke', 'Luke Skywalker');
-        $model = new RestfulJsonModel();
-        $model->setPayload($child);
-
-        $json = $this->renderer->render($model);
-        $test = json_decode($json);
-        $this->assertObjectHasAttribute('_links', $test);
-        $this->assertObjectHasAttribute('self', $test->_links);
-        $this->assertObjectHasAttribute('href', $test->_links->self);
-        $this->assertEquals('http://localhost.localdomain/api/parent/anakin/child/luke', $test->_links->self->href);
-    }
-
-    public function testChildCollectionRendersAsExpected()
-    {
-        $uri = 'http://localhost.localdomain/api/parent/anakin/child';
-        $request = new Request();
-        $request->setUri($uri);
-        $matches = $this->router->match($request);
-        $this->assertInstanceOf('Zend\Mvc\Router\RouteMatch', $matches);
-        $this->assertEquals('anakin', $matches->getParam('parent'));
-        $this->assertNull($matches->getParam('child'));
-        $this->assertEquals('parent/child', $matches->getMatchedRouteName());
-
-        // Emulate url helper factory and inject route matches
-        $this->helpers->get('url')->setRouteMatch($matches);
-
-        $collection = $this->setUpChildCollection();
-        $model = new RestfulJsonModel();
-        $model->setPayload($collection);
-
-        $json = $this->renderer->render($model);
-        $test = json_decode($json);
-        $this->assertObjectHasAttribute('_links', $test);
-        $this->assertObjectHasAttribute('self', $test->_links);
-        $this->assertObjectHasAttribute('href', $test->_links->self);
-        $this->assertEquals('http://localhost.localdomain/api/parent/anakin/child', $test->_links->self->href);
-
-        $this->assertObjectHasAttribute('_embedded', $test);
-        $this->assertObjectHasAttribute('child', $test->_embedded);
-        $this->assertInternalType('array', $test->_embedded->child);
-
-        foreach ($test->_embedded->child as $child) {
-            $this->assertObjectHasAttribute('_links', $child);
-            $this->assertObjectHasAttribute('self', $child->_links);
-            $this->assertObjectHasAttribute('href', $child->_links->self);
-            $this->assertRegex('#^http://localhost.localdomain/api/parent/anakin/child/[^/]+$#', $child->_links->self->href);
-        }
-    }
-
     public function setUpAlternateRouter()
     {
         $routes = array(
@@ -270,73 +183,6 @@ class ChildResourcesIntegrationTest extends TestCase
         $this->router = $router = new TreeRouteStack();
         $router->addRoutes($routes);
         $this->helpers->get('url')->setRouter($router);
-    }
-
-    public function testChildResourceObjectIdentiferMapping()
-    {
-        $this->setUpAlternateRouter();
-
-        $uri = 'http://localhost.localdomain/api/parent/anakin/child/luke';
-        $request = new Request();
-        $request->setUri($uri);
-        $matches = $this->router->match($request);
-        $this->assertInstanceOf('Zend\Mvc\Router\RouteMatch', $matches);
-        $this->assertEquals('anakin', $matches->getParam('id'));
-        $this->assertEquals('luke', $matches->getParam('child_id'));
-        $this->assertEquals('parent/child', $matches->getMatchedRouteName());
-
-        // Emulate url helper factory and inject route matches
-        $this->helpers->get('url')->setRouteMatch($matches);
-
-        $child = $this->setUpChildResource('luke', 'Luke Skywalker');
-        $model = new RestfulJsonModel();
-        $model->setPayload($child);
-
-        $json = $this->renderer->render($model);
-        $test = json_decode($json);
-        $this->assertObjectHasAttribute('_links', $test);
-        $this->assertObjectHasAttribute('self', $test->_links);
-        $this->assertObjectHasAttribute('href', $test->_links->self);
-        $this->assertEquals('http://localhost.localdomain/api/parent/anakin/child/luke', $test->_links->self->href);
-    }
-
-    public function testChildResourceIdentifierMappingInsideCollection()
-    {
-        $this->setUpAlternateRouter();
-
-        $uri = 'http://localhost.localdomain/api/parent/anakin/child';
-        $request = new Request();
-        $request->setUri($uri);
-        $matches = $this->router->match($request);
-        $this->assertInstanceOf('Zend\Mvc\Router\RouteMatch', $matches);
-        $this->assertEquals('anakin', $matches->getParam('id'));
-        $this->assertNull($matches->getParam('child_id'));
-        $this->assertEquals('parent/child', $matches->getMatchedRouteName());
-
-        // Emulate url helper factory and inject route matches
-        $this->helpers->get('url')->setRouteMatch($matches);
-
-        $collection = $this->setUpChildCollection();
-        $model = new RestfulJsonModel();
-        $model->setPayload($collection);
-
-        $json = $this->renderer->render($model);
-        $test = json_decode($json);
-        $this->assertObjectHasAttribute('_links', $test);
-        $this->assertObjectHasAttribute('self', $test->_links);
-        $this->assertObjectHasAttribute('href', $test->_links->self);
-        $this->assertEquals('http://localhost.localdomain/api/parent/anakin/child', $test->_links->self->href);
-
-        $this->assertObjectHasAttribute('_embedded', $test);
-        $this->assertObjectHasAttribute('child', $test->_embedded);
-        $this->assertInternalType('array', $test->_embedded->child);
-
-        foreach ($test->_embedded->child as $child) {
-            $this->assertObjectHasAttribute('_links', $child);
-            $this->assertObjectHasAttribute('self', $child->_links);
-            $this->assertObjectHasAttribute('href', $child->_links->self);
-            $this->assertRegex('#^http://localhost.localdomain/api/parent/anakin/child/[^/]+$#', $child->_links->self->href);
-        }
     }
 
     public function testChildResourceObjectIdentiferMappingViaControllerReturn()
@@ -375,7 +221,7 @@ class ChildResourcesIntegrationTest extends TestCase
         $this->assertEquals('luke', $id);
 
         $result = $controller->get('luke');
-        $this->assertInstanceOf('ZF\Rest\HalResource', $result);
+        $this->assertInstanceOf('ZF\Hal\HalResource', $result);
         $self = $result->getLinks()->get('self');
         $params = $self->getRouteParams();
         $this->assertArrayHasKey('child_id', $params);
@@ -422,7 +268,7 @@ class ChildResourcesIntegrationTest extends TestCase
         $this->helpers->get('url')->setRouteMatch($matches);
 
         $result = $controller->getList();
-        $this->assertInstanceOf('ZF\Rest\HalCollection', $result);
+        $this->assertInstanceOf('ZF\Hal\HalCollection', $result);
 
         // Now, what happens if we render this?
         $model = new RestfulJsonModel();
