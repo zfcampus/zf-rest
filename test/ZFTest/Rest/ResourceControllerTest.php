@@ -938,8 +938,8 @@ class ResourceControllerTest extends TestCase
 
         $result = $this->controller->dispatch($request, $this->controller->getResponse());
 
-        $this->assertInstanceOf('ZF\Hal\View\RestfulJsonModel', $result);
-        $this->assertSame($problem, $result->getPayload());
+        $this->assertInstanceOf('ZF\ApiProblem\View\ApiProblemModel', $result);
+        $this->assertSame($problem, $result->getApiProblem());
     }
 
     /**

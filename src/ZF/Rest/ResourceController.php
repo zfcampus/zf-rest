@@ -11,6 +11,7 @@ use Zend\Mvc\MvcEvent;
 use Zend\Paginator\Paginator;
 use ZF\ApiProblem\ApiProblem;
 use ZF\ApiProblem\Exception\DomainException;
+use ZF\ApiProblem\View\ApiProblemModel;
 use ZF\Hal\HalCollection;
 use ZF\Hal\HalResource;
 use ZF\Hal\View\RestfulJsonModel;
@@ -293,6 +294,12 @@ class ResourceController extends AbstractRestfulController
             && !$return instanceof HalCollection
         ) {
             return $return;
+        }
+
+        if ($return instanceof ApiProblem) {
+            $viewModel = new ApiProblemModel($return);
+            $e->setResult($viewModel);
+            return $viewModel;
         }
 
         $viewModel = $this->acceptableViewModelSelector($this->acceptCriteria);
