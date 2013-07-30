@@ -5,8 +5,8 @@
 
 namespace ZFTest\Rest\Factory\TestAsset;
 
-use ZF\Rest\ResourceController;
+use ZF\Rest\RestController;
 
-class CustomController extends ResourceController
+class CustomController extends RestController
 {
 }

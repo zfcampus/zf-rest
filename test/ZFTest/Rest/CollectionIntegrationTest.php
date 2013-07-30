@@ -22,11 +22,11 @@ use Zend\View\HelperPluginManager;
 use Zend\View\Helper\ServerUrl as ServerUrlHelper;
 use Zend\View\Helper\Url as UrlHelper;
 use ZF\ApiProblem\View\ApiProblemRenderer;
-use ZF\Hal\Plugin\HalLinks;
-use ZF\Hal\View\RestfulJsonModel;
-use ZF\Hal\View\RestfulJsonRenderer;
+use ZF\Hal\Plugin\Hal as HalHelper;
+use ZF\Hal\View\HalJsonModel;
+use ZF\Hal\View\HalJsonRenderer;
 use ZF\Rest\Resource;
-use ZF\Rest\ResourceController;
+use ZF\Rest\RestController;
 
 /**
  * @subpackage UnitTest
@@ -53,20 +53,20 @@ class CollectionIntegrationTest extends TestCase
         $serverUrlHelper->setScheme('http');
         $serverUrlHelper->setHost('localhost.localdomain');
 
-        $this->linksHelper = $linksHelper = new HalLinks();
+        $this->linksHelper = $linksHelper = new HalHelper();
         $linksHelper->setUrlHelper($urlHelper);
         $linksHelper->setServerUrlHelper($serverUrlHelper);
 
         $this->helpers = $helpers = new HelperPluginManager();
         $helpers->setService('url', $urlHelper);
         $helpers->setService('serverUrl', $serverUrlHelper);
-        $helpers->setService('halLinks', $linksHelper);
+        $helpers->setService('hal', $linksHelper);
     }
 
     public function setUpRenderer()
     {
         $this->setupHelpers();
-        $this->renderer = $renderer = new RestfulJsonRenderer(new ApiProblemRenderer());
+        $this->renderer = $renderer = new HalJsonRenderer(new ApiProblemRenderer());
         $renderer->setHelperPluginManager($this->helpers);
     }
 
@@ -84,7 +84,7 @@ class CollectionIntegrationTest extends TestCase
                 'options' => array(
                     'route' => '/api/resource[/:id]',
                     'defaults' => array(
-                        'controller' => 'Api\ResourceController',
+                        'controller' => 'Api\RestController',
                     ),
                 ),
             ),
@@ -134,7 +134,7 @@ class CollectionIntegrationTest extends TestCase
         $events   = $resource->getEventManager();
         $events->attach($this->listeners);
 
-        $controller = $this->controller = new ResourceController('Api\ResourceController');
+        $controller = $this->controller = new RestController('Api\RestController');
         $controller->setResource($resource);
         $controller->setIdentifierName('id');
         $controller->setPageSize(3);
@@ -142,7 +142,7 @@ class CollectionIntegrationTest extends TestCase
         $controller->setEvent($this->getEvent());
 
         $plugins = new ControllerPluginManager();
-        $plugins->setService('HalLinks', $this->linksHelper);
+        $plugins->setService('Hal', $this->linksHelper);
         $controller->setPluginManager($plugins);
     }
 
@@ -201,7 +201,7 @@ class CollectionIntegrationTest extends TestCase
             ));
         });
         $result = $this->controller->dispatch($this->request, $this->response);
-        $this->assertInstanceOf('ZF\Hal\View\RestfulJsonModel', $result);
+        $this->assertInstanceOf('ZF\Hal\View\HalJsonModel', $result);
 
         $json = $this->renderer->render($result);
         $payload = json_decode($json, true);
@@ -219,22 +219,20 @@ class CollectionIntegrationTest extends TestCase
     public function getServiceManager()
     {
         $controllers = new ControllerManager();
-        $controllers->addAbstractFactory('ZF\Rest\Factory\ResourceControllerFactory');
+        $controllers->addAbstractFactory('ZF\Rest\Factory\RestControllerFactory');
 
         $services    = new ServiceManager();
         $services->setService('Zend\ServiceManager\ServiceLocatorInterface', $services);
         $services->setService('ControllerLoader', $controllers);
         $services->setService('Config', array(
             'zf-rest' => array(
-                'resources' => array(
-                    'Api\ResourceController' => array(
-                        'listener'                   => 'CollectionIntegrationListener',
-                        'page_size'                  => 3,
-                        'route_name'                 => 'resource',
-                        'identifier_name'            => 'id',
-                        'collection_name'            => 'items',
-                        'collection_query_whitelist' => 'query',
-                    ),
+                'Api\RestController' => array(
+                    'listener'                   => 'CollectionIntegrationListener',
+                    'page_size'                  => 3,
+                    'route_name'                 => 'resource',
+                    'identifier_name'            => 'id',
+                    'collection_name'            => 'items',
+                    'collection_query_whitelist' => 'query',
                 ),
             ),
         ));
@@ -255,7 +253,7 @@ class CollectionIntegrationTest extends TestCase
         $controllers->setServiceLocator($services);
 
         $plugins = $services->get('ControllerPluginManager');
-        $plugins->setService('HalLinks', $this->linksHelper);
+        $plugins->setService('Hal', $this->linksHelper);
 
         return $services;
     }
@@ -263,11 +261,11 @@ class CollectionIntegrationTest extends TestCase
     public function testFactoryEnabledListenerCreatesQueryStringWhitelist()
     {
         $services = $this->getServiceManager();
-        $controller = $services->get('ControllerLoader')->get('Api\ResourceController');
+        $controller = $services->get('ControllerLoader')->get('Api\RestController');
         $controller->setEvent($this->getEvent());
 
         $result = $controller->dispatch($this->request, $this->response);
-        $this->assertInstanceOf('ZF\Hal\View\RestfulJsonModel', $result);
+        $this->assertInstanceOf('ZF\Hal\View\HalJsonModel', $result);
 
         $json = $this->renderer->render($result);
         $payload = json_decode($json, true);

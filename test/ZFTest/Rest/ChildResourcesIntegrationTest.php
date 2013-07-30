@@ -14,14 +14,14 @@ use Zend\View\HelperPluginManager;
 use Zend\View\Helper\ServerUrl as ServerUrlHelper;
 use Zend\View\Helper\Url as UrlHelper;
 use ZF\ApiProblem\View\ApiProblemRenderer;
-use ZF\Hal\HalCollection;
-use ZF\Hal\HalResource;
-use ZF\Hal\Link;
-use ZF\Hal\Plugin\HalLinks;
-use ZF\Hal\View\RestfulJsonModel;
-use ZF\Hal\View\RestfulJsonRenderer;
+use ZF\Hal\Collection as HalCollection;
+use ZF\Hal\Link\Link;
+use ZF\Hal\Plugin\Hal as HalHelper;
+use ZF\Hal\Resource as HalResource;
+use ZF\Hal\View\HalJsonModel;
+use ZF\Hal\View\HalJsonRenderer;
 use ZF\Rest\Resource;
-use ZF\Rest\ResourceController;
+use ZF\Rest\RestController;
 
 /**
  * @subpackage UnitTest
@@ -48,17 +48,17 @@ class ChildResourcesIntegrationTest extends TestCase
         $serverUrlHelper->setScheme('http');
         $serverUrlHelper->setHost('localhost.localdomain');
 
-        $linksHelper = new HalLinks();
+        $linksHelper = new HalHelper();
         $linksHelper->setUrlHelper($urlHelper);
         $linksHelper->setServerUrlHelper($serverUrlHelper);
 
         $this->helpers = $helpers = new HelperPluginManager();
         $helpers->setService('url', $urlHelper);
         $helpers->setService('serverUrl', $serverUrlHelper);
-        $helpers->setService('halLinks', $linksHelper);
+        $helpers->setService('hal', $linksHelper);
 
         $this->plugins = $plugins = new ControllerPluginManager();
-        $plugins->setService('halLinks', $linksHelper);
+        $plugins->setService('hal', $linksHelper);
     }
 
     public function setupRenderer()
@@ -66,7 +66,7 @@ class ChildResourcesIntegrationTest extends TestCase
         if (!$this->helpers) {
             $this->setupHelpers();
         }
-        $this->renderer = $renderer = new RestfulJsonRenderer(new ApiProblemRenderer());
+        $this->renderer = $renderer = new HalJsonRenderer(new ApiProblemRenderer());
         $renderer->setHelperPluginManager($this->helpers);
     }
 
@@ -196,7 +196,7 @@ class ChildResourcesIntegrationTest extends TestCase
                 'name' => 'Luke Skywalker',
             );
         });
-        $controller = new ResourceController();
+        $controller = new RestController();
         $controller->setPluginManager($this->plugins);
         $controller->setResource($resource);
         $controller->setIdentifierName('child_id');
@@ -221,7 +221,7 @@ class ChildResourcesIntegrationTest extends TestCase
         $this->assertEquals('luke', $id);
 
         $result = $controller->get('luke');
-        $this->assertInstanceOf('ZF\Hal\HalResource', $result);
+        $this->assertInstanceOf('ZF\Hal\Resource', $result);
         $self = $result->getLinks()->get('self');
         $params = $self->getRouteParams();
         $this->assertArrayHasKey('child_id', $params);
@@ -245,7 +245,7 @@ class ChildResourcesIntegrationTest extends TestCase
                 ),
             );
         });
-        $controller = new ResourceController();
+        $controller = new RestController();
         $controller->setPluginManager($this->plugins);
         $controller->setResource($resource);
         $controller->setRoute('parent/child');
@@ -268,10 +268,10 @@ class ChildResourcesIntegrationTest extends TestCase
         $this->helpers->get('url')->setRouteMatch($matches);
 
         $result = $controller->getList();
-        $this->assertInstanceOf('ZF\Hal\HalCollection', $result);
+        $this->assertInstanceOf('ZF\Hal\Collection', $result);
 
         // Now, what happens if we render this?
-        $model = new RestfulJsonModel();
+        $model = new HalJsonModel();
         $model->setPayload($result);
 
         $json = $this->renderer->render($model);

@@ -11,7 +11,7 @@ use Zend\EventManager\EventManagerInterface;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
 use ZF\ApiProblem\ApiProblem;
-use ZF\Hal\HalCollection;
+use ZF\Hal\Collection as HalCollection;
 
 /**
  * Base resource class
