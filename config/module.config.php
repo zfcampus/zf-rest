@@ -5,20 +5,19 @@
 
 return array(
     'zf-rest' => array(
-        'renderer'         => array(),
-        'resources'        => array(),
-        'controller_class' => 'ZF\Rest\ResourceController',
+        'controllers'      => array(),
+        'controller_class' => 'ZF\Rest\RestController',
     ),
 
     'service_manager' => array(
         'invokables' => array(
-            'ZF\Rest\ResourceParametersListener' => 'ZF\Rest\Listener\ResourceParametersListener',
+            'ZF\Rest\RestParametersListener' => 'ZF\Rest\Listener\RestParametersListener',
         ),
     ),
 
     'controllers' => array(
         'abstract_factories' => array(
-            'ZF\Rest\Factory\ResourceControllerFactory'
+            'ZF\Rest\Factory\RestControllerFactory'
         )
     ),
 

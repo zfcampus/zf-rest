@@ -6,7 +6,7 @@
 namespace ZF\Rest\Factory;
 
 use ZF\Rest\Resource;
-use ZF\Rest\ResourceController;
+use ZF\Rest\RestController;
 use Zend\EventManager\ListenerAggregateInterface;
 use Zend\ServiceManager\AbstractFactoryInterface;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
@@ -14,9 +14,9 @@ use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
 /**
- * Class ResourceControllerFactory
+ * Class RestControllerFactory
  */
-class ResourceControllerFactory implements AbstractFactoryInterface
+class RestControllerFactory implements AbstractFactoryInterface
 {
     /**
      * Determine if we can create a service with name
@@ -37,11 +37,11 @@ class ResourceControllerFactory implements AbstractFactoryInterface
 
         $config = $services->get('Config');
         if (!isset($config['zf-rest'])
-            || !isset($config['zf-rest']['resources'])
+            || !isset($config['zf-rest']['controllers'])
         ) {
             return false;
         }
-        $config = $config['zf-rest']['resources'];
+        $config = $config['zf-rest']['controllers'];
 
         if (!isset($config[$requestedName])
             || !isset($config[$requestedName]['listener'])
@@ -72,14 +72,14 @@ class ResourceControllerFactory implements AbstractFactoryInterface
      * @param ServiceLocatorInterface $controllers
      * @param string                  $name
      * @param string                  $requestedName
-     * @return ResourceController
+     * @return RestController
      * @throws ServiceNotCreatedException if listener specified is not a ListenerAggregate
      */
     public function createServiceWithName(ServiceLocatorInterface $controllers, $name, $requestedName)
     {
         $services = $controllers->getServiceLocator();
         $config   = $services->get('Config');
-        $config   = $config['zf-rest']['resources'][$requestedName];
+        $config   = $config['zf-rest']['controllers'][$requestedName];
 
         if ($services->has($config['listener'])) {
             $listener = $services->get($config['listener']);
@@ -116,12 +116,12 @@ class ResourceControllerFactory implements AbstractFactoryInterface
         }
 
         $events          = $services->get('EventManager');
-        $controllerClass = isset($config['controller_class']) ? $config['controller_class'] : 'ZF\Rest\ResourceController';
+        $controllerClass = isset($config['controller_class']) ? $config['controller_class'] : 'ZF\Rest\RestController';
         $controller      = new $controllerClass($identifier);
 
-        if (!$controller instanceof ResourceController) {
+        if (!$controller instanceof RestController) {
             throw new ServiceNotCreatedException(sprintf(
-                '"%s" must be an implementation of ZF\Rest\ResourceController',
+                '"%s" must be an implementation of ZF\Rest\RestController',
                 $controllerClass
             ));
         }
@@ -137,9 +137,9 @@ class ResourceControllerFactory implements AbstractFactoryInterface
      * Loop through configuration to discover and set controller options.
      *
      * @param  array $config
-     * @param  ResourceController $controller
+     * @param  RestController $controller
      */
-    protected function setControllerOptions(array $config, ResourceController $controller)
+    protected function setControllerOptions(array $config, RestController $controller)
     {
         foreach ($config as $option => $value) {
             switch ($option) {

@@ -21,21 +21,21 @@ use Zend\Stdlib\Parameters;
 use Zend\View\Helper\ServerUrl as ServerUrlHelper;
 use Zend\View\Helper\Url as UrlHelper;
 use ZF\ApiProblem\ApiProblem;
-use ZF\Hal\HalCollection;
-use ZF\Hal\HalResource;
-use ZF\Hal\Plugin\HalLinks;
+use ZF\Hal\Collection as HalCollection;
+use ZF\Hal\Resource as HalResource;
+use ZF\Hal\Plugin\Hal as HalHelper;
 use ZF\Rest\Exception;
 use ZF\Rest\Resource;
-use ZF\Rest\ResourceController;
+use ZF\Rest\RestController;
 
 /**
  * @subpackage UnitTest
  */
-class ResourceControllerTest extends TestCase
+class RestControllerTest extends TestCase
 {
     public function setUp()
     {
-        $this->controller = $controller = new ResourceController();
+        $this->controller = $controller = new RestController();
 
         $this->router = $router = new SimpleRouteStack();
         $route = new Segment('/resource[/[:id]]');
@@ -56,11 +56,11 @@ class ResourceControllerTest extends TestCase
         $serverUrlHelper->setScheme('http');
         $serverUrlHelper->setHost('localhost.localdomain');
 
-        $linksHelper = new HalLinks();
+        $linksHelper = new HalHelper();
         $linksHelper->setUrlHelper($urlHelper);
         $linksHelper->setServerUrlHelper($serverUrlHelper);
 
-        $pluginManager->setService('HalLinks', $linksHelper);
+        $pluginManager->setService('Hal', $linksHelper);
         $linksHelper->setController($controller);
 
         $this->resource = $resource = new Resource();
@@ -103,7 +103,7 @@ class ResourceControllerTest extends TestCase
         });
 
         $result = $this->controller->create(array());
-        $this->assertInstanceOf('ZF\Hal\HalResource', $result);
+        $this->assertInstanceOf('ZF\Hal\Resource', $result);
         $this->assertEquals($resource, $result->resource);
     }
 
@@ -167,7 +167,7 @@ class ResourceControllerTest extends TestCase
         });
 
         $result = $this->controller->get('foo');
-        $this->assertInstanceOf('ZF\Hal\HalResource', $result);
+        $this->assertInstanceOf('ZF\Hal\Resource', $result);
         $this->assertEquals($resource, $result->resource);
     }
 
@@ -181,7 +181,7 @@ class ResourceControllerTest extends TestCase
         });
 
         $result = $this->controller->getList();
-        $this->assertInstanceOf('ZF\Hal\HalCollection', $result);
+        $this->assertInstanceOf('ZF\Hal\Collection', $result);
         $this->assertEquals($items, $result->collection);
         return $result;
     }
@@ -204,7 +204,7 @@ class ResourceControllerTest extends TestCase
         $request->setQuery(new Parameters(array('page' => 2)));
 
         $result = $this->controller->getList();
-        $this->assertInstanceOf('ZF\Hal\HalCollection', $result);
+        $this->assertInstanceOf('ZF\Hal\Collection', $result);
         $this->assertSame($paginator, $result->collection);
         $this->assertEquals(2, $result->page);
         $this->assertEquals(1, $result->pageSize);
@@ -231,7 +231,7 @@ class ResourceControllerTest extends TestCase
         )));
 
         $result = $this->controller->getList();
-        $this->assertInstanceOf('ZF\Hal\HalCollection', $result);
+        $this->assertInstanceOf('ZF\Hal\Collection', $result);
         $this->assertSame($paginator, $result->collection);
         $this->assertEquals(2, $result->page);
         $this->assertEquals(1, $result->pageSize);
@@ -264,7 +264,7 @@ class ResourceControllerTest extends TestCase
         $request->setQuery(new Parameters(array('page' => 2)));
 
         $result = $this->controller->head();
-        $this->assertInstanceOf('ZF\Hal\HalCollection', $result);
+        $this->assertInstanceOf('ZF\Hal\Collection', $result);
         $this->assertSame($paginator, $result->collection);
     }
 
@@ -276,7 +276,7 @@ class ResourceControllerTest extends TestCase
         });
 
         $result = $this->controller->head('foo');
-        $this->assertInstanceOf('ZF\Hal\HalResource', $result);
+        $this->assertInstanceOf('ZF\Hal\Resource', $result);
         $this->assertEquals($resource, $result->resource);
     }
 
@@ -341,7 +341,7 @@ class ResourceControllerTest extends TestCase
         });
 
         $result = $this->controller->patch('foo', $resource);
-        $this->assertInstanceOf('ZF\Hal\HalResource', $result);
+        $this->assertInstanceOf('ZF\Hal\Resource', $result);
         $this->assertEquals($resource, $result->resource);
     }
 
@@ -363,7 +363,7 @@ class ResourceControllerTest extends TestCase
         });
 
         $result = $this->controller->update('foo', $resource);
-        $this->assertInstanceOf('ZF\Hal\HalResource', $result);
+        $this->assertInstanceOf('ZF\Hal\Resource', $result);
         $this->assertEquals($resource, $result->resource);
     }
 
@@ -387,7 +387,7 @@ class ResourceControllerTest extends TestCase
         });
 
         $result = $this->controller->replaceList($items);
-        $this->assertInstanceOf('ZF\Hal\HalCollection', $result);
+        $this->assertInstanceOf('ZF\Hal\Collection', $result);
         return $result;
     }
 
@@ -402,14 +402,14 @@ class ResourceControllerTest extends TestCase
 
     public function testOnDispatchRaisesDomainExceptionOnMissingResource()
     {
-        $controller = new ResourceController();
+        $controller = new RestController();
         $this->setExpectedException('ZF\ApiProblem\Exception\DomainException', 'ResourceInterface');
         $controller->onDispatch($this->event);
     }
 
     public function testOnDispatchRaisesDomainExceptionOnMissingRoute()
     {
-        $controller = new ResourceController();
+        $controller = new RestController();
         $controller->setResource($this->resource);
         $this->setExpectedException('ZF\ApiProblem\Exception\DomainException', 'route');
         $controller->onDispatch($this->event);
@@ -468,7 +468,7 @@ class ResourceControllerTest extends TestCase
         $this->assertInstanceof('Zend\View\Model\ModelInterface', $result);
     }
 
-    public function testValidMethodReturningHalOrApiValueCastsReturnToRestfulJsonModelWhenAcceptHeaderIsJson()
+    public function testValidMethodReturningHalOrApiValueCastsReturnToHalJsonModelWhenAcceptHeaderIsJson()
     {
         $resource = array('id' => 'foo', 'bar' => 'baz');
         $this->resource->getEventManager()->attach('fetch', function ($e) use ($resource) {
@@ -484,12 +484,12 @@ class ResourceControllerTest extends TestCase
         $this->event->getRouteMatch()->setParam('id', 'foo');
 
         $result = $this->controller->onDispatch($this->event);
-        $this->assertInstanceof('ZF\Hal\View\RestfulJsonModel', $result);
+        $this->assertInstanceof('ZF\Hal\View\HalJsonModel', $result);
     }
 
     public function testPassingIdentifierToConstructorAllowsListeningOnThatIdentifier()
     {
-        $controller   = new ResourceController('MyNamespace\Controller\Foo');
+        $controller   = new RestController('MyNamespace\Controller\Foo');
         $events       = new EventManager();
         $sharedEvents = new SharedEventManager();
         $events->setSharedManager($sharedEvents);
@@ -517,19 +517,19 @@ class ResourceControllerTest extends TestCase
         $this->controller->setCollectionName('resources');
 
         $result = $this->controller->getList();
-        $this->assertInstanceOf('ZF\Hal\HalCollection', $result);
+        $this->assertInstanceOf('ZF\Hal\Collection', $result);
         $this->assertEquals('resources', $result->collectionName);
     }
 
     public function testAllowsInjectingContentTypesForRequestMarshalling()
     {
         $types = array(
-            ResourceController::CONTENT_TYPE_JSON => array(
+            RestController::CONTENT_TYPE_JSON => array(
                 'application/api-problem+json',
                 'text/json',
             ),
         );
-        $controller = new ResourceController();
+        $controller = new RestController();
         $controller->setContentTypes($types);
 
         $this->assertAttributeEquals($types, 'contentTypes', $controller);
@@ -807,7 +807,7 @@ class ResourceControllerTest extends TestCase
         $result = $this->controller->getList();
         $this->assertTrue($test->pre);
         $this->assertTrue($test->post);
-        $this->assertSame($collection, $test->collection);
+        $this->assertSame($collection, $test->collection, 'Expected ' . get_class($collection) . ', received ' . get_class($test->collection));
     }
 
     public function testPatchTriggersPreAndPostEvents()
@@ -947,7 +947,7 @@ class ResourceControllerTest extends TestCase
      */
     public function testGetResourceThrowsExceptionOnMissingResource()
     {
-        $controller = new ResourceController();
+        $controller = new RestController();
         $controller->getResource();
     }
 

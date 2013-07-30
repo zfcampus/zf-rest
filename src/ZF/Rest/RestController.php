@@ -12,9 +12,9 @@ use Zend\Paginator\Paginator;
 use ZF\ApiProblem\ApiProblem;
 use ZF\ApiProblem\Exception\DomainException;
 use ZF\ApiProblem\View\ApiProblemModel;
-use ZF\Hal\HalCollection;
-use ZF\Hal\HalResource;
-use ZF\Hal\View\RestfulJsonModel;
+use ZF\Hal\Collection as HalCollection;
+use ZF\Hal\Resource as HalResource;
+use ZF\Hal\View\HalJsonModel;
 
 /**
  * Controller for handling resources.
@@ -37,7 +37,7 @@ use ZF\Hal\View\RestfulJsonModel;
  * @see http://tools.ietf.org/html/draft-kelly-json-hal-03
  * @see http://tools.ietf.org/html/draft-nottingham-http-problem-02
  */
-class ResourceController extends AbstractRestfulController
+class RestController extends AbstractRestfulController
 {
     /**
      * Criteria for the AcceptableViewModelSelector
@@ -45,7 +45,7 @@ class ResourceController extends AbstractRestfulController
      * @var array
      */
     protected $acceptCriteria = array(
-        'ZF\Hal\View\RestfulJsonModel' => array(
+        'ZF\Hal\View\HalJsonModel' => array(
             '*/json',
         ),
     );
@@ -63,7 +63,7 @@ class ResourceController extends AbstractRestfulController
     );
 
     /**
-     * Name of the collections entry in a HalCollection
+     * Name of the collections entry in a Collection
      *
      * @var string
      */
@@ -162,7 +162,7 @@ class ResourceController extends AbstractRestfulController
     }
 
     /**
-     * Set the name to which to assign a collection in a HalCollection
+     * Set the name to which to assign a collection in a Collection
      *
      * @param  string $name
      */
@@ -305,7 +305,7 @@ class ResourceController extends AbstractRestfulController
         $viewModel = $this->acceptableViewModelSelector($this->acceptCriteria);
         $viewModel->setVariables(array('payload' => $return));
 
-        if ($viewModel instanceof RestfulJsonModel) {
+        if ($viewModel instanceof HalJsonModel) {
             $viewModel->setTerminal(true);
         }
 
@@ -339,7 +339,7 @@ class ResourceController extends AbstractRestfulController
             return $resource;
         }
 
-        $plugin   = $this->plugin('HalLinks');
+        $plugin   = $this->plugin('Hal');
         $resource = $plugin->createResource($resource, $this->route, $this->getIdentifierName());
 
         if ($resource instanceof ApiProblem) {
@@ -458,7 +458,7 @@ class ResourceController extends AbstractRestfulController
             return $resource;
         }
 
-        $plugin   = $this->plugin('HalLinks');
+        $plugin   = $this->plugin('Hal');
         $resource = $plugin->createResource($resource, $this->route, $this->getIdentifierName());
 
         if ($resource instanceof ApiProblem) {
@@ -495,7 +495,7 @@ class ResourceController extends AbstractRestfulController
             return $collection;
         }
 
-        $plugin     = $this->plugin('HalLinks');
+        $plugin     = $this->plugin('Hal');
         $collection = $plugin->createCollection($collection, $this->route);
         $collection->setCollectionRoute($this->route);
         $collection->setIdentifierName($this->getIdentifierName());
@@ -589,7 +589,7 @@ class ResourceController extends AbstractRestfulController
             return $resource;
         }
 
-        $plugin   = $this->plugin('HalLinks');
+        $plugin   = $this->plugin('Hal');
         $resource = $plugin->createResource($resource, $this->route, $this->getIdentifierName());
 
         if ($resource instanceof ApiProblem) {
@@ -630,7 +630,7 @@ class ResourceController extends AbstractRestfulController
             return $resource;
         }
 
-        $plugin   = $this->plugin('HalLinks');
+        $plugin   = $this->plugin('Hal');
         $resource = $plugin->createResource($resource, $this->route, $this->getIdentifierName());
 
         $events->trigger('update.post', $this, array('id' => $id, 'data' => $data, 'resource' => $resource));
@@ -663,7 +663,7 @@ class ResourceController extends AbstractRestfulController
             return $collection;
         }
 
-        $plugin = $this->plugin('HalLinks');
+        $plugin = $this->plugin('Hal');
         $collection = $plugin->createCollection($collection, $this->route);
         $collection->setCollectionRoute($this->route);
         $collection->setIdentifierName($this->getIdentifierName());

@@ -5,14 +5,14 @@
 
 namespace ZF\Rest\Listener;
 
-use ZF\Rest\ResourceController;
+use ZF\Rest\RestController;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateInterface;
 use Zend\EventManager\SharedEventManagerInterface;
 use Zend\EventManager\SharedListenerAggregateInterface;
 use Zend\Mvc\MvcEvent;
 
-class ResourceParametersListener implements
+class RestParametersListener implements
     ListenerAggregateInterface,
     SharedListenerAggregateInterface
 {
@@ -51,7 +51,7 @@ class ResourceParametersListener implements
      */
     public function attachShared(SharedEventManagerInterface $events)
     {
-        $this->sharedListeners[] = $events->attach('ZF\Rest\ResourceController', 'dispatch', array($this, 'onDispatch'), 100);
+        $this->sharedListeners[] = $events->attach('ZF\Rest\RestController', 'dispatch', array($this, 'onDispatch'), 100);
     }
 
     /**
@@ -74,7 +74,7 @@ class ResourceParametersListener implements
     public function onDispatch(MvcEvent $e)
     {
         $controller = $e->getTarget();
-        if (!$controller instanceof ResourceController) {
+        if (!$controller instanceof RestController) {
             return;
         }
 

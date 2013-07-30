@@ -5,9 +5,9 @@
 
 namespace ZFTest\Rest\Listener;
 
-use ZF\Rest\Listener\ResourceParametersListener;
+use ZF\Rest\Listener\RestParametersListener;
 use ZF\Rest\Resource;
-use ZF\Rest\ResourceController;
+use ZF\Rest\RestController;
 use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Mvc\MvcEvent;
@@ -17,12 +17,12 @@ use Zend\Stdlib\Parameters;
 /**
  * @subpackage UnitTest
  */
-class ResourceParametersListenerTest extends TestCase
+class RestParametersListenerTest extends TestCase
 {
     public function setUp()
     {
         $this->resource   = $resource   = new Resource();
-        $this->controller = $controller = new ResourceController();
+        $this->controller = $controller = new RestController();
         $controller->setResource($resource);
 
         $this->matches    = $matches    = new RouteMatch(array());
@@ -35,10 +35,10 @@ class ResourceParametersListenerTest extends TestCase
         $this->event->setRouteMatch($matches);
         $this->event->setRequest($request);
 
-        $this->listener = new ResourceParametersListener();
+        $this->listener = new RestParametersListener();
     }
 
-    public function testIgnoresNonResourceControllers()
+    public function testIgnoresNonRestControllers()
     {
         $controller = $this->getMock('Zend\Mvc\Controller\AbstractRestfulController');
         $this->event->setTarget($controller);
@@ -47,13 +47,13 @@ class ResourceParametersListenerTest extends TestCase
         $this->assertNull($this->resource->getQueryParams());
     }
 
-    public function testInjectsRouteMatchOnDispatchOfResourceController()
+    public function testInjectsRouteMatchOnDispatchOfRestController()
     {
         $this->listener->onDispatch($this->event);
         $this->assertSame($this->matches, $this->resource->getRouteMatch());
     }
 
-    public function testInjectsQueryParamsOnDispatchOfResourceController()
+    public function testInjectsQueryParamsOnDispatchOfRestController()
     {
         $this->listener->onDispatch($this->event);
         $this->assertSame($this->query, $this->resource->getQueryParams());
