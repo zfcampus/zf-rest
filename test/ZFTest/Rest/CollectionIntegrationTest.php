@@ -226,15 +226,13 @@ class CollectionIntegrationTest extends TestCase
         $services->setService('ControllerLoader', $controllers);
         $services->setService('Config', array(
             'zf-rest' => array(
-                'controllers' => array(
-                    'Api\RestController' => array(
-                        'listener'                   => 'CollectionIntegrationListener',
-                        'page_size'                  => 3,
-                        'route_name'                 => 'resource',
-                        'identifier_name'            => 'id',
-                        'collection_name'            => 'items',
-                        'collection_query_whitelist' => 'query',
-                    ),
+                'Api\RestController' => array(
+                    'listener'                   => 'CollectionIntegrationListener',
+                    'page_size'                  => 3,
+                    'route_name'                 => 'resource',
+                    'identifier_name'            => 'id',
+                    'collection_name'            => 'items',
+                    'collection_query_whitelist' => 'query',
                 ),
             ),
         ));

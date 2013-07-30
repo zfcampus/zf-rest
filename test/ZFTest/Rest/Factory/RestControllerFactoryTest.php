@@ -34,11 +34,9 @@ class RestControllerFactoryTest extends TestCase
     {
         return array(
             'zf-rest' => array(
-                'controllers' => array(
-                    'ApiController' => array(
-                        'listener'   => 'ZFTest\Rest\Factory\TestAsset\Listener',
-                        'route_name' => 'api',
-                    ),
+                'ApiController' => array(
+                    'listener'   => 'ZFTest\Rest\Factory\TestAsset\Listener',
+                    'route_name' => 'api',
                 ),
             ),
         );
@@ -54,7 +52,7 @@ class RestControllerFactoryTest extends TestCase
     public function testWillInstantiateAlternateRestControllerWhenSpecified()
     {
         $config = $this->services->get('Config');
-        $config['zf-rest']['controllers']['ApiController']['controller_class'] = 'ZFTest\Rest\Factory\TestAsset\CustomController';
+        $config['zf-rest']['ApiController']['controller_class'] = 'ZFTest\Rest\Factory\TestAsset\CustomController';
         $this->services->setAllowOverride(true);
         $this->services->setService('Config', $config);
         $controller = $this->controllers->get('ApiController');

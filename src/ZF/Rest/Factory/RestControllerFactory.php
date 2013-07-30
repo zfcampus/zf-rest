@@ -37,11 +37,11 @@ class RestControllerFactory implements AbstractFactoryInterface
 
         $config = $services->get('Config');
         if (!isset($config['zf-rest'])
-            || !isset($config['zf-rest']['controllers'])
+            || !is_array($config['zf-rest'])
         ) {
             return false;
         }
-        $config = $config['zf-rest']['controllers'];
+        $config = $config['zf-rest'];
 
         if (!isset($config[$requestedName])
             || !isset($config[$requestedName]['listener'])
@@ -79,7 +79,7 @@ class RestControllerFactory implements AbstractFactoryInterface
     {
         $services = $controllers->getServiceLocator();
         $config   = $services->get('Config');
-        $config   = $config['zf-rest']['controllers'][$requestedName];
+        $config   = $config['zf-rest'][$requestedName];
 
         if ($services->has($config['listener'])) {
             $listener = $services->get($config['listener']);
