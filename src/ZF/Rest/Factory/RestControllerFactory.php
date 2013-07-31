@@ -19,6 +19,12 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 class RestControllerFactory implements AbstractFactoryInterface
 {
     /**
+     * Cache of canCreateServiceWithName lookups
+     * @var array
+     */
+    protected $lookupCache = array();
+
+    /**
      * Determine if we can create a service with name
      *
      * @param ServiceLocatorInterface $controllers
@@ -28,6 +34,10 @@ class RestControllerFactory implements AbstractFactoryInterface
      */
     public function canCreateServiceWithName(ServiceLocatorInterface $controllers, $name, $requestedName)
     {
+        if (array_key_exists($requestedName, $this->lookupCache)) {
+            return $this->lookupCache[$requestedName];
+        }
+
         $services = $controllers->getServiceLocator();
 
         if (!$services->has('Config') || !$services->has('EventManager')) {
@@ -39,6 +49,7 @@ class RestControllerFactory implements AbstractFactoryInterface
         if (!isset($config['zf-rest'])
             || !is_array($config['zf-rest'])
         ) {
+            $this->lookupCache[$requestedName] = false;
             return false;
         }
         $config = $config['zf-rest'];
@@ -49,6 +60,7 @@ class RestControllerFactory implements AbstractFactoryInterface
         ) {
             // Configuration, and specifically the listener and route_name
             // keys, is required
+            $this->lookupCache[$requestedName] = false;
             return false;
         }
 
@@ -56,6 +68,7 @@ class RestControllerFactory implements AbstractFactoryInterface
             && !class_exists($config[$requestedName]['listener'])
         ) {
             // Service referenced by listener key is required
+            $this->lookupCache[$requestedName] = false;
             throw new ServiceNotFoundException(sprintf(
                 '%s requires that a valid "listener" service be specified for controller %s; no service found',
                 __METHOD__,
@@ -63,6 +76,7 @@ class RestControllerFactory implements AbstractFactoryInterface
             ));
         }
 
+        $this->lookupCache[$requestedName] = true;
         return true;
     }
 
