@@ -150,7 +150,7 @@ class ResourceTest extends TestCase
     }
 
     /**
-     * @dataProvider badData
+     * @dataProvider badUpdateCollectionData
      */
     public function testReplaceListRaisesExceptionWithInvalidData($data)
     {
@@ -378,6 +378,7 @@ class ResourceTest extends TestCase
             'update' => array('update', array($id, $resource), true),
             'replaceList' => array('replaceList', array($collection), false),
             'patch' => array('patch', array($id, $resource), true),
+            'patchList' => array('patchList', array($collection), false),
             'delete' => array('delete', array($id), true),
             'deleteList' => array('deleteList', array($collection), false),
             'fetch' => array('fetch', array($id), true),
@@ -453,5 +454,54 @@ class ResourceTest extends TestCase
         $this->assertInstanceOf('ZF\Rest\ResourceEvent', $e);
         $this->assertSame($matches, $e->getRouteMatch());
         $this->assertSame($queryParams, $e->getQueryParams());
+    }
+
+    public function badUpdateCollectionData()
+    {
+        return array_merge(
+            $this->badData(),
+            array(
+                'object'    => array(new StdClass),
+                'notnested' => array(array(null)),
+            )
+        );
+    }
+
+    /**
+     * @dataProvider badUpdateCollectionData
+     */
+    public function testPatchListListRaisesExceptionWithInvalidData($data)
+    {
+        $this->setExpectedException('ZF\Rest\Exception\InvalidArgumentException');
+        $this->resource->patchList($data);
+    }
+
+    public function testPatchListReturnsResultOfLastListener()
+    {
+        $this->events->attach('patchList', function ($e) {
+            return;
+        });
+        $object = array(new stdClass);
+        $this->events->attach('patchList', function ($e) use ($object) {
+            return $object;
+        });
+
+        $test = $this->resource->patchList(array(array()));
+        $this->assertSame($object, $test);
+    }
+
+    public function testPatchListReturnsDataIfLastListenerDoesNotReturnResource()
+    {
+        $data = array(new stdClass);
+        $object = new stdClass;
+        $this->events->attach('patchList', function ($e) use ($object) {
+            return $object;
+        });
+        $this->events->attach('patchList', function ($e) {
+            return;
+        });
+
+        $test = $this->resource->patchList($data);
+        $this->assertSame($data, $test);
     }
 }
