@@ -157,10 +157,6 @@ class RestControllerFactory implements AbstractFactoryInterface
     {
         foreach ($config as $option => $value) {
             switch ($option) {
-                case 'accept_criteria':
-                    $controller->setAcceptCriteria($value);
-                    break;
-
                 case 'collection_http_options':
                     $controller->setCollectionHttpOptions($value);
                     break;

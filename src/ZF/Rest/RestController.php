@@ -12,6 +12,7 @@ use Zend\Paginator\Paginator;
 use ZF\ApiProblem\ApiProblem;
 use ZF\ApiProblem\Exception\DomainException;
 use ZF\ApiProblem\View\ApiProblemModel;
+use ZF\ContentNegotiation\ViewModel as ContentNegotiationViewModel;
 use ZF\Hal\Collection as HalCollection;
 use ZF\Hal\Resource as HalResource;
 use ZF\Hal\View\HalJsonModel;
@@ -39,17 +40,6 @@ use ZF\Hal\View\HalJsonModel;
  */
 class RestController extends AbstractRestfulController
 {
-    /**
-     * Criteria for the AcceptableViewModelSelector
-     *
-     * @var array
-     */
-    protected $acceptCriteria = array(
-        'ZF\Hal\View\HalJsonModel' => array(
-            '*/json',
-        ),
-    );
-
     /**
      * HTTP methods we allow for the resource (collection); used by options()
      *
@@ -139,16 +129,6 @@ class RestController extends AbstractRestfulController
         if (null !== $eventIdentifier) {
             $this->eventIdentifier = $eventIdentifier;
         }
-    }
-
-    /**
-     * Set the Accept header criteria for use with the AcceptableViewModelSelector
-     *
-     * @param  array $criteria
-     */
-    public function setAcceptCriteria(array $criteria)
-    {
-        $this->acceptCriteria = $criteria;
     }
 
     /**
@@ -302,13 +282,11 @@ class RestController extends AbstractRestfulController
             return $viewModel;
         }
 
-        $viewModel = $this->acceptableViewModelSelector($this->acceptCriteria);
-        $viewModel->setVariables(array('payload' => $return));
+        // Set the fallback content negotiation to use HalJson.
+        $e->setParam('ZFContentNegotiationFallback', 'HalJson');
 
-        if ($viewModel instanceof HalJsonModel) {
-            $viewModel->setTerminal(true);
-        }
-
+        // Use content negotiation for creating the view model
+        $viewModel = new ContentNegotiationViewModel(array('payload' => $return));
         $e->setResult($viewModel);
         return $viewModel;
     }

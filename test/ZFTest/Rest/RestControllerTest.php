@@ -468,7 +468,7 @@ class RestControllerTest extends TestCase
         $this->assertInstanceof('Zend\View\Model\ModelInterface', $result);
     }
 
-    public function testValidMethodReturningHalOrApiValueCastsReturnToHalJsonModelWhenAcceptHeaderIsJson()
+    public function testValidMethodReturningHalOrApiValueCastsReturnToContentNegotiationViewModel()
     {
         $resource = array('id' => 'foo', 'bar' => 'baz');
         $this->resource->getEventManager()->attach('fetch', function ($e) use ($resource) {
@@ -484,7 +484,7 @@ class RestControllerTest extends TestCase
         $this->event->getRouteMatch()->setParam('id', 'foo');
 
         $result = $this->controller->onDispatch($this->event);
-        $this->assertInstanceof('ZF\Hal\View\HalJsonModel', $result);
+        $this->assertInstanceof('ZF\ContentNegotiation\ViewModel', $result);
     }
 
     public function testPassingIdentifierToConstructorAllowsListeningOnThatIdentifier()
