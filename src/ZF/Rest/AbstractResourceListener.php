@@ -18,7 +18,7 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
 
     /**
      * Retrieve the current resource event, if any
-     * 
+     *
      * @return ResourceEvent
      */
     public function getEvent()
@@ -28,8 +28,8 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
 
     /**
      * Attach listeners for all Resource events
-     * 
-     * @param  EventManagerInterface $events 
+     *
+     * @param  EventManagerInterface $events
      */
     public function attach(EventManagerInterface $events)
     {
@@ -47,8 +47,8 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
      * Dispatch an incoming event to the appropriate method
      *
      * Marshals arguments from the event parameters.
-     * 
-     * @param  ResourceEvent $event 
+     *
+     * @param  ResourceEvent $event
      * @return mixed
      */
     public function dispatch(ResourceEvent $event)
@@ -91,8 +91,8 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
 
     /**
      * Create a resource
-     * 
-     * @param  mixed $data 
+     *
+     * @param  mixed $data
      * @return ApiProblem|mixed
      */
     public function create($data)
@@ -102,8 +102,8 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
 
     /**
      * Delete a resource
-     * 
-     * @param  mixed $id 
+     *
+     * @param  mixed $id
      * @return ApiProblem|mixed
      */
     public function delete($id)
@@ -113,8 +113,8 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
 
     /**
      * Delete a collection, or members of a collection
-     * 
-     * @param  mixed $data 
+     *
+     * @param  mixed $data
      * @return ApiProblem|mixed
      */
     public function deleteList($data)
@@ -124,8 +124,8 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
 
     /**
      * Fetch a resource
-     * 
-     * @param  mixed $id 
+     *
+     * @param  mixed $id
      * @return ApiProblem|mixed
      */
     public function fetch($id)
@@ -135,8 +135,8 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
 
     /**
      * Fetch all or a subset of resources
-     * 
-     * @param  array $params 
+     *
+     * @param  array $params
      * @return ApiProblem|mixed
      */
     public function fetchAll($params = array())
@@ -146,9 +146,9 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
 
     /**
      * Patch (partial in-place update) a resource
-     * 
-     * @param  mixed $id 
-     * @param  mixed $data 
+     *
+     * @param  mixed $id
+     * @param  mixed $data
      * @return ApiProblem|mixed
      */
     public function patch($id, $data)
@@ -158,8 +158,8 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
 
     /**
      * Replace a collection or members of a collection
-     * 
-     * @param  mixed $data 
+     *
+     * @param  mixed $data
      * @return ApiProblem|mixed
      */
     public function replaceList($data)
@@ -168,10 +168,10 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
     }
 
     /**
-     * Update a resource 
-     * 
-     * @param  mixed $id 
-     * @param  mixed $data 
+     * Update a resource
+     *
+     * @param  mixed $id
+     * @param  mixed $data
      * @return ApiProblem|mixed
      */
     public function update($id, $data)
