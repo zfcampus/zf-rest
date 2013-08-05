@@ -22,6 +22,7 @@ use Zend\View\HelperPluginManager;
 use Zend\View\Helper\ServerUrl as ServerUrlHelper;
 use Zend\View\Helper\Url as UrlHelper;
 use ZF\ApiProblem\View\ApiProblemRenderer;
+use ZF\ContentNegotiation\AcceptListener;
 use ZF\Hal\Plugin\Hal as HalHelper;
 use ZF\Hal\View\HalJsonModel;
 use ZF\Hal\View\HalJsonRenderer;
@@ -140,10 +141,27 @@ class CollectionIntegrationTest extends TestCase
         $controller->setPageSize(3);
         $controller->setRoute('resource');
         $controller->setEvent($this->getEvent());
+        $this->setUpContentNegotiation($controller);
+    }
 
+    public function setUpContentNegotiation($controller)
+    {
         $plugins = new ControllerPluginManager();
         $plugins->setService('Hal', $this->linksHelper);
         $controller->setPluginManager($plugins);
+
+        $viewModelSelector = $plugins->get('AcceptableViewModelSelector');
+        $acceptListener    = new AcceptListener($viewModelSelector, array(
+            'controllers' => array(),
+            'selectors'  => array(
+                'HalJson' => array(
+                    'ZF\Hal\View\HalJsonModel' => array(
+                        'application/json',
+                    ),
+                ),
+            ),
+        ));
+        $controller->getEventManager()->attach(MvcEvent::EVENT_DISPATCH, $acceptListener, -10);
     }
 
     public function setUpRequest()
@@ -263,6 +281,7 @@ class CollectionIntegrationTest extends TestCase
         $services = $this->getServiceManager();
         $controller = $services->get('ControllerLoader')->get('Api\RestController');
         $controller->setEvent($this->getEvent());
+        $this->setUpContentNegotiation($controller);
 
         $result = $controller->dispatch($this->request, $this->response);
         $this->assertInstanceOf('ZF\Hal\View\HalJsonModel', $result);
