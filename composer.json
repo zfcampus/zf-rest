@@ -29,19 +29,19 @@
         "php": ">=5.3.3",
         "zfcampus/zf-api-problem": "dev-master",
         "zfcampus/zf-hal": "dev-master",
-        "zendframework/zend-eventmanager": ">=2.3.0dev",
-        "zendframework/zend-json": ">=2.3.0dev",
-        "zendframework/zend-loader": ">=2.3.0dev",
-        "zendframework/zend-mvc": ">=2.3.0dev",
-        "zendframework/zend-paginator": ">=2.3.0dev"
+        "zendframework/zend-eventmanager": "dev-develop",
+        "zendframework/zend-json": "dev-develop",
+        "zendframework/zend-loader": "dev-develop",
+        "zendframework/zend-mvc": "dev-develop",
+        "zendframework/zend-paginator": "dev-develop"
     },
     "require-dev": {
         "phpunit/PHPUnit": "3.7.*",
-        "zendframework/zend-console": ">=2.3.0dev",
-        "zendframework/zend-http": ">=2.3.0dev",
-        "zendframework/zend-servicemanager": ">=2.3.0dev",
-        "zendframework/zend-uri": ">=2.3.0dev",
-        "zendframework/zend-view": ">=2.3.0dev"
+        "zendframework/zend-console": "dev-develop",
+        "zendframework/zend-http": "dev-develop",
+        "zendframework/zend-servicemanager": "dev-develop",
+        "zendframework/zend-uri": "dev-develop",
+        "zendframework/zend-view": "dev-develop"
     },
     "autoload": {
         "psr-0": {
