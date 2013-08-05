@@ -33,7 +33,7 @@
         "zfcampus/zf-api-problem": "dev-master",
         "zfcampus/zf-content-negotiation": "dev-master",
         "zfcampus/zf-hal": "dev-master",
-	"zendframework/zendframework": ">=2.3.0dev"
+	    "zendframework/zendframework": "dev-master"
     },
     "require-dev": {
 	"phpunit/PHPUnit": "3.7.*"
