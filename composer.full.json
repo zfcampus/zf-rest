@@ -1,0 +1,51 @@
+{
+    "name": "zfcampus/zf-rest",
+    "description": "ZF2 Module providing structure for RESTful resources",
+    "type": "library",
+    "license": "BSD-2-Clause",
+    "keywords": [
+	"zf2",
+	"zend",
+	"module",
+	"rest"
+    ],
+    "homepage": "https://bitbucket.org/zendframework/zfrest",
+    "repositories": [
+	{
+	    "type": "vcs",
+	    "url": "git@bitbucket.org:zendframework/zfapiproblem.git"
+	},
+	{
+	    "type": "vcs",
+	    "url": "git@bitbucket.org:zendframework/zfhal.git"
+	},
+	{
+	    "type": "composer",
+	    "url": "https://packages.zendframework.com"
+	}
+    ],
+    "require": {
+	"php": ">=5.3.3",
+	"zfcampus/zf-api-problem": "dev-master",
+	"zfcampus/zf-hal": "dev-master",
+	"zendframework/zend-eventmanager": ">=2.2.0",
+	"zendframework/zend-json": ">=2.2.0",
+	"zendframework/zend-loader": ">=2.2.0",
+	"zendframework/zend-mvc": ">=2.2.0",
+	"zendframework/zend-paginator": ">=2.2.0"
+    },
+    "require-dev": {
+	"phpunit/PHPUnit": "3.7.*",
+	"zendframework/zend-console": ">=2.2.0",
+	"zendframework/zend-http": ">=2.2.0",
+	"zendframework/zend-servicemanager": ">=2.2.0",
+	"zendframework/zend-uri": ">=2.2.0",
+	"zendframework/zend-view": ">=2.2.0"
+    },
+    "autoload": {
+	"psr-0": {
+	    "ZF\\Rest\\": "src/",
+	    "ZFTest\\": "test/"
+	}
+    }
+}

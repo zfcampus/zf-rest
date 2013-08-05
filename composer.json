@@ -33,19 +33,10 @@
         "zfcampus/zf-api-problem": "dev-master",
         "zfcampus/zf-content-negotiation": "dev-master",
         "zfcampus/zf-hal": "dev-master",
-        "zendframework/zend-eventmanager": ">=2.2.0",
-        "zendframework/zend-json": ">=2.2.0",
-        "zendframework/zend-loader": ">=2.2.0",
-        "zendframework/zend-mvc": ">=2.2.0",
-        "zendframework/zend-paginator": ">=2.2.0"
+	"zendframework/zendframework": ">=2.3.0dev"
     },
     "require-dev": {
-        "phpunit/PHPUnit": "3.7.*",
-        "zendframework/zend-console": ">=2.2.0",
-        "zendframework/zend-http": ">=2.2.0",
-        "zendframework/zend-servicemanager": ">=2.2.0",
-        "zendframework/zend-uri": ">=2.2.0",
-        "zendframework/zend-view": ">=2.2.0"
+	"phpunit/PHPUnit": "3.7.*"
     },
     "autoload": {
         "psr-0": {
