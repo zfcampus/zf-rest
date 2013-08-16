@@ -129,7 +129,6 @@ class RestControllerFactory implements AbstractFactoryInterface
             $identifier = $config['identifier'];
         }
 
-        $events          = $services->get('EventManager');
         $controllerClass = isset($config['controller_class']) ? $config['controller_class'] : 'ZF\Rest\RestController';
         $controller      = new $controllerClass($identifier);
 
