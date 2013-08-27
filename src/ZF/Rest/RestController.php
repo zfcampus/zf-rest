@@ -247,7 +247,7 @@ class RestController extends AbstractRestfulController
      */
     public function onDispatch(MvcEvent $e)
     {
-        if (!$this->resource) {
+        if (!$this->getResource()) {
             throw new DomainException(sprintf(
                 '%s requires that a %s\ResourceInterface object is composed; none provided',
                 __CLASS__, __NAMESPACE__
@@ -308,7 +308,7 @@ class RestController extends AbstractRestfulController
         $events->trigger('create.pre', $this, array('data' => $data));
 
         try {
-            $resource = $this->resource->create($data);
+            $resource = $this->getResource()->create($data);
         } catch (\Exception $e) {
             $code = $e->getCode() ?: 500;
             return new ApiProblem($code, $e);
@@ -356,7 +356,7 @@ class RestController extends AbstractRestfulController
         $events->trigger('delete.pre', $this, array('id' => $id));
 
         try {
-            $result = $this->resource->delete($id);
+            $result = $this->getResource()->delete($id);
         } catch (\Exception $e) {
             $code = $e->getCode() ?: 500;
 
@@ -387,7 +387,7 @@ class RestController extends AbstractRestfulController
         $events->trigger('deleteList.pre', $this, array());
 
         try {
-            $result = $this->resource->deleteList();
+            $result = $this->getResource()->deleteList();
         } catch (\Exception $e) {
             $code = $e->getCode() ?: 500;
 
@@ -424,7 +424,7 @@ class RestController extends AbstractRestfulController
         $events->trigger('get.pre', $this, array('id' => $id));
 
         try {
-            $resource = $this->resource->fetch($id);
+            $resource = $this->getResource()->fetch($id);
         } catch (\Exception $e) {
             $code = $e->getCode() ?: 500;
 
@@ -463,7 +463,7 @@ class RestController extends AbstractRestfulController
         $events->trigger('getList.pre', $this, array());
 
         try {
-            $collection = $this->resource->fetchAll();
+            $collection = $this->getResource()->fetchAll();
         } catch (\Exception $e) {
             $code = $e->getCode() ?: 500;
 
@@ -558,7 +558,7 @@ class RestController extends AbstractRestfulController
         $events->trigger('patch.pre', $this, array('id' => $id, 'data' => $data));
 
         try {
-            $resource = $this->resource->patch($id, $data);
+            $resource = $this->getResource()->patch($id, $data);
         } catch (\Exception $e) {
             $code = $e->getCode() ?: 500;
             return new ApiProblem($code, $e);
@@ -599,7 +599,7 @@ class RestController extends AbstractRestfulController
         $events->trigger('update.pre', $this, array('id' => $id, 'data' => $data));
 
         try {
-            $resource = $this->resource->update($id, $data);
+            $resource = $this->getResource()->update($id, $data);
         } catch (\Exception $e) {
             $code = $e->getCode() ?: 500;
             return new ApiProblem($code, $e);
@@ -633,7 +633,7 @@ class RestController extends AbstractRestfulController
         $events->trigger('patchList.pre', $this, array('data' => $data));
 
         try {
-            $collection = $this->resource->patchList($data);
+            $collection = $this->getResource()->patchList($data);
         } catch (\Exception $e) {
             $code = $e->getCode() ?: 500;
             return new ApiProblem($code, $e);
@@ -672,7 +672,7 @@ class RestController extends AbstractRestfulController
         $events->trigger('replaceList.pre', $this, array('data' => $data));
 
         try {
-            $collection = $this->resource->replaceList($data);
+            $collection = $this->getResource()->replaceList($data);
         } catch (\Exception $e) {
             $code = $e->getCode() ?: 500;
             return new ApiProblem($code, $e);

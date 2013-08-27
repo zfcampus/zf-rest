@@ -42,9 +42,11 @@ class Module
     public function onBootstrap($e)
     {
         $app          = $e->getTarget();
+        $services     = $app->getServiceManager();
         $events       = $app->getEventManager();
         $sharedEvents = $events->getSharedManager();
         $sharedEvents->attach('ZF\Rest\RestController', $e::EVENT_DISPATCH, array($this, 'onDispatch'), 100);
+        $sharedEvents->attachAggregate($services->get('ZF\Rest\RestParametersListener'));
     }
 
     /**
@@ -61,8 +63,5 @@ class Module
         $services = $app->getServiceManager();
         $listener = $services->get('ZF\ApiProblem\RenderErrorListener');
         $events->attach($listener);
-
-        $sharedEvents = $events->getSharedManager();
-        $sharedEvents->attachAggregate($services->get('ZF\Rest\RestParametersListener'));
     }
 }
