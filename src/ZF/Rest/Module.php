@@ -61,5 +61,8 @@ class Module
         $services = $app->getServiceManager();
         $listener = $services->get('ZF\ApiProblem\RenderErrorListener');
         $events->attach($listener);
+
+        $sharedEvents = $events->getSharedManager();
+        $sharedEvents->attachAggregate($services->get('ZF\Rest\Listener\RestParametersListener'));
     }
 }
