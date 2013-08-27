@@ -63,6 +63,6 @@ class Module
         $events->attach($listener);
 
         $sharedEvents = $events->getSharedManager();
-        $sharedEvents->attachAggregate($services->get('ZF\Rest\Listener\RestParametersListener'));
+        $sharedEvents->attachAggregate($services->get('ZF\Rest\RestParametersListener'));
     }
 }
