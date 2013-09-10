@@ -283,10 +283,10 @@ class RestControllerTest extends TestCase
     public function testOptionsReturnsEmptyResponseWithAllowHeaderPopulatedForCollection()
     {
         $r = new ReflectionObject($this->controller);
-        $httpOptionsProp = $r->getProperty('collectionHttpOptions');
-        $httpOptionsProp->setAccessible(true);
-        $httpOptions = $httpOptionsProp->getValue($this->controller);
-        sort($httpOptions);
+        $httpMethodsProp = $r->getProperty('collectionHttpMethods');
+        $httpMethodsProp->setAccessible(true);
+        $httpMethods = $httpMethodsProp->getValue($this->controller);
+        sort($httpMethods);
 
         $result = $this->controller->options();
         $this->assertInstanceOf('Zend\Http\Response', $result);
@@ -297,16 +297,16 @@ class RestControllerTest extends TestCase
         $test  = $allow->getFieldValue();
         $test  = explode(', ', $test);
         sort($test);
-        $this->assertEquals($httpOptions, $test);
+        $this->assertEquals($httpMethods, $test);
     }
 
     public function testOptionsReturnsEmptyResponseWithAllowHeaderPopulatedForResource()
     {
         $r = new ReflectionObject($this->controller);
-        $httpOptionsProp = $r->getProperty('resourceHttpOptions');
-        $httpOptionsProp->setAccessible(true);
-        $httpOptions = $httpOptionsProp->getValue($this->controller);
-        sort($httpOptions);
+        $httpMethodsProp = $r->getProperty('resourceHttpMethods');
+        $httpMethodsProp->setAccessible(true);
+        $httpMethods = $httpMethodsProp->getValue($this->controller);
+        sort($httpMethods);
 
         $this->event->getRouteMatch()->setParam('id', 'foo');
 
@@ -319,7 +319,7 @@ class RestControllerTest extends TestCase
         $test  = $allow->getFieldValue();
         $test  = explode(', ', $test);
         sort($test);
-        $this->assertEquals($httpOptions, $test);
+        $this->assertEquals($httpMethods, $test);
     }
 
 
@@ -403,7 +403,7 @@ class RestControllerTest extends TestCase
     public function testOnDispatchRaisesDomainExceptionOnMissingResource()
     {
         $controller = new RestController();
-        $this->setExpectedException('ZF\ApiProblem\Exception\DomainException', 'ResourceInterface');
+        $this->setExpectedException('ZF\ApiProblem\Exception\DomainException', 'No resource');
         $controller->onDispatch($this->event);
     }
 
@@ -417,7 +417,7 @@ class RestControllerTest extends TestCase
 
     public function testOnDispatchReturns405ResponseForInvalidCollectionMethod()
     {
-        $this->controller->setCollectionHttpOptions(array('GET'));
+        $this->controller->setCollectionHttpMethods(array('GET'));
         $request = $this->controller->getRequest();
         $request->setMethod('POST');
         $this->event->setRequest($request);
@@ -434,7 +434,7 @@ class RestControllerTest extends TestCase
 
     public function testOnDispatchReturns405ResponseForInvalidResourceMethod()
     {
-        $this->controller->setResourceHttpOptions(array('GET'));
+        $this->controller->setResourceHttpMethods(array('GET'));
         $request = $this->controller->getRequest();
         $request->setMethod('PUT');
         $this->event->setRequest($request);
@@ -457,7 +457,7 @@ class RestControllerTest extends TestCase
             return $resource;
         });
 
-        $this->controller->setResourceHttpOptions(array('GET'));
+        $this->controller->setResourceHttpMethods(array('GET'));
 
         $request = $this->controller->getRequest();
         $request->setMethod('GET');
@@ -475,7 +475,7 @@ class RestControllerTest extends TestCase
             return $resource;
         });
 
-        $this->controller->setResourceHttpOptions(array('GET'));
+        $this->controller->setResourceHttpMethods(array('GET'));
 
         $request = $this->controller->getRequest();
         $request->setMethod('GET');
@@ -727,8 +727,8 @@ class RestControllerTest extends TestCase
 
     public function testOptionsTriggersPreAndPostEventsForCollection()
     {
-        $options = array('GET', 'POST');
-        $this->controller->setCollectionHttpOptions($options);
+        $methods = array('GET', 'POST');
+        $this->controller->setCollectionHttpMethods($methods);
 
         $test = (object) array(
             'pre'          => false,
@@ -748,15 +748,15 @@ class RestControllerTest extends TestCase
 
         $this->controller->options();
         $this->assertTrue($test->pre);
-        $this->assertEquals($options, $test->pre_options);
+        $this->assertEquals($methods, $test->pre_options);
         $this->assertTrue($test->post);
-        $this->assertEquals($options, $test->post_options);
+        $this->assertEquals($methods, $test->post_options);
     }
 
     public function testOptionsTriggersPreAndPostEventsForResource()
     {
-        $options = array('GET', 'PUT', 'PATCH');
-        $this->controller->setResourceHttpOptions($options);
+        $methods = array('GET', 'PUT', 'PATCH');
+        $this->controller->setResourceHttpMethods($methods);
 
         $test = (object) array(
             'pre'          => false,
@@ -778,9 +778,9 @@ class RestControllerTest extends TestCase
 
         $this->controller->options();
         $this->assertTrue($test->pre);
-        $this->assertEquals($options, $test->pre_options);
+        $this->assertEquals($methods, $test->pre_options);
         $this->assertTrue($test->post);
-        $this->assertEquals($options, $test->post_options);
+        $this->assertEquals($methods, $test->post_options);
     }
 
     public function testGetListTriggersPreAndPostEvents()

@@ -156,8 +156,8 @@ class RestControllerFactory implements AbstractFactoryInterface
     {
         foreach ($config as $option => $value) {
             switch ($option) {
-                case 'collection_http_options':
-                    $controller->setCollectionHttpOptions($value);
+                case 'collection_http_methods':
+                    $controller->setCollectionHttpMethods($value);
                     break;
 
                 case 'collection_name':
@@ -216,8 +216,8 @@ class RestControllerFactory implements AbstractFactoryInterface
                     $controller->setPageSizeParam($value);
                     break;
 
-                case 'resource_http_options':
-                    $controller->setResourceHttpOptions($value);
+                case 'resource_http_methods':
+                    $controller->setResourceHttpMethods($value);
                     break;
 
                 case 'route_name':

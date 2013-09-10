@@ -10,12 +10,12 @@ return array(
         //     'listener'                => 'Name of service/class that acts as a listener on the composed Resource',
         //     'route_name'              => 'Name of the route that will map to this controller',
         //     'identifier_name'         => 'Name of parameter in route that acts as a resource identifier',
-        //     'resource_http_options'   => array(
-        //         /* array of HTTP options that are allowed on individual resources */
+        //     'resource_http_methods'   => array(
+        //         /* array of HTTP methods that are allowed on individual resources */
         //         'get', 'post', 'delete'
         //     ),
-        //     'collection_http_options' => array(
-        //         /* array of HTTP options that are allowed on collections */
+        //     'collection_http_methods' => array(
+        //         /* array of HTTP methods that are allowed on collections */
         //         'get'
         //     ),
         // ),

@@ -47,7 +47,7 @@ class RestController extends AbstractRestfulController
      *
      * @var array
      */
-    protected $collectionHttpOptions = array(
+    protected $collectionHttpMethods = array(
         'GET',
         'POST',
     );
@@ -102,7 +102,7 @@ class RestController extends AbstractRestfulController
      *
      * @var array
      */
-    protected $resourceHttpOptions = array(
+    protected $resourceHttpMethods = array(
         'DELETE',
         'GET',
         'PATCH',
@@ -132,13 +132,13 @@ class RestController extends AbstractRestfulController
     }
 
     /**
-     * Set the allowed HTTP OPTIONS for the resource (collection)
+     * Set the allowed HTTP methods for the resource (collection)
      *
-     * @param  array $options
+     * @param  array $methods
      */
-    public function setCollectionHttpOptions(array $options)
+    public function setCollectionHttpMethods(array $methods)
     {
-        $this->collectionHttpOptions = $options;
+        $this->collectionHttpMethods = $methods;
     }
 
     /**
@@ -201,7 +201,6 @@ class RestController extends AbstractRestfulController
     public function getResource()
     {
         if ($this->resource === null) {
-
             throw new DomainException('No resource has been set.');
         }
 
@@ -213,9 +212,9 @@ class RestController extends AbstractRestfulController
      *
      * @param  array $options
      */
-    public function setResourceHttpOptions(array $options)
+    public function setResourceHttpMethods(array $methods)
     {
-        $this->resourceHttpOptions = $options;
+        $this->resourceHttpMethods = $methods;
     }
 
     /**
@@ -301,7 +300,7 @@ class RestController extends AbstractRestfulController
     public function create($data)
     {
         if (!$this->isMethodAllowedForCollection()) {
-            return $this->createMethodNotAllowedResponse($this->collectionHttpOptions);
+            return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
         }
 
         $events = $this->getEventManager();
@@ -346,10 +345,10 @@ class RestController extends AbstractRestfulController
     public function delete($id)
     {
         if ($id && !$this->isMethodAllowedForResource()) {
-            return $this->createMethodNotAllowedResponse($this->resourceHttpOptions);
+            return $this->createMethodNotAllowedResponse($this->resourceHttpMethods);
         }
         if (!$id && !$this->isMethodAllowedForCollection()) {
-            return $this->createMethodNotAllowedResponse($this->collectionHttpOptions);
+            return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
         }
 
         $events = $this->getEventManager();
@@ -380,7 +379,7 @@ class RestController extends AbstractRestfulController
     public function deleteList()
     {
         if (!$this->isMethodAllowedForCollection()) {
-            return $this->createMethodNotAllowedResponse($this->collectionHttpOptions);
+            return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
         }
 
         $events = $this->getEventManager();
@@ -417,7 +416,7 @@ class RestController extends AbstractRestfulController
     public function get($id)
     {
         if (!$this->isMethodAllowedForResource()) {
-            return $this->createMethodNotAllowedResponse($this->resourceHttpOptions);
+            return $this->createMethodNotAllowedResponse($this->resourceHttpMethods);
         }
 
         $events = $this->getEventManager();
@@ -456,7 +455,7 @@ class RestController extends AbstractRestfulController
     public function getList()
     {
         if (!$this->isMethodAllowedForCollection()) {
-            return $this->createMethodNotAllowedResponse($this->collectionHttpOptions);
+            return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
         }
 
         $events = $this->getEventManager();
@@ -519,9 +518,9 @@ class RestController extends AbstractRestfulController
         }
 
         if ($id) {
-            $options = $this->resourceHttpOptions;
+            $options = $this->resourceHttpMethods;
         } else {
-            $options = $this->collectionHttpOptions;
+            $options = $this->collectionHttpMethods;
         }
 
         array_walk($options, function (&$method) {
@@ -551,7 +550,7 @@ class RestController extends AbstractRestfulController
     public function patch($id, $data)
     {
         if (!$this->isMethodAllowedForResource()) {
-            return $this->createMethodNotAllowedResponse($this->resourceHttpOptions);
+            return $this->createMethodNotAllowedResponse($this->resourceHttpMethods);
         }
 
         $events = $this->getEventManager();
@@ -589,10 +588,10 @@ class RestController extends AbstractRestfulController
     public function update($id, $data)
     {
         if ($id && !$this->isMethodAllowedForResource()) {
-            return $this->createMethodNotAllowedResponse($this->resourceHttpOptions);
+            return $this->createMethodNotAllowedResponse($this->resourceHttpMethods);
         }
         if (!$id && !$this->isMethodAllowedForCollection()) {
-            return $this->createMethodNotAllowedResponse($this->collectionHttpOptions);
+            return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
         }
 
         $events = $this->getEventManager();
@@ -626,7 +625,7 @@ class RestController extends AbstractRestfulController
     public function patchList($data)
     {
         if (!$this->isMethodAllowedForCollection()) {
-            return $this->createMethodNotAllowedResponse($this->collectionHttpOptions);
+            return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
         }
 
         $events = $this->getEventManager();
@@ -665,7 +664,7 @@ class RestController extends AbstractRestfulController
     public function replaceList($data)
     {
         if (!$this->isMethodAllowedForCollection()) {
-            return $this->createMethodNotAllowedResponse($this->collectionHttpOptions);
+            return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
         }
 
         $events = $this->getEventManager();
@@ -728,10 +727,10 @@ class RestController extends AbstractRestfulController
      */
     protected function isMethodAllowedForResource()
     {
-        array_walk($this->resourceHttpOptions, function (&$method) {
+        array_walk($this->resourceHttpMethods, function (&$method) {
             $method = strtoupper($method);
         });
-        $options = array_merge($this->resourceHttpOptions, array('OPTIONS', 'HEAD'));
+        $options = array_merge($this->resourceHttpMethods, array('OPTIONS', 'HEAD'));
         $request = $this->getRequest();
         $method  = strtoupper($request->getMethod());
         if (!in_array($method, $options)) {
@@ -747,30 +746,30 @@ class RestController extends AbstractRestfulController
      */
     protected function isMethodAllowedForCollection()
     {
-        array_walk($this->collectionHttpOptions, function (&$method) {
+        array_walk($this->collectionHttpMethods, function (&$method) {
             $method = strtoupper($method);
         });
-        $options = array_merge($this->collectionHttpOptions, array('OPTIONS', 'HEAD'));
+        $methods = array_merge($this->collectionHttpMethods, array('OPTIONS', 'HEAD'));
         $request = $this->getRequest();
         $method  = strtoupper($request->getMethod());
-        if (!in_array($method, $options)) {
+        if (!in_array($method, $methods)) {
             return false;
         }
         return true;
     }
 
     /**
-     * Creates a "405 Method Not Allowed" response detailing the available options
+     * Creates a "405 Method Not Allowed" response detailing the available methods
      *
-     * @param  array $options
+     * @param  array $methods
      * @return Response
      */
-    protected function createMethodNotAllowedResponse(array $options)
+    protected function createMethodNotAllowedResponse(array $methods)
     {
         $response = $this->getResponse();
         $response->setStatusCode(405);
         $headers = $response->getHeaders();
-        $headers->addHeaderLine('Allow', implode(', ', $options));
+        $headers->addHeaderLine('Allow', implode(', ', $methods));
         return $response;
     }
 }
