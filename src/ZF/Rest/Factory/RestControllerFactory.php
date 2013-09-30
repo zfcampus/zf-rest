@@ -194,9 +194,29 @@ class RestControllerFactory implements AbstractFactoryInterface
                         }
 
                         $collection = $e->getParam('collection');
-                        $collection->setCollectionRouteOptions(array(
+
+                        // If no self link defined, set the options in the collection and return
+                        $links = $collection->getLinks();
+                        if (!$links->has('self')) {
+                            $collection->setCollectionRouteOptions(array(
+                                'query' => $params,
+                            ));
+                            return;
+                        }
+
+                        // If self link is defined, but is not route-based, return
+                        $self = $links->get('self');
+                        if (!$self->hasRoute()) {
+                            return;
+                        }
+
+                        // Otherwise, merge the query string parameters with 
+                        // the self link's route options
+                        $self = $links->get('self');
+                        $options = $self->getRouteOptions();
+                        $self->setRouteOptions(array_merge($options, array(
                             'query' => $params,
-                        ));
+                        )));
                     });
                     break;
 
