@@ -2,16 +2,22 @@
     "name": "zfcampus/zf-rest",
     "description": "ZF2 Module providing structure for RESTful resources",
     "type": "library",
-    "license": "BSD-2-Clause",
+    "license": "BSD-3-Clause",
     "keywords": [
         "zf2",
         "zend",
         "module",
         "rest"
     ],
+    "homepage": "http://apigility.org/",
+    "support": {
+        "email": "apigility-users@zend.com",
+        "irc": "irc://irc.freenode.net/apigility",
+        "source": "https://github.com/zfcampus/zf-rest",
+        "issues": "https://github.com/zfcampus/zf-rest/issues"
+    },
     "repositories": [
-        { "type": "composer", "url": "https://packages.zendframework.com" },
-        { "type": "composer", "url": "http://packages-zfcampus.rhcloud.com" }
+        { "type": "composer", "url": "https://packages.zendframework.com" }
     ],
     "minimum-stability": "dev",
     "require": {
