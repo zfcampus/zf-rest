@@ -196,12 +196,15 @@ class RestControllerFactory implements AbstractFactoryInterface
 
                         $collection = $e->getParam('collection');
 
+                        // Set collection route options with the captured query whitelist, to
+                        // ensure paginated links are generated correctly
+                        $collection->setCollectionRouteOptions(array(
+                            'query' => $params,
+                        ));
+
                         // If no self link defined, set the options in the collection and return
                         $links = $collection->getLinks();
                         if (!$links->has('self')) {
-                            $collection->setCollectionRouteOptions(array(
-                                'query' => $params,
-                            ));
                             return;
                         }
 

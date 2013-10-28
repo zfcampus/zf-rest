@@ -23,6 +23,7 @@
     "require": {
         "php": ">=5.3.3",
         "zfcampus/zf-api-problem": "dev-master",
+        "zfcampus/zf-content-negotiation": "dev-master",
         "zfcampus/zf-hal": "dev-master",
         "zendframework/zend-eventmanager": "dev-develop",
         "zendframework/zend-json": "dev-develop",
