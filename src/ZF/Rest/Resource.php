@@ -13,6 +13,7 @@ use Zend\EventManager\EventManagerInterface;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
 use ZF\ApiProblem\ApiProblem;
+use ZF\ApiProblem\ApiProblemResponse;
 use ZF\Hal\Collection as HalCollection;
 
 /**
@@ -190,7 +191,9 @@ class Resource implements ResourceInterface
         $events  = $this->getEventManager();
         $event   = $this->prepareEvent(__FUNCTION__, array('data' => $data));
         $results = $events->triggerUntil($event, function($result) {
-            return $result instanceof ApiProblem;
+            return ($result instanceof ApiProblem
+                || $result instanceof ApiProblemResponse
+            );
         });
         $last    = $results->last();
         if (!is_array($last) && !is_object($last)) {
@@ -231,7 +234,9 @@ class Resource implements ResourceInterface
         $events  = $this->getEventManager();
         $event   = $this->prepareEvent(__FUNCTION__, compact('id', 'data'));
         $results = $events->triggerUntil($event, function($result) {
-            return $result instanceof ApiProblem;
+            return ($result instanceof ApiProblem
+                || $result instanceof ApiProblemResponse
+            );
         });
         $last    = $results->last();
         if (!is_array($last) && !is_object($last)) {
@@ -280,7 +285,9 @@ class Resource implements ResourceInterface
         $events  = $this->getEventManager();
         $event   = $this->prepareEvent(__FUNCTION__, array('data' => $data));
         $results = $events->triggerUntil($event, function($result) {
-            return $result instanceof ApiProblem;
+            return ($result instanceof ApiProblem
+                || $result instanceof ApiProblemResponse
+            );
         });
         $last    = $results->last();
         if (!is_array($last) && !is_object($last)) {
@@ -322,7 +329,9 @@ class Resource implements ResourceInterface
         $events  = $this->getEventManager();
         $event   = $this->prepareEvent(__FUNCTION__, compact('id', 'data'));
         $results = $events->triggerUntil($event, function($result) {
-            return $result instanceof ApiProblem;
+            return ($result instanceof ApiProblem
+                || $result instanceof ApiProblemResponse
+            );
         });
         $last    = $results->last();
         if (!is_array($last) && !is_object($last)) {
@@ -377,7 +386,9 @@ class Resource implements ResourceInterface
         $events   = $this->getEventManager();
         $event    = $this->prepareEvent(__FUNCTION__, array('data' => $data));
         $results  = $events->triggerUntil($event, function($result) {
-            return $result instanceof ApiProblem;
+            return ($result instanceof ApiProblem
+                || $result instanceof ApiProblemResponse
+            );
         });
         $last     = $results->last();
         if (!is_array($last) && !is_object($last)) {
@@ -401,10 +412,12 @@ class Resource implements ResourceInterface
         $events  = $this->getEventManager();
         $event   = $this->prepareEvent(__FUNCTION__, array('id' => $id));
         $results = $events->triggerUntil($event, function($result) {
-            return $result instanceof ApiProblem;
+            return ($result instanceof ApiProblem
+                || $result instanceof ApiProblemResponse
+            );
         });
         $last    = $results->last();
-        if (!is_bool($last) && !$last instanceof ApiProblem) {
+        if (!is_bool($last) && (!$last instanceof ApiProblem) && (!$last instanceof ApiProblemResponse)) {
             return false;
         }
         return $last;
@@ -430,10 +443,12 @@ class Resource implements ResourceInterface
         $events  = $this->getEventManager();
         $event   = $this->prepareEvent(__FUNCTION__, array('data' => $data));
         $results = $events->triggerUntil($event, function($result) {
-            return $result instanceof ApiProblem;
+            return ($result instanceof ApiProblem
+                || $result instanceof ApiProblemResponse
+            );
         });
         $last    = $results->last();
-        if (!is_bool($last) && !$last instanceof ApiProblem) {
+        if (!is_bool($last) && (!$last instanceof ApiProblem) && (!$last instanceof ApiProblemResponse)) {
             return false;
         }
         return $last;
@@ -455,7 +470,9 @@ class Resource implements ResourceInterface
         $events  = $this->getEventManager();
         $event   = $this->prepareEvent(__FUNCTION__, array('id' => $id));
         $results = $events->triggerUntil($event, function($result) {
-            return $result instanceof ApiProblem;
+            return ($result instanceof ApiProblem
+                || $result instanceof ApiProblemResponse
+            );
         });
         $last    = $results->last();
         if (!is_array($last) && !is_object($last)) {
@@ -483,12 +500,15 @@ class Resource implements ResourceInterface
         $params  = func_get_args();
         $event   = $this->prepareEvent(__FUNCTION__, $params);
         $results = $events->triggerUntil($event, function($result) {
-            return $result instanceof ApiProblem;
+            return ($result instanceof ApiProblem
+                || $result instanceof ApiProblemResponse
+            );
         });
         $last    = $results->last();
         if (!is_array($last)
             && !$last instanceof HalCollection
             && !$last instanceof ApiProblem
+            && !$last instanceof ApiProblemResponse
             && !$last instanceof Traversable
         ) {
             return array();

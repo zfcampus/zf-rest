@@ -49,20 +49,4 @@ class Module
         $sharedEvents->attach('ZF\Rest\RestController', $e::EVENT_DISPATCH, array($this, 'onDispatch'), 100);
         $sharedEvents->attachAggregate($services->get('ZF\Rest\RestParametersListener'));
     }
-
-    /**
-     * RestController dispatch listener
-     *
-     * Attach the ApiProblem RenderErrorListener when a restful controller is detected.
-     * 
-     * @param  \Zend\Mvc\MvcEvent $e 
-     */
-    public function onDispatch($e)
-    {
-        $app      = $e->getApplication();
-        $events   = $app->getEventManager();
-        $services = $app->getServiceManager();
-        $listener = $services->get('ZF\ApiProblem\RenderErrorListener');
-        $events->attach($listener);
-    }
 }

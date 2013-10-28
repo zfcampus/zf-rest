@@ -6,13 +6,14 @@
 
 namespace ZF\Rest;
 
+use Zend\Http\Header\Allow;
 use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractRestfulController;
 use Zend\Mvc\MvcEvent;
 use Zend\Paginator\Paginator;
 use ZF\ApiProblem\ApiProblem;
+use ZF\ApiProblem\ApiProblemResponse;
 use ZF\ApiProblem\Exception\DomainException;
-use ZF\ApiProblem\View\ApiProblemModel;
 use ZF\ContentNegotiation\ViewModel as ContentNegotiationViewModel;
 use ZF\Hal\Collection as HalCollection;
 use ZF\Hal\Resource as HalResource;
@@ -277,9 +278,7 @@ class RestController extends AbstractRestfulController
         }
 
         if ($return instanceof ApiProblem) {
-            $viewModel = new ApiProblemModel($return);
-            $e->setResult($viewModel);
-            return $viewModel;
+            return new ApiProblemResponse($return);
         }
 
         // Set the fallback content negotiation to use HalJson.
@@ -314,7 +313,9 @@ class RestController extends AbstractRestfulController
             return new ApiProblem($code, $e);
         }
 
-        if ($resource instanceof ApiProblem) {
+        if ($resource instanceof ApiProblem
+            || $resource instanceof ApiProblemResponse
+        ) {
             return $resource;
         }
 
@@ -365,7 +366,9 @@ class RestController extends AbstractRestfulController
 
         $result = $result ?: new ApiProblem(422, 'Unable to delete resource.');
 
-        if ($result instanceof ApiProblem) {
+        if ($result instanceof ApiProblem
+            || $result instanceof ApiProblemResponse
+        ) {
             return $result;
         }
 
@@ -396,7 +399,9 @@ class RestController extends AbstractRestfulController
 
         $result = $result ?: new ApiProblem(422, 'Unable to delete collection.');
 
-        if ($result instanceof ApiProblem) {
+        if ($result instanceof ApiProblem
+            || $result instanceof ApiProblemResponse
+        ) {
             return $result;
         }
 
@@ -433,7 +438,9 @@ class RestController extends AbstractRestfulController
 
         $resource = $resource ?: new ApiProblem(404, 'Resource not found.');
 
-        if ($resource instanceof ApiProblem) {
+        if ($resource instanceof ApiProblem
+            || $resource instanceof ApiProblemResponse
+        ) {
             return $resource;
         }
 
@@ -470,7 +477,9 @@ class RestController extends AbstractRestfulController
             return new ApiProblem($code, $e);
         }
 
-        if ($collection instanceof ApiProblem) {
+        if ($collection instanceof ApiProblem
+            || $collection instanceof ApiProblemResponse
+        ) {
             return $collection;
         }
 
@@ -524,17 +533,13 @@ class RestController extends AbstractRestfulController
             $options = $this->collectionHttpMethods;
         }
 
-        array_walk($options, function (&$method) {
-            $method = strtoupper($method);
-        });
-
         $events = $this->getEventManager();
         $events->trigger('options.pre', $this, array('options' => $options));
 
         $response = $this->getResponse();
         $response->setStatusCode(204);
         $headers  = $response->getHeaders();
-        $headers->addHeaderLine('Allow', implode(', ', $options));
+        $headers->addHeader($this->createAllowHeaderWithAllowedMethods($options));
 
         $events->trigger('options.post', $this, array('options' => $options));
 
@@ -564,7 +569,9 @@ class RestController extends AbstractRestfulController
             return new ApiProblem($code, $e);
         }
 
-        if ($resource instanceof ApiProblem) {
+        if ($resource instanceof ApiProblem
+            || $resource instanceof ApiProblemResponse
+        ) {
             return $resource;
         }
 
@@ -605,7 +612,9 @@ class RestController extends AbstractRestfulController
             return new ApiProblem($code, $e);
         }
 
-        if ($resource instanceof ApiProblem) {
+        if ($resource instanceof ApiProblem
+            || $resource instanceof ApiProblemResponse
+        ) {
             return $resource;
         }
 
@@ -639,7 +648,9 @@ class RestController extends AbstractRestfulController
             return new ApiProblem($code, $e);
         }
 
-        if ($collection instanceof ApiProblem) {
+        if ($collection instanceof ApiProblem
+            || $collection instanceof ApiProblemResponse
+        ) {
             return $collection;
         }
 
@@ -678,7 +689,9 @@ class RestController extends AbstractRestfulController
             return new ApiProblem($code, $e);
         }
 
-        if ($collection instanceof ApiProblem) {
+        if ($collection instanceof ApiProblem
+            || $collection instanceof ApiProblemResponse
+        ) {
             return $collection;
         }
 
@@ -770,7 +783,25 @@ class RestController extends AbstractRestfulController
         $response = $this->getResponse();
         $response->setStatusCode(405);
         $headers = $response->getHeaders();
-        $headers->addHeaderLine('Allow', implode(', ', $methods));
+        $headers->addHeader($this->createAllowHeaderWithAllowedMethods($methods));
         return $response;
+    }
+
+    /**
+     * Creates an ALLOW header with the provided HTTP methods
+     * 
+     * @param  array $methods 
+     * @return Allow
+     */
+    protected function createAllowHeaderWithAllowedMethods(array $methods)
+    {
+        // Need to create an Allow header. It has several defaults, and the only
+        // way to start with a clean slate is to retrieve all methods, disallow
+        // them all, and then set the ones we want to allow.
+        $allow      = new Allow();
+        $allMethods = $allow->getAllMethods();
+        $allow->disallowMethods(array_keys($allMethods));
+        $allow->allowMethods($methods);
+        return $allow;
     }
 }

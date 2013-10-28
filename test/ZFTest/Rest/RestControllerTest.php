@@ -939,7 +939,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->dispatch($request, $this->controller->getResponse());
 
-        $this->assertInstanceOf('ZF\ApiProblem\View\ApiProblemModel', $result);
+        $this->assertInstanceOf('ZF\ApiProblem\ApiProblemResponse', $result);
         $this->assertSame($problem, $result->getApiProblem());
     }
 
