@@ -46,7 +46,6 @@ class Module
         $services     = $app->getServiceManager();
         $events       = $app->getEventManager();
         $sharedEvents = $events->getSharedManager();
-        $sharedEvents->attach('ZF\Rest\RestController', $e::EVENT_DISPATCH, array($this, 'onDispatch'), 100);
         $sharedEvents->attachAggregate($services->get('ZF\Rest\RestParametersListener'));
     }
 }
