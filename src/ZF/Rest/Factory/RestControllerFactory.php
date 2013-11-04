@@ -148,6 +148,10 @@ class RestControllerFactory implements AbstractFactoryInterface
             $listener->setEntityClass($config['entity_class']);
         }
 
+        if (isset($config['collection_class'])) {
+            $listener->setCollectionClass($config['collection_class']);
+        }
+
         return $controller;
     }
 

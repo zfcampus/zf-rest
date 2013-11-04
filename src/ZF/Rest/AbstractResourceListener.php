@@ -36,6 +36,17 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
         return $this->entityClass;
     }
 
+    public function setCollectionClass($className)
+    {
+        $this->collectionClass = $className;
+        return $this;
+    }
+
+    public function getCollectionClass()
+    {
+        return $this->collectionClass;
+    }
+
     /**
      * Retrieve the current resource event, if any
      *
