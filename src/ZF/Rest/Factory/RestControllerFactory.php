@@ -144,6 +144,10 @@ class RestControllerFactory implements AbstractFactoryInterface
         $controller->setResource($resource);
         $this->setControllerOptions($config, $controller);
 
+        if (isset($config['entity_class'])) {
+            $listener->setEntityClass($config['entity_class']);
+        }
+
         return $controller;
     }
 
@@ -214,7 +218,7 @@ class RestControllerFactory implements AbstractFactoryInterface
                             return;
                         }
 
-                        // Otherwise, merge the query string parameters with 
+                        // Otherwise, merge the query string parameters with
                         // the self link's route options
                         $self = $links->get('self');
                         $options = $self->getRouteOptions();
