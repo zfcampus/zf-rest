@@ -784,8 +784,8 @@ class RestController extends AbstractRestfulController
 
     /**
      * Creates an ALLOW header with the provided HTTP methods
-     * 
-     * @param  array $methods 
+     *
+     * @param  array $methods
      * @return Allow
      */
     protected function createAllowHeaderWithAllowedMethods(array $methods)

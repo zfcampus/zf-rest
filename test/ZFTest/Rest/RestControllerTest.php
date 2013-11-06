@@ -1018,8 +1018,7 @@ class RestControllerTest extends TestCase
         // Queries should not be used as identifiers, identifiers are route information.
         $routeMatch->setParam('name', false);
         $request->getQuery()->set('name', 'bar');
-        $result = $getIdentifier->invoke($this->controller, $routeMatch, $request);
-        $this->assertEquals(null, $result);
+        $this->assertFalse($getIdentifier->invoke($this->controller, $routeMatch, $request));
     }
 
     /**
