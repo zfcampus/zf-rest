@@ -18,6 +18,36 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
     protected $event;
 
     /**
+     * The entity_class config for the calling controller zf-rest config
+     */
+    protected $entityClass;
+
+    /**
+     * Set the entity_class for the controller config calling this resource
+     */
+    public function setEntityClass($className)
+    {
+        $this->entityClass = $className;
+        return $this;
+    }
+
+    public function getEntityClass()
+    {
+        return $this->entityClass;
+    }
+
+    public function setCollectionClass($className)
+    {
+        $this->collectionClass = $className;
+        return $this;
+    }
+
+    public function getCollectionClass()
+    {
+        return $this->collectionClass;
+    }
+
+    /**
      * Retrieve the current resource event, if any
      *
      * @return ResourceEvent
