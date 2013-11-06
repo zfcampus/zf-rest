@@ -711,8 +711,8 @@ class RestController extends AbstractRestfulController
     /**
      * Retrieve the identifier, if any
      *
-     * Attempts to see if an identifier was passed in either the URI or the
-     * query string, returning it if found. Otherwise, returns a boolean false.
+     * Attempts to see if an identifier was passed in the URI,
+     * returning it if found. Otherwise, returns a boolean false.
      *
      * @param  \Zend\Mvc\Router\RouteMatch $routeMatch
      * @param  \Zend\Http\Request $request
@@ -722,11 +722,6 @@ class RestController extends AbstractRestfulController
     {
         $identifier = $this->getIdentifierName();
         $id = $routeMatch->getParam($identifier, false);
-        if ($id) {
-            return $id;
-        }
-
-        $id = $request->getQuery()->get($identifier, false);
         if ($id) {
             return $id;
         }
@@ -789,8 +784,8 @@ class RestController extends AbstractRestfulController
 
     /**
      * Creates an ALLOW header with the provided HTTP methods
-     * 
-     * @param  array $methods 
+     *
+     * @param  array $methods
      * @return Allow
      */
     protected function createAllowHeaderWithAllowedMethods(array $methods)
