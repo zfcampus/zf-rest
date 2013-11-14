@@ -309,8 +309,7 @@ class RestController extends AbstractRestfulController
         try {
             $resource = $this->getResource()->create($data);
         } catch (\Exception $e) {
-            $code = $e->getCode() ?: 500;
-            return new ApiProblem($code, $e);
+            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
 
         if ($resource instanceof ApiProblem
@@ -359,9 +358,7 @@ class RestController extends AbstractRestfulController
         try {
             $result = $this->getResource()->delete($id);
         } catch (\Exception $e) {
-            $code = $e->getCode() ?: 500;
-
-            return new ApiProblem($code, $e);
+            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
 
         $result = $result ?: new ApiProblem(422, 'Unable to delete resource.');
@@ -392,9 +389,7 @@ class RestController extends AbstractRestfulController
         try {
             $result = $this->getResource()->deleteList();
         } catch (\Exception $e) {
-            $code = $e->getCode() ?: 500;
-
-            return new ApiProblem($code, $e);
+            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
 
         $result = $result ?: new ApiProblem(422, 'Unable to delete collection.');
@@ -431,9 +426,7 @@ class RestController extends AbstractRestfulController
         try {
             $resource = $this->getResource()->fetch($id);
         } catch (\Exception $e) {
-            $code = $e->getCode() ?: 500;
-
-            return new ApiProblem($code, $e);
+            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
 
         $resource = $resource ?: new ApiProblem(404, 'Resource not found.');
@@ -472,9 +465,7 @@ class RestController extends AbstractRestfulController
         try {
             $collection = $this->getResource()->fetchAll();
         } catch (\Exception $e) {
-            $code = $e->getCode() ?: 500;
-
-            return new ApiProblem($code, $e);
+            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
 
         if ($collection instanceof ApiProblem
@@ -565,8 +556,7 @@ class RestController extends AbstractRestfulController
         try {
             $resource = $this->getResource()->patch($id, $data);
         } catch (\Exception $e) {
-            $code = $e->getCode() ?: 500;
-            return new ApiProblem($code, $e);
+            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
 
         if ($resource instanceof ApiProblem
@@ -608,8 +598,7 @@ class RestController extends AbstractRestfulController
         try {
             $resource = $this->getResource()->update($id, $data);
         } catch (\Exception $e) {
-            $code = $e->getCode() ?: 500;
-            return new ApiProblem($code, $e);
+            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
 
         if ($resource instanceof ApiProblem
@@ -644,8 +633,7 @@ class RestController extends AbstractRestfulController
         try {
             $collection = $this->getResource()->patchList($data);
         } catch (\Exception $e) {
-            $code = $e->getCode() ?: 500;
-            return new ApiProblem($code, $e);
+            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
 
         if ($collection instanceof ApiProblem
@@ -685,8 +673,7 @@ class RestController extends AbstractRestfulController
         try {
             $collection = $this->getResource()->replaceList($data);
         } catch (\Exception $e) {
-            $code = $e->getCode() ?: 500;
-            return new ApiProblem($code, $e);
+            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
 
         if ($collection instanceof ApiProblem
@@ -798,5 +785,23 @@ class RestController extends AbstractRestfulController
         $allow->disallowMethods(array_keys($allMethods));
         $allow->allowMethods($methods);
         return $allow;
+    }
+
+    /**
+     * Ensure we have a valid HTTP status code for an ApiProblem
+     * 
+     * @param \Exception $e 
+     * @return int
+     */
+    protected function getHttpStatusCodeFromException(\Exception $e)
+    {
+        $code = $e->getCode();
+        if (!is_int($code)
+            || $code < 100
+            || $code >= 600
+        ) {
+            return 500;
+        }
+        return $code;
     }
 }
