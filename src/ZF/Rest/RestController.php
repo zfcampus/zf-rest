@@ -174,6 +174,16 @@ class RestController extends AbstractRestfulController
     }
 
     /**
+     * Return the page size
+     *
+     * @return int
+     */
+    public function getPageSize()
+    {
+        return $this->pageSize;
+    }
+
+    /**
      * Set the page size parameter for paginated responses.
      *
      * @param string
@@ -474,6 +484,12 @@ class RestController extends AbstractRestfulController
             return $collection;
         }
 
+        $pageSize = $this->pageSizeParam
+            ? $this->getRequest()->getQuery($this->pageSizeParam, $this->pageSize)
+            : $this->pageSize;
+
+        $this->setPageSize($pageSize);
+
         $plugin     = $this->plugin('Hal');
         $collection = $plugin->createCollection($collection, $this->route);
         $collection->setCollectionRoute($this->route);
@@ -481,11 +497,7 @@ class RestController extends AbstractRestfulController
         $collection->setResourceRoute($this->route);
         $collection->setPage($this->getRequest()->getQuery('page', 1));
         $collection->setCollectionName($this->collectionName);
-
-        $pageSize = $this->pageSizeParam
-            ? $this->getRequest()->getQuery($this->pageSizeParam, $this->pageSize)
-            : $this->pageSize;
-        $collection->setPageSize($pageSize);
+        $collection->setPageSize($this->getPageSize());
 
         $events->trigger('getList.post', $this, array('collection' => $collection));
         return $collection;
@@ -648,7 +660,7 @@ class RestController extends AbstractRestfulController
         $collection->setIdentifierName($this->getIdentifierName());
         $collection->setResourceRoute($this->route);
         $collection->setPage($this->getRequest()->getQuery('page', 1));
-        $collection->setPageSize($this->pageSize);
+        $collection->setPageSize($this->getPageSize());
         $collection->setCollectionName($this->collectionName);
 
         $events->trigger('patchList.post', $this, array('data' => $data, 'collection' => $collection));
@@ -688,7 +700,7 @@ class RestController extends AbstractRestfulController
         $collection->setIdentifierName($this->getIdentifierName());
         $collection->setResourceRoute($this->route);
         $collection->setPage($this->getRequest()->getQuery('page', 1));
-        $collection->setPageSize($this->pageSize);
+        $collection->setPageSize($this->getPageSize());
         $collection->setCollectionName($this->collectionName);
 
         $events->trigger('replaceList.post', $this, array('data' => $data, 'collection' => $collection));
@@ -789,8 +801,8 @@ class RestController extends AbstractRestfulController
 
     /**
      * Ensure we have a valid HTTP status code for an ApiProblem
-     * 
-     * @param \Exception $e 
+     *
+     * @param \Exception $e
      * @return int
      */
     protected function getHttpStatusCodeFromException(\Exception $e)
