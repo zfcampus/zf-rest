@@ -19,25 +19,32 @@
     "repositories": [
         { "type": "composer", "url": "https://packages.zendframework.com" }
     ],
-    "minimum-stability": "dev",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    },
     "require": {
         "php": ">=5.3.3",
-        "zfcampus/zf-api-problem": "dev-master",
-        "zfcampus/zf-content-negotiation": "dev-master",
-        "zfcampus/zf-hal": "dev-master",
-        "zendframework/zend-eventmanager": "dev-develop",
-        "zendframework/zend-json": "dev-develop",
-        "zendframework/zend-loader": "dev-develop",
-        "zendframework/zend-mvc": "dev-develop",
-        "zendframework/zend-paginator": "dev-develop"
+        "zfcampus/zf-api-problem": "~1.0-dev",
+        "zfcampus/zf-content-negotiation": "~1.0-dev",
+        "zfcampus/zf-hal": "~1.0-dev",
+        "zendframework/zend-eventmanager": "~2.3-dev",
+        "zendframework/zend-json": "~2.3-dev",
+        "zendframework/zend-loader": "~2.3-dev",
+        "zendframework/zend-mvc": "~2.3-dev",
+        "zendframework/zend-paginator": "~2.3-dev",
+        "zendframework/zend-stdlib": "~2.3-dev"
     },
     "require-dev": {
         "phpunit/PHPUnit": "3.7.*",
-        "zendframework/zend-console": "dev-develop",
-        "zendframework/zend-http": "dev-develop",
-        "zendframework/zend-servicemanager": "dev-develop",
-        "zendframework/zend-uri": "dev-develop",
-        "zendframework/zend-view": "dev-develop"
+        "zendframework/zend-console": "~2.3-dev",
+        "zendframework/zend-escaper": "~2.3-dev",
+        "zendframework/zend-http": "~2.3-dev",
+        "zendframework/zend-servicemanager": "~2.3-dev",
+        "zendframework/zend-uri": "~2.3-dev",
+        "zendframework/zend-validator": "~2.3-dev",
+        "zendframework/zend-view": "~2.3-dev"
     },
     "autoload": {
         "psr-0": {
