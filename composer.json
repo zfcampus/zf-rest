@@ -49,7 +49,10 @@
     "autoload": {
         "psr-0": {
             "ZF\\Rest\\": "src/",
-            "ZFTest\\": "test/"
-        }
+            "ZFTest\\Rest\\": "test/"
+        },
+        "classmap": [
+            "Module.php"
+        ]
     }
 }
