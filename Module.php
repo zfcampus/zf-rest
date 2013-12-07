@@ -4,4 +4,48 @@
  * @copyright Copyright (c) 2013 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
-require __DIR__ . '/src/ZF/Rest/Module.php';
+namespace ZF\Rest;
+
+/**
+ * ZF2 module
+ */
+class Module
+{
+    /**
+     * Retrieve autoloader configuration
+     *
+     * @return array
+     */
+    public function getAutoloaderConfig()
+    {
+        return array('Zend\Loader\StandardAutoloader' => array('namespaces' => array(
+            __NAMESPACE__ => __DIR__ . '/src/ZF/Rest/',
+        )));
+    }
+
+    /**
+     * Retrieve module configuration
+     *
+     * @return array
+     */
+    public function getConfig()
+    {
+        return include __DIR__ . '/config/module.config.php';
+    }
+
+    /**
+     * Bootstrap listener
+     *
+     * Attaches a listener to the RestController dispatch event.
+     *
+     * @param  \Zend\Mvc\MvcEvent $e
+     */
+    public function onBootstrap($e)
+    {
+        $app          = $e->getTarget();
+        $services     = $app->getServiceManager();
+        $events       = $app->getEventManager();
+        $sharedEvents = $events->getSharedManager();
+        $sharedEvents->attachAggregate($services->get('ZF\Rest\RestParametersListener'));
+    }
+}
