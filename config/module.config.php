@@ -12,7 +12,7 @@ return array(
         //         'get'
         //     ),
         //     'collection_name'            => 'Name of property denoting collection in response',
-        //     'collection_query_whitelist' => arrray(
+        //     'collection_query_whitelist' => array(
         //         /* array of query string parameters to whitelist and return
         //          * when generating links to the collection. E.g., "sort",
         //          * "filter", etc.
