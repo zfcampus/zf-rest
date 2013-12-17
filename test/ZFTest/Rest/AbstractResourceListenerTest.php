@@ -8,7 +8,9 @@ namespace ZFTest\Rest;
 
 use PHPUnit_Framework_TestCase as TestCase;
 use Zend\EventManager\EventManager;
+use Zend\Stdlib\Parameters;
 use ZF\Rest\Resource;
+use ZF\Rest\ResourceEvent;
 
 /**
  * @subpackage UnitTest
@@ -87,5 +89,20 @@ class AbstractResourceListenerTest extends TestCase
 
         $this->assertEquals($expectedMethod, $this->methodInvokedInListener);
         $this->assertEquals($expectedParams, $this->paramsPassedToListener, var_export($this->paramsPassedToListener, 1));
+    }
+
+    /**
+     * @group 7
+     */
+    public function testDispatchShouldPassWhitelistedQueryParamsToFetchAllMethod()
+    {
+        $queryParams = new Parameters(['foo' => 'bar']);
+        $event = new ResourceEvent();
+        $event->setName('fetchAll');
+        $event->setQueryParams($queryParams);
+
+        $this->listener->dispatch($event);
+
+        $this->assertEquals($queryParams->toArray(), $this->listener->testCase->paramsPassedToListener);
     }
 }
