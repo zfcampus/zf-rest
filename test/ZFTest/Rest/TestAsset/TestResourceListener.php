@@ -62,15 +62,6 @@ class TestResourceListener extends AbstractResourceListener
     public function fetchAll($params = array())
     {
         $this->testCase->methodInvokedInListener = __METHOD__;
-
-        // Get actual argument...
-        if ($params instanceof \ArrayObject) {
-            $params = $params->getArrayCopy();
-        }
-        if (1 === count($params)) {
-            $params = array_pop($params);
-        }
-
         $this->testCase->paramsPassedToListener  = $params;
     }
 }

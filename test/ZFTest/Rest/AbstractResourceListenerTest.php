@@ -103,6 +103,6 @@ class AbstractResourceListenerTest extends TestCase
 
         $this->listener->dispatch($event);
 
-        $this->assertEquals($queryParams->toArray(), $this->listener->testCase->paramsPassedToListener);
+        $this->assertEquals($queryParams, $this->listener->testCase->paramsPassedToListener);
     }
 }
