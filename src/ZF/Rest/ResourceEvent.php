@@ -29,7 +29,7 @@ class ResourceEvent extends Event
     protected $routeMatch;
 
     /**
-     * @param null|InputFilterInterface $inputFilter 
+     * @param null|InputFilterInterface $inputFilter
      * @return self
      */
     public function setInputFilter(InputFilterInterface $inputFilter = null)
