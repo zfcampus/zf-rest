@@ -6,10 +6,11 @@
 
 namespace ZFTest\Rest;
 
-use ZF\Rest\ResourceEvent;
 use PHPUnit_Framework_TestCase as TestCase;
+use Zend\InputFilter\InputFilter;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
+use ZF\Rest\ResourceEvent;
 
 class ResourceEventTest extends TestCase
 {
@@ -93,5 +94,29 @@ class ResourceEventTest extends TestCase
     {
         $this->assertNull($this->event->getQueryParam('foo'));
         $this->assertEquals('bat', $this->event->getQueryParam('baz', 'bat'));
+    }
+
+    public function testInputFilterIsUndefinedByDefault()
+    {
+        $this->assertNull($this->event->getInputFilter());
+    }
+
+    /**
+     * @depends testInputFilterIsUndefinedByDefault
+     */
+    public function testCanComposeInputFilter()
+    {
+        $inputFilter = new InputFilter();
+        $this->event->setInputFilter($inputFilter);
+        $this->assertSame($inputFilter, $this->event->getInputFilter());
+    }
+
+    /**
+     * @depends testCanComposeInputFilter
+     */
+    public function testCanNullifyInputFilter()
+    {
+        $this->event->setInputFilter(null);
+        $this->assertNull($this->event->getInputFilter());
     }
 }
