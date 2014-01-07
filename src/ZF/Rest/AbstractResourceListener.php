@@ -23,6 +23,13 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
     protected $entityClass;
 
     /**
+     * Input filter, if discovered in the resource event.
+     *
+     * @var \Zend\InputFilter\InputFilterInterface
+     */
+    protected $inputFilter;
+
+    /**
      * Set the entity_class for the controller config calling this resource
      */
     public function setEntityClass($className)
@@ -55,6 +62,29 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
     public function getEvent()
     {
         return $this->event;
+    }
+
+    /**
+     * Retrieve the input filter, if any
+     *
+     * Proxies to the resource event to find the input filter, if not already
+     * composed, and composes it.
+     *
+     * @return null|\Zend\InputFilter\InputFilterInterface
+     */
+    public function getInputFilter()
+    {
+        if ($this->inputFilter) {
+            return $this->inputFilter;
+        }
+
+        $event = $this->getEvent();
+        if (! $event instanceof ResourceEvent) {
+            return null;
+        }
+
+        $this->inputFilter = $event->getInputFilter();
+        return $this->inputFilter;
     }
 
     /**
