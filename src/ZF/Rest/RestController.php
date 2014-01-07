@@ -216,6 +216,7 @@ class RestController extends AbstractRestfulController
             throw new DomainException('No resource has been set.');
         }
 
+        $this->injectEventInputFilterIntoResource();
         return $this->resource;
     }
 
@@ -815,5 +816,27 @@ class RestController extends AbstractRestfulController
             return 500;
         }
         return $code;
+    }
+
+    /**
+     * Injects the resource with the input filter composed in the event, if present
+     */
+    protected function injectEventInputFilterIntoResource()
+    {
+        if ($this->resource->getInputFilter()) {
+            return;
+        }
+
+        $event = $this->getEvent();
+        if (! $event) {
+            return;
+        }
+
+        $inputFilter = $event->getParam('ZF\ContentValidation\InputFilter');
+        if (! $inputFilter) {
+            return;
+        }
+
+        $this->resource->setInputFilter($inputFilter);
     }
 }

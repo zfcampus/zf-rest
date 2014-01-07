@@ -11,6 +11,7 @@ use ReflectionObject;
 use stdClass;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\SharedEventManager;
+use Zend\InputFilter\InputFilter;
 use Zend\Mvc\Controller\PluginManager;
 use Zend\Mvc\MvcEvent;
 use Zend\Mvc\Router\Http\Segment;
@@ -1223,5 +1224,105 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->patchList(array());
         $this->assertSame($problem, $result);
+    }
+
+    public function validResourcePayloads()
+    {
+        return [
+            'GET_collection' => [
+                'GET',
+                'fetchAll',
+                null,
+                null,
+                [],
+            ],
+            'GET_item' => [
+                'GET',
+                'fetch',
+                'foo',
+                null,
+                ['id' => 'foo', 'bar' => 'baz'],
+            ],
+            'POST' => [
+                'POST',
+                'create',
+                null,
+                ['bar' => 'baz'],
+                ['id' => 'foo', 'bar' => 'baz'],
+            ],
+            'PUT_collection' => [
+                'PUT',
+                'replaceList',
+                null,
+                [['id' => 'foo', 'bar' => 'bat']],
+                [['id' => 'foo', 'bar' => 'bat']],
+            ],
+            'PUT_item' => [
+                'PUT',
+                'update',
+                'foo',
+                ['bar' => 'bat'],
+                ['id' => 'foo', 'bar' => 'bat'],
+            ],
+            'PATCH_collection' => [
+                'PATCH',
+                'patchList',
+                null,
+                ['foo' => ['bar' => 'bat']],
+                [['id' => 'foo', 'bar' => 'bat']],
+            ],
+            'PATCH_item' => [
+                'PATCH',
+                'patch',
+                'foo',
+                ['bar' => 'bat'],
+                ['id' => 'foo', 'bar' => 'bat'],
+            ],
+            'DELETE_collection' => [
+                'DELETE',
+                'deleteList',
+                null,
+                null,
+                true,
+            ],
+            'DELETE_item' => [
+                'DELETE',
+                'delete',
+                'foo',
+                null,
+                true,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider validResourcePayloads
+     */
+    public function testInjectsContentValidationInputFilterFromMvcEventIntoResourceEvent($method, $event, $id, $data, $returnValue)
+    {
+        $resourceEvent = null;
+        $this->resource->getEventManager()->attach($event, function ($e) use ($returnValue, & $resourceEvent) {
+            $resourceEvent = $e;
+            return $resource;
+        });
+
+        $this->controller->setCollectionHttpMethods(array('GET', 'POST', 'PUT', 'PATCH', 'DELETE'));
+        $this->controller->setResourceHttpMethods(array('GET', 'PUT', 'PATCH', 'DELETE'));
+
+        $request = $this->controller->getRequest();
+        $request->setMethod($method);
+        $this->event->setRequest($request);
+
+        if ($id) {
+            $this->event->getRouteMatch()->setParam('id', $id);
+        }
+
+        $inputFilter = new InputFilter();
+        $this->event->setParam('ZF\ContentValidation\InputFilter', $inputFilter);
+
+        $result = $this->controller->onDispatch($this->event);
+
+        $this->assertInstanceOf('ZF\Rest\ResourceEvent', $resourceEvent);
+        $this->assertSame($inputFilter, $resourceEvent->getInputFilter());
     }
 }

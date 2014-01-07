@@ -7,11 +7,17 @@
 namespace ZF\Rest;
 
 use Zend\EventManager\Event;
+use Zend\InputFilter\InputFilterInterface;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
 
 class ResourceEvent extends Event
 {
+    /**
+     * @var null|InputFilterInterface
+     */
+    protected $inputFilter;
+
     /**
      * @var null|Parameters
      */
@@ -21,6 +27,24 @@ class ResourceEvent extends Event
      * @var null|RouteMatch
      */
     protected $routeMatch;
+
+    /**
+     * @param null|InputFilterInterface $inputFilter
+     * @return self
+     */
+    public function setInputFilter(InputFilterInterface $inputFilter = null)
+    {
+        $this->inputFilter = $inputFilter;
+        return $this;
+    }
+
+    /**
+     * @return null|InputFilterInterface
+     */
+    public function getInputFilter()
+    {
+        return $this->inputFilter;
+    }
 
     /**
      * @param Parameters $params

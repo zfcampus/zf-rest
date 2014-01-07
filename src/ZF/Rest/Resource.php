@@ -10,6 +10,7 @@ use ArrayObject;
 use Traversable;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\EventManagerInterface;
+use Zend\InputFilter\InputFilterInterface;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
 use ZF\ApiProblem\ApiProblem;
@@ -28,6 +29,11 @@ class Resource implements ResourceInterface
      * @var EventManagerInterface
      */
     protected $events;
+
+    /**
+     * @var null|InputFilterInterface
+     */
+    protected $inputFilter;
 
     /**
      * @var array
@@ -60,6 +66,24 @@ class Resource implements ResourceInterface
     public function getEventParams()
     {
         return $this->params;
+    }
+
+    /**
+     * @param null|InputFilterInterface $inputFilter
+     * @return self
+     */
+    public function setInputFilter(InputFilterInterface $inputFilter = null)
+    {
+        $this->inputFilter = $inputFilter;
+        return $this;
+    }
+
+    /**
+     * @return null|InputFilterInterface
+     */
+    public function getInputFilter()
+    {
+        return $this->inputFilter;
     }
 
     /**
@@ -190,7 +214,7 @@ class Resource implements ResourceInterface
 
         $events  = $this->getEventManager();
         $event   = $this->prepareEvent(__FUNCTION__, array('data' => $data));
-        $results = $events->triggerUntil($event, function($result) {
+        $results = $events->triggerUntil($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
             );
@@ -233,7 +257,7 @@ class Resource implements ResourceInterface
 
         $events  = $this->getEventManager();
         $event   = $this->prepareEvent(__FUNCTION__, compact('id', 'data'));
-        $results = $events->triggerUntil($event, function($result) {
+        $results = $events->triggerUntil($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
             );
@@ -269,7 +293,7 @@ class Resource implements ResourceInterface
                 gettype($data)
             ));
         }
-        array_walk($data, function($value, $key) use(&$data) {
+        array_walk($data, function ($value, $key) use (&$data) {
             if (is_array($value)) {
                 $data[$key] = (object) $value;
                 return;
@@ -284,7 +308,7 @@ class Resource implements ResourceInterface
         });
         $events  = $this->getEventManager();
         $event   = $this->prepareEvent(__FUNCTION__, array('data' => $data));
-        $results = $events->triggerUntil($event, function($result) {
+        $results = $events->triggerUntil($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
             );
@@ -328,7 +352,7 @@ class Resource implements ResourceInterface
 
         $events  = $this->getEventManager();
         $event   = $this->prepareEvent(__FUNCTION__, compact('id', 'data'));
-        $results = $events->triggerUntil($event, function($result) {
+        $results = $events->triggerUntil($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
             );
@@ -368,7 +392,7 @@ class Resource implements ResourceInterface
         }
 
         $original = $data;
-        array_walk($data, function($value, $key) use(&$data) {
+        array_walk($data, function ($value, $key) use (&$data) {
             if (is_array($value)) {
                 $data[$key] = new ArrayObject($value);
                 return;
@@ -385,7 +409,7 @@ class Resource implements ResourceInterface
         $data     = new ArrayObject($data);
         $events   = $this->getEventManager();
         $event    = $this->prepareEvent(__FUNCTION__, array('data' => $data));
-        $results  = $events->triggerUntil($event, function($result) {
+        $results  = $events->triggerUntil($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
             );
@@ -411,7 +435,7 @@ class Resource implements ResourceInterface
     {
         $events  = $this->getEventManager();
         $event   = $this->prepareEvent(__FUNCTION__, array('id' => $id));
-        $results = $events->triggerUntil($event, function($result) {
+        $results = $events->triggerUntil($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
             );
@@ -442,7 +466,7 @@ class Resource implements ResourceInterface
         }
         $events  = $this->getEventManager();
         $event   = $this->prepareEvent(__FUNCTION__, array('data' => $data));
-        $results = $events->triggerUntil($event, function($result) {
+        $results = $events->triggerUntil($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
             );
@@ -469,7 +493,7 @@ class Resource implements ResourceInterface
     {
         $events  = $this->getEventManager();
         $event   = $this->prepareEvent(__FUNCTION__, array('id' => $id));
-        $results = $events->triggerUntil($event, function($result) {
+        $results = $events->triggerUntil($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
             );
@@ -499,7 +523,7 @@ class Resource implements ResourceInterface
         $events  = $this->getEventManager();
         $params  = func_get_args();
         $event   = $this->prepareEvent(__FUNCTION__, $params);
-        $results = $events->triggerUntil($event, function($result) {
+        $results = $events->triggerUntil($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
             );
@@ -523,12 +547,15 @@ class Resource implements ResourceInterface
      * to a resource method, and passes them to the `prepareArgs` method of the
      * event manager.
      *
+     * If an input filter is composed, this, too, is injected into the event.
+     *
      * @param  array $args
      * @return ArrayObject
      */
     protected function prepareEvent($name, array $args)
     {
         $event = new ResourceEvent($name, $this, $this->prepareEventParams($args));
+        $event->setInputFilter($this->getInputFilter());
         $event->setQueryParams($this->getQueryParams());
         $event->setRouteMatch($this->getRouteMatch());
         return $event;
