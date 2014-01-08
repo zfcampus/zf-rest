@@ -236,7 +236,11 @@ class RestControllerFactory implements AbstractFactoryInterface
                     $controller->setContentTypes($value);
                     break;
 
-                case 'identifier_name':
+                /**
+                 * The identifierName is a property of the ancestor
+                 * and is described by Apigility as route_identifier_name
+                 */
+                case 'route_identifier_name':
                     $controller->setIdentifierName($value);
                     break;
 

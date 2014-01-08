@@ -184,7 +184,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->getList();
         $this->assertInstanceOf('ZF\Hal\Collection', $result);
-        $this->assertEquals($items, $result->collection);
+        $this->assertEquals($items, $result->getCollection());
         return $result;
     }
 
@@ -207,9 +207,9 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->getList();
         $this->assertInstanceOf('ZF\Hal\Collection', $result);
-        $this->assertSame($paginator, $result->collection);
-        $this->assertEquals(2, $result->page);
-        $this->assertEquals(1, $result->pageSize);
+        $this->assertSame($paginator, $result->getCollection());
+        $this->assertEquals(2, $result->getPage());
+        $this->assertEquals(1, $result->getPageSize());
     }
 
     public function testReturnsHalCollectionForPaginatedListUsingPassedPageSizeParameter()
@@ -234,9 +234,9 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->getList();
         $this->assertInstanceOf('ZF\Hal\Collection', $result);
-        $this->assertSame($paginator, $result->collection);
-        $this->assertEquals(2, $result->page);
-        $this->assertEquals(1, $result->pageSize);
+        $this->assertSame($paginator, $result->getCollection());
+        $this->assertEquals(2, $result->getPage());
+        $this->assertEquals(1, $result->getPageSize());
     }
 
     /**
@@ -244,8 +244,8 @@ class RestControllerTest extends TestCase
      */
     public function testHalCollectionReturnedIncludesRoutes($collection)
     {
-        $this->assertEquals('resource', $collection->collectionRoute);
-        $this->assertEquals('resource', $collection->resourceRoute);
+        $this->assertEquals('resource', $collection->getCollectionRoute());
+        $this->assertEquals('resource', $collection->getResourceRoute());
     }
 
     public function testHeadReturnsListResponseWhenNoIdProvided()
@@ -267,7 +267,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->head();
         $this->assertInstanceOf('ZF\Hal\Collection', $result);
-        $this->assertSame($paginator, $result->collection);
+        $this->assertSame($paginator, $result->getCollection());
     }
 
     public function testHeadReturnsResourceResponseWhenIdProvided()
@@ -398,8 +398,8 @@ class RestControllerTest extends TestCase
      */
     public function testReplaceListReturnsHalCollectionWithRoutesInjected($collection)
     {
-        $this->assertEquals('resource', $collection->collectionRoute);
-        $this->assertEquals('resource', $collection->resourceRoute);
+        $this->assertEquals('resource', $collection->getCollectionRoute());
+        $this->assertEquals('resource', $collection->getResourceRoute());
     }
 
     public function testOnDispatchRaisesDomainExceptionOnMissingResource()
@@ -520,7 +520,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->getList();
         $this->assertInstanceOf('ZF\Hal\Collection', $result);
-        $this->assertEquals('resources', $result->collectionName);
+        $this->assertEquals('resources', $result->getCollectionName());
     }
 
     public function testAllowsInjectingContentTypesForRequestMarshalling()
@@ -1163,8 +1163,8 @@ class RestControllerTest extends TestCase
      */
     public function testPatchListReturnsHalCollectionWithRoutesInjected($collection)
     {
-        $this->assertEquals('resource', $collection->collectionRoute);
-        $this->assertEquals('resource', $collection->resourceRoute);
+        $this->assertEquals('resource', $collection->getCollectionRoute());
+        $this->assertEquals('resource', $collection->getResourceRoute());
     }
 
     public function testPatchListUsesHalCollectionReturnedByResource()
