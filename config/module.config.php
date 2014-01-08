@@ -26,7 +26,7 @@ return array(
         //          */
         //     ),
         //     'controller_class'           => 'Name of ZF\Rest\RestController derivative, if not using that class',
-        //     'identifier_name'            => 'Name of parameter in route that acts as a resource identifier',
+        //     'route_identifier_name'      => 'Name of parameter in route that acts as a resource identifier',
         //     'listener'                   => 'Name of service/class that acts as a listener on the composed Resource',
         //     'page_size'                  => 'Integer specifying the number of results to return per page, if collections are paginated',
         //     'page_size_param'            => 'Name of query string parameter that specifies the number of results to return per page',

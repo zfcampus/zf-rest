@@ -249,7 +249,7 @@ class CollectionIntegrationTest extends TestCase
                     'listener'                   => 'CollectionIntegrationListener',
                     'page_size'                  => 3,
                     'route_name'                 => 'resource',
-                    'identifier_name'            => 'id',
+                    'route_identifier_name'            => 'id',
                     'collection_name'            => 'items',
                     'collection_query_whitelist' => 'query',
                 ),

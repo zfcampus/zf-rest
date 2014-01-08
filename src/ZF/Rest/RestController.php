@@ -194,6 +194,17 @@ class RestController extends AbstractRestfulController
     }
 
     /**
+     * The true description of getIdentifierName is
+     * a route identifier name.  This function corrects
+     * this mistake for this controller.
+     *
+     * @return string
+     */
+    public function getRouteIdentifierName() {
+        return $this->getIdentifierName();
+    }
+
+    /**
      * Inject the resource with which this controller will communicate.
      *
      * @param  ResourceInterface $resource
@@ -330,7 +341,7 @@ class RestController extends AbstractRestfulController
         }
 
         $plugin   = $this->plugin('Hal');
-        $resource = $plugin->createResource($resource, $this->route, $this->getIdentifierName());
+        $resource = $plugin->createResource($resource, $this->route, $this->getRouteIdentifierName());
 
         if ($resource instanceof ApiProblem) {
             return $resource;
@@ -449,7 +460,7 @@ class RestController extends AbstractRestfulController
         }
 
         $plugin   = $this->plugin('Hal');
-        $resource = $plugin->createResource($resource, $this->route, $this->getIdentifierName());
+        $resource = $plugin->createResource($resource, $this->route, $this->getRouteIdentifierName());
 
         if ($resource instanceof ApiProblem) {
             return $resource;
@@ -494,7 +505,7 @@ class RestController extends AbstractRestfulController
         $plugin     = $this->plugin('Hal');
         $collection = $plugin->createCollection($collection, $this->route);
         $collection->setCollectionRoute($this->route);
-        $collection->setIdentifierName($this->getIdentifierName());
+        $collection->setRouteIdentifierName($this->getRouteIdentifierName());
         $collection->setResourceRoute($this->route);
         $collection->setPage($this->getRequest()->getQuery('page', 1));
         $collection->setCollectionName($this->collectionName);
@@ -579,7 +590,7 @@ class RestController extends AbstractRestfulController
         }
 
         $plugin   = $this->plugin('Hal');
-        $resource = $plugin->createResource($resource, $this->route, $this->getIdentifierName());
+        $resource = $plugin->createResource($resource, $this->route, $this->getRouteIdentifierName());
 
         if ($resource instanceof ApiProblem) {
             return $resource;
@@ -621,7 +632,7 @@ class RestController extends AbstractRestfulController
         }
 
         $plugin   = $this->plugin('Hal');
-        $resource = $plugin->createResource($resource, $this->route, $this->getIdentifierName());
+        $resource = $plugin->createResource($resource, $this->route, $this->getRouteIdentifierName());
 
         $events->trigger('update.post', $this, array('id' => $id, 'data' => $data, 'resource' => $resource));
         return $resource;
@@ -658,7 +669,7 @@ class RestController extends AbstractRestfulController
         $plugin = $this->plugin('Hal');
         $collection = $plugin->createCollection($collection, $this->route);
         $collection->setCollectionRoute($this->route);
-        $collection->setIdentifierName($this->getIdentifierName());
+        $collection->setRouteIdentifierName($this->getRouteIdentifierName());
         $collection->setResourceRoute($this->route);
         $collection->setPage($this->getRequest()->getQuery('page', 1));
         $collection->setPageSize($this->getPageSize());
@@ -698,7 +709,7 @@ class RestController extends AbstractRestfulController
         $plugin = $this->plugin('Hal');
         $collection = $plugin->createCollection($collection, $this->route);
         $collection->setCollectionRoute($this->route);
-        $collection->setIdentifierName($this->getIdentifierName());
+        $collection->setRouteIdentifierName($this->getRouteIdentifierName());
         $collection->setResourceRoute($this->route);
         $collection->setPage($this->getRequest()->getQuery('page', 1));
         $collection->setPageSize($this->getPageSize());
