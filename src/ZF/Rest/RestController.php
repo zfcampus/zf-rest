@@ -11,6 +11,7 @@ use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractRestfulController;
 use Zend\Mvc\MvcEvent;
 use Zend\Paginator\Paginator;
+use Zend\Stdlib\RequestInterface;
 use ZF\ApiProblem\ApiProblem;
 use ZF\ApiProblem\ApiProblemResponse;
 use ZF\ApiProblem\Exception\DomainException;
@@ -849,5 +850,27 @@ class RestController extends AbstractRestfulController
         }
 
         $this->resource->setInputFilter($inputFilter);
+    }
+
+    /**
+     * Override parent - pull from content negotiation helpers
+     * 
+     * @param RequestInterface $request 
+     * @return null|array|\Traversable
+     */
+    public function processPostData(RequestInterface $request)
+    {
+        return $this->bodyParams();
+    }
+
+    /**
+     * Override parent - pull from content negotiation helpers
+     * 
+     * @param Request $request 
+     * @return null|array|\Traversable
+     */
+    protected function processBodyContent($request)
+    {
+        return $this->bodyParams();
     }
 }
