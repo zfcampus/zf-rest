@@ -23,6 +23,8 @@ use Zend\Stdlib\Parameters;
 use Zend\View\Helper\ServerUrl as ServerUrlHelper;
 use Zend\View\Helper\Url as UrlHelper;
 use ZF\ApiProblem\ApiProblem;
+use ZF\ContentNegotiation\ControllerPlugin\BodyParams;
+use ZF\ContentNegotiation\ParameterDataContainer;
 use ZF\Hal\Collection as HalCollection;
 use ZF\Hal\Resource as HalResource;
 use ZF\Hal\Plugin\Hal as HalHelper;
@@ -49,6 +51,7 @@ class RestControllerTest extends TestCase
         $controller->setRoute('resource');
 
         $pluginManager = new PluginManager();
+        $pluginManager->setService('bodyParams', new BodyParams());
         $controller->setPluginManager($pluginManager);
 
         $urlHelper = new UrlHelper();
@@ -1312,6 +1315,10 @@ class RestControllerTest extends TestCase
         $request = $this->controller->getRequest();
         $request->setMethod($method);
         $this->event->setRequest($request);
+
+        $container = new ParameterDataContainer();
+        $container->setBodyParams($data);
+        $this->event->setParam('ZFContentNegotiationParameterData', $container);
 
         if ($id) {
             $this->event->getRouteMatch()->setParam('id', $id);
