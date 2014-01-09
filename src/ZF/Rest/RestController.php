@@ -860,7 +860,7 @@ class RestController extends AbstractRestfulController
      */
     public function processPostData(RequestInterface $request)
     {
-        return $this->bodyParams();
+        return $this->create($this->bodyParams());
     }
 
     /**
