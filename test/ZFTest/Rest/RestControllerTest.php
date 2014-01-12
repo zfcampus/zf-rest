@@ -72,11 +72,11 @@ class RestControllerTest extends TestCase
         $controller->setResource($resource);
     }
 
-    public function assertProblemApiResult($expectedHttpStatus, $expectedDetail, $result)
+    public function assertProblemApiResult($expectedStatus, $expectedDetail, $result)
     {
         $this->assertInstanceOf('ZF\ApiProblem\ApiProblem', $result);
         $problem = $result->toArray();
-        $this->assertEquals($expectedHttpStatus, $problem['httpStatus']);
+        $this->assertEquals($expectedStatus, $problem['status']);
         $this->assertContains($expectedDetail, $problem['detail']);
     }
 
@@ -530,7 +530,7 @@ class RestControllerTest extends TestCase
     {
         $types = array(
             RestController::CONTENT_TYPE_JSON => array(
-                'application/api-problem+json',
+                'application/problem+json',
                 'text/json',
             ),
         );
