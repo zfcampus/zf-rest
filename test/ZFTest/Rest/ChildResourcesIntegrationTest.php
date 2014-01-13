@@ -186,7 +186,7 @@ class ChildResourcesIntegrationTest extends TestCase
         $this->helpers->get('url')->setRouter($router);
     }
 
-    public function testChildResourceObjectIdentiferMappingViaControllerReturn()
+    public function testChildResourceObjectIdentifierMappingViaControllerReturn()
     {
         $this->setUpAlternateRouter();
 
@@ -229,7 +229,7 @@ class ChildResourcesIntegrationTest extends TestCase
         $this->assertEquals('luke', $params['child_id']);
     }
 
-    public function testChildResourceObjectIdentiferMappingInCollectionsViaControllerReturn()
+    public function testChildResourceObjectIdentifierMappingInCollectionsViaControllerReturn()
     {
         $this->setUpAlternateRouter();
 
