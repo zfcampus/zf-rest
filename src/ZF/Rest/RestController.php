@@ -17,7 +17,7 @@ use ZF\ApiProblem\ApiProblemResponse;
 use ZF\ApiProblem\Exception\DomainException;
 use ZF\ContentNegotiation\ViewModel as ContentNegotiationViewModel;
 use ZF\Hal\Collection as HalCollection;
-use ZF\Hal\Resource as HalResource;
+use ZF\Hal\Entity as HalEntity;
 use ZF\Hal\View\HalJsonModel;
 
 /**
@@ -44,7 +44,7 @@ use ZF\Hal\View\HalJsonModel;
 class RestController extends AbstractRestfulController
 {
     /**
-     * HTTP methods we allow for the resource (collection); used by options()
+     * HTTP methods we allow for the collections; used by options()
      *
      * HEAD and OPTIONS are always available.
      *
@@ -75,8 +75,9 @@ class RestController extends AbstractRestfulController
     );
 
     /**
-     * Number of resources to return per page.  If $pageSizeParameter is
-     * specified, then it will override this when provided in a request.
+     * Number of entities to return per page of a collection.  If 
+     * $pageSizeParameter is specified, then it will override this when 
+     * provided in a request.
      *
      * @var int
      */
@@ -99,13 +100,13 @@ class RestController extends AbstractRestfulController
     protected $resource;
 
     /**
-     * HTTP methods we allow for individual resources; used by options()
+     * HTTP methods we allow for individual entities; used by options()
      *
      * HEAD and OPTIONS are always available.
      *
      * @var array
      */
-    protected $resourceHttpMethods = array(
+    protected $entityHttpMethods = array(
         'DELETE',
         'GET',
         'PATCH',
@@ -135,7 +136,7 @@ class RestController extends AbstractRestfulController
     }
 
     /**
-     * Set the allowed HTTP methods for the resource (collection)
+     * Set the allowed HTTP methods for collections
      *
      * @param  array $methods
      */
@@ -155,7 +156,7 @@ class RestController extends AbstractRestfulController
     }
 
     /**
-     * Set the allowed content types for the resource (collection)
+     * Set the allowed content types for the resource
      *
      * @param  array $contentTypes
      */
@@ -237,9 +238,9 @@ class RestController extends AbstractRestfulController
      *
      * @param  array $options
      */
-    public function setResourceHttpMethods(array $methods)
+    public function setEntityHttpMethods(array $methods)
     {
-        $this->resourceHttpMethods = $methods;
+        $this->entityHttpMethods = $methods;
     }
 
     /**
@@ -294,7 +295,7 @@ class RestController extends AbstractRestfulController
         }
 
         if (!$return instanceof ApiProblem
-            && !$return instanceof HalResource
+            && !$return instanceof HalEntity
             && !$return instanceof HalCollection
         ) {
             return $return;
@@ -315,10 +316,11 @@ class RestController extends AbstractRestfulController
     }
 
     /**
-     * Create a new resource
+     * Create a new entity
      *
+     * @todo   Remove 'resource' from the create.post event parameters for 1.0.0
      * @param  array $data
-     * @return Response|ApiProblem|HalResource
+     * @return Response|ApiProblem|HalEntity
      */
     public function create($data)
     {
@@ -330,46 +332,50 @@ class RestController extends AbstractRestfulController
         $events->trigger('create.pre', $this, array('data' => $data));
 
         try {
-            $resource = $this->getResource()->create($data);
+            $entity = $this->getResource()->create($data);
         } catch (\Exception $e) {
             return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
 
-        if ($resource instanceof ApiProblem
-            || $resource instanceof ApiProblemResponse
+        if ($entity instanceof ApiProblem
+            || $entity instanceof ApiProblemResponse
         ) {
-            return $resource;
+            return $entity;
         }
 
         $plugin   = $this->plugin('Hal');
-        $resource = $plugin->createResource($resource, $this->route, $this->getRouteIdentifierName());
+        $entity   = $plugin->createEntity($entity, $this->route, $this->getRouteIdentifierName());
 
-        if ($resource instanceof ApiProblem) {
-            return $resource;
+        if ($entity instanceof ApiProblem) {
+            return $entity;
         }
 
-        $self = $resource->getLinks()->get('self');
+        $self = $entity->getLinks()->get('self');
         $self = $plugin->fromLink($self);
 
         $response = $this->getResponse();
         $response->setStatusCode(201);
         $response->getHeaders()->addHeaderLine('Location', $self);
 
-        $events->trigger('create.post', $this, array('data' => $data, 'resource' => $resource));
+        $events->trigger('create.post', $this, array(
+            'data'     => $data,
+            'entity'   => $entity,
+            'resource' => $entity,
+        ));
 
-        return $resource;
+        return $entity;
     }
 
     /**
-     * Delete an existing resource
+     * Delete an existing entity
      *
      * @param  int|string $id
      * @return Response|ApiProblem
      */
     public function delete($id)
     {
-        if ($id && !$this->isMethodAllowedForResource()) {
-            return $this->createMethodNotAllowedResponse($this->resourceHttpMethods);
+        if ($id && !$this->isMethodAllowedForEntity()) {
+            return $this->createMethodNotAllowedResponse($this->entityHttpMethods);
         }
         if (!$id && !$this->isMethodAllowedForCollection()) {
             return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
@@ -384,7 +390,7 @@ class RestController extends AbstractRestfulController
             return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
 
-        $result = $result ?: new ApiProblem(422, 'Unable to delete resource.');
+        $result = $result ?: new ApiProblem(422, 'Unable to delete entity.');
 
         if ($result instanceof ApiProblem
             || $result instanceof ApiProblemResponse
@@ -432,47 +438,52 @@ class RestController extends AbstractRestfulController
     }
 
     /**
-     * Return single resource
+     * Return single entity
      *
+     * @todo   Remove 'resource' from get.post event for 1.0.0
      * @param  int|string $id
-     * @return Response|ApiProblem|HalResource
+     * @return Response|ApiProblem|HalEntity
      */
     public function get($id)
     {
-        if (!$this->isMethodAllowedForResource()) {
-            return $this->createMethodNotAllowedResponse($this->resourceHttpMethods);
+        if (!$this->isMethodAllowedForEntity()) {
+            return $this->createMethodNotAllowedResponse($this->entityHttpMethods);
         }
 
         $events = $this->getEventManager();
         $events->trigger('get.pre', $this, array('id' => $id));
 
         try {
-            $resource = $this->getResource()->fetch($id);
+            $entity = $this->getResource()->fetch($id);
         } catch (\Exception $e) {
             return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
 
-        $resource = $resource ?: new ApiProblem(404, 'Resource not found.');
+        $entity = $entity ?: new ApiProblem(404, 'Entity not found.');
 
-        if ($resource instanceof ApiProblem
-            || $resource instanceof ApiProblemResponse
+        if ($entity instanceof ApiProblem
+            || $entity instanceof ApiProblemResponse
         ) {
-            return $resource;
+            return $entity;
         }
 
         $plugin   = $this->plugin('Hal');
-        $resource = $plugin->createResource($resource, $this->route, $this->getRouteIdentifierName());
+        $entity   = $plugin->createEntity($entity, $this->route, $this->getRouteIdentifierName());
 
-        if ($resource instanceof ApiProblem) {
-            return $resource;
+        if ($entity instanceof ApiProblem) {
+            return $entity;
         }
 
-        $events->trigger('get.post', $this, array('id' => $id, 'resource' => $resource));
-        return $resource;
+        $events->trigger('get.post', $this, array(
+            'id'       => $id,
+            'entity'   => $entity,
+            'resource' => $entity,
+        ));
+        return $entity;
     }
 
     /**
-     * Return collection of resources
+     * Return collection of entities
      *
      * @return Response|HalCollection
      */
@@ -507,7 +518,7 @@ class RestController extends AbstractRestfulController
         $collection = $plugin->createCollection($collection, $this->route);
         $collection->setCollectionRoute($this->route);
         $collection->setRouteIdentifierName($this->getRouteIdentifierName());
-        $collection->setResourceRoute($this->route);
+        $collection->setEntityRoute($this->route);
         $collection->setPage($this->getRequest()->getQuery('page', 1));
         $collection->setCollectionName($this->collectionName);
         $collection->setPageSize($this->getPageSize());
@@ -517,10 +528,10 @@ class RestController extends AbstractRestfulController
     }
 
     /**
-     * Retrieve HEAD metadata for the resource and/or collection
+     * Retrieve HEAD metadata for the entity and/or collection
      *
      * @param  null|mixed $id
-     * @return Response|ApiProblem|HalResource|HalCollection
+     * @return Response|ApiProblem|HalEntity|HalCollection
      */
     public function head($id = null)
     {
@@ -544,7 +555,7 @@ class RestController extends AbstractRestfulController
         }
 
         if ($id) {
-            $options = $this->resourceHttpMethods;
+            $options = $this->entityHttpMethods;
         } else {
             $options = $this->collectionHttpMethods;
         }
@@ -563,55 +574,62 @@ class RestController extends AbstractRestfulController
     }
 
     /**
-     * Respond to the PATCH method (partial update of existing resource)
+     * Respond to the PATCH method (partial update of existing entity)
      *
+     * @todo   Remove 'resource' from patch.post event for 1.0.0
      * @param  int|string $id
      * @param  array $data
-     * @return Response|ApiProblem|HalResource
+     * @return Response|ApiProblem|HalEntity
      */
     public function patch($id, $data)
     {
-        if (!$this->isMethodAllowedForResource()) {
-            return $this->createMethodNotAllowedResponse($this->resourceHttpMethods);
+        if (!$this->isMethodAllowedForEntity()) {
+            return $this->createMethodNotAllowedResponse($this->entityHttpMethods);
         }
 
         $events = $this->getEventManager();
         $events->trigger('patch.pre', $this, array('id' => $id, 'data' => $data));
 
         try {
-            $resource = $this->getResource()->patch($id, $data);
+            $entity = $this->getResource()->patch($id, $data);
         } catch (\Exception $e) {
             return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
 
-        if ($resource instanceof ApiProblem
-            || $resource instanceof ApiProblemResponse
+        if ($entity instanceof ApiProblem
+            || $entity instanceof ApiProblemResponse
         ) {
-            return $resource;
+            return $entity;
         }
 
         $plugin   = $this->plugin('Hal');
-        $resource = $plugin->createResource($resource, $this->route, $this->getRouteIdentifierName());
+        $entity   = $plugin->createEntity($entity, $this->route, $this->getRouteIdentifierName());
 
-        if ($resource instanceof ApiProblem) {
-            return $resource;
+        if ($entity instanceof ApiProblem) {
+            return $entity;
         }
 
-        $events->trigger('patch.post', $this, array('id' => $id, 'data' => $data, 'resource' => $resource));
-        return $resource;
+        $events->trigger('patch.post', $this, array(
+            'id'       => $id,
+            'data'     => $data,
+            'entity'   => $entity,
+            'resource' => $entity,
+        ));
+        return $entity;
     }
 
     /**
-     * Update an existing resource
+     * Update an existing entity
      *
+     * @todo   Remove 'resource' from update.post event for 1.0.0
      * @param  int|string $id
      * @param  array $data
-     * @return Response|ApiProblem|HalResource
+     * @return Response|ApiProblem|HalEntity
      */
     public function update($id, $data)
     {
-        if ($id && !$this->isMethodAllowedForResource()) {
-            return $this->createMethodNotAllowedResponse($this->resourceHttpMethods);
+        if ($id && !$this->isMethodAllowedForEntity()) {
+            return $this->createMethodNotAllowedResponse($this->entityHttpMethods);
         }
         if (!$id && !$this->isMethodAllowedForCollection()) {
             return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
@@ -621,27 +639,32 @@ class RestController extends AbstractRestfulController
         $events->trigger('update.pre', $this, array('id' => $id, 'data' => $data));
 
         try {
-            $resource = $this->getResource()->update($id, $data);
+            $entity = $this->getResource()->update($id, $data);
         } catch (\Exception $e) {
             return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
 
-        if ($resource instanceof ApiProblem
-            || $resource instanceof ApiProblemResponse
+        if ($entity instanceof ApiProblem
+            || $entity instanceof ApiProblemResponse
         ) {
-            return $resource;
+            return $entity;
         }
 
         $plugin   = $this->plugin('Hal');
-        $resource = $plugin->createResource($resource, $this->route, $this->getRouteIdentifierName());
+        $entity   = $plugin->createEntity($entity, $this->route, $this->getRouteIdentifierName());
 
-        $events->trigger('update.post', $this, array('id' => $id, 'data' => $data, 'resource' => $resource));
-        return $resource;
+        $events->trigger('update.post', $this, array(
+            'id'       => $id,
+            'data'     => $data,
+            'entity'   => $entity,
+            'resource' => $entity,
+        ));
+        return $entity;
     }
 
     /**
-     * Respond to the PATCH method (partial update of existing resource) on
-     * a collection, i.e. create and/or update multiple resources in a collection.
+     * Respond to the PATCH method (partial update of existing entity) on
+     * a collection, i.e. create and/or update multiple entities in a collection.
      *
      * @param array $data
      * @return array
@@ -671,7 +694,7 @@ class RestController extends AbstractRestfulController
         $collection = $plugin->createCollection($collection, $this->route);
         $collection->setCollectionRoute($this->route);
         $collection->setRouteIdentifierName($this->getRouteIdentifierName());
-        $collection->setResourceRoute($this->route);
+        $collection->setEntityRoute($this->route);
         $collection->setPage($this->getRequest()->getQuery('page', 1));
         $collection->setPageSize($this->getPageSize());
         $collection->setCollectionName($this->collectionName);
@@ -681,7 +704,7 @@ class RestController extends AbstractRestfulController
     }
 
     /**
-     * Update an existing collection of resources
+     * Update an existing collection of entities
      *
      * @param array $data
      * @return array
@@ -711,7 +734,7 @@ class RestController extends AbstractRestfulController
         $collection = $plugin->createCollection($collection, $this->route);
         $collection->setCollectionRoute($this->route);
         $collection->setRouteIdentifierName($this->getRouteIdentifierName());
-        $collection->setResourceRoute($this->route);
+        $collection->setEntityRoute($this->route);
         $collection->setPage($this->getRequest()->getQuery('page', 1));
         $collection->setPageSize($this->getPageSize());
         $collection->setCollectionName($this->collectionName);
@@ -742,16 +765,16 @@ class RestController extends AbstractRestfulController
     }
 
     /**
-     * Is the current HTTP method allowed for a resource?
+     * Is the current HTTP method allowed for a entity?
      *
      * @return bool
      */
-    protected function isMethodAllowedForResource()
+    protected function isMethodAllowedForEntity()
     {
-        array_walk($this->resourceHttpMethods, function (&$method) {
+        array_walk($this->entityHttpMethods, function (&$method) {
             $method = strtoupper($method);
         });
-        $options = array_merge($this->resourceHttpMethods, array('OPTIONS', 'HEAD'));
+        $options = array_merge($this->entityHttpMethods, array('OPTIONS', 'HEAD'));
         $request = $this->getRequest();
         $method  = strtoupper($request->getMethod());
         if (!in_array($method, $options)) {
@@ -761,7 +784,7 @@ class RestController extends AbstractRestfulController
     }
 
     /**
-     * Is the current HTTP method allowed for the resource (collection)?
+     * Is the current HTTP method allowed for the collection?
      *
      * @return bool
      */
