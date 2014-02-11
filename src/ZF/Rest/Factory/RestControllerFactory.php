@@ -236,6 +236,10 @@ class RestControllerFactory implements AbstractFactoryInterface
                     $controller->setContentTypes($value);
                     break;
 
+                case 'entity_http_methods':
+                    $controller->setResourceHttpMethods($value);
+                    break;
+
                 /**
                  * The identifierName is a property of the ancestor
                  * and is described by Apigility as route_identifier_name
@@ -252,6 +256,9 @@ class RestControllerFactory implements AbstractFactoryInterface
                     $controller->setPageSizeParam($value);
                     break;
 
+                /**
+                 * @todo Remove this by 1.0; BC only, starting in 0.9.0
+                 */
                 case 'resource_http_methods':
                     $controller->setResourceHttpMethods($value);
                     break;
