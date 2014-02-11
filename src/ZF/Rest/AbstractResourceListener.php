@@ -221,6 +221,17 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
     {
         return new ApiProblem(405, 'The PATCH method has not been defined for individual resources');
     }
+    
+    /**
+     * Patch (partial in-place update) a collection or members of a collection
+     *
+     * @param  mixed $data
+     * @return ApiProblem|mixed
+     */
+    public function patchList($data)
+    {
+        return new ApiProblem(405, 'The PATCH method has not been defined for collections');
+    }
 
     /**
      * Replace a collection or members of a collection
