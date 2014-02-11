@@ -16,9 +16,9 @@ use Zend\View\Helper\ServerUrl as ServerUrlHelper;
 use Zend\View\Helper\Url as UrlHelper;
 use ZF\ApiProblem\View\ApiProblemRenderer;
 use ZF\Hal\Collection as HalCollection;
+use ZF\Hal\Entity as HalEntity;
 use ZF\Hal\Link\Link;
 use ZF\Hal\Plugin\Hal as HalHelper;
-use ZF\Hal\Resource as HalResource;
 use ZF\Hal\View\HalJsonModel;
 use ZF\Hal\View\HalJsonRenderer;
 use ZF\Rest\Resource;
@@ -106,7 +106,7 @@ class ChildResourcesIntegrationTest extends TestCase
             'id'   => 'anakin',
             'name' => 'Anakin Skywalker',
         );
-        $resource = new HalResource($this->parent, 'anakin');
+        $resource = new HalEntity($this->parent, 'anakin');
 
         $link = new Link('self');
         $link->setRoute('parent');
@@ -122,7 +122,7 @@ class ChildResourcesIntegrationTest extends TestCase
             'id'   => $id,
             'name' => $name,
         );
-        $resource = new HalResource($this->child, $id);
+        $resource = new HalEntity($this->child, $id);
 
         $link = new Link('self');
         $link->setRoute('parent/child');
@@ -144,7 +144,7 @@ class ChildResourcesIntegrationTest extends TestCase
         }
         $collection = new HalCollection($this->collection);
         $collection->setCollectionRoute('parent/child');
-        $collection->setResourceRoute('parent/child');
+        $collection->setEntityRoute('parent/child');
         $collection->setPage(1);
         $collection->setPageSize(10);
         $collection->setCollectionName('child');
@@ -222,7 +222,7 @@ class ChildResourcesIntegrationTest extends TestCase
         $this->assertEquals('luke', $id);
 
         $result = $controller->get('luke');
-        $this->assertInstanceOf('ZF\Hal\Resource', $result);
+        $this->assertInstanceOf('ZF\Hal\Entity', $result);
         $self = $result->getLinks()->get('self');
         $params = $self->getRouteParams();
         $this->assertArrayHasKey('child_id', $params);

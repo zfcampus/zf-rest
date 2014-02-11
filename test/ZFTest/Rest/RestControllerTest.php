@@ -26,7 +26,7 @@ use ZF\ApiProblem\ApiProblem;
 use ZF\ContentNegotiation\ControllerPlugin\BodyParams;
 use ZF\ContentNegotiation\ParameterDataContainer;
 use ZF\Hal\Collection as HalCollection;
-use ZF\Hal\Resource as HalResource;
+use ZF\Hal\Entity as HalEntity;
 use ZF\Hal\Plugin\Hal as HalHelper;
 use ZF\Rest\Exception;
 use ZF\Rest\Resource;
@@ -90,29 +90,29 @@ class RestControllerTest extends TestCase
         $this->assertProblemApiResult(500, 'failed', $result);
     }
 
-    public function testCreateReturnsProblemResultOnBadResourceIdentifier()
+    public function testCreateReturnsProblemResultOnBadEntityIdentifier()
     {
         $this->resource->getEventManager()->attach('create', function ($e) {
             return array('foo' => 'bar');
         });
 
         $result = $this->controller->create(array());
-        $this->assertProblemApiResult(422, 'resource identifier', $result);
+        $this->assertProblemApiResult(422, 'entity identifier', $result);
     }
 
-    public function testCreateReturnsHalResourceOnSuccess()
+    public function testCreateReturnsHalEntityOnSuccess()
     {
-        $resource = array('id' => 'foo', 'bar' => 'baz');
-        $this->resource->getEventManager()->attach('create', function ($e) use ($resource) {
-            return $resource;
+        $entity = array('id' => 'foo', 'bar' => 'baz');
+        $this->resource->getEventManager()->attach('create', function ($e) use ($entity) {
+            return $entity;
         });
 
         $result = $this->controller->create(array());
-        $this->assertInstanceOf('ZF\Hal\Resource', $result);
-        $this->assertEquals($resource, $result->resource);
+        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $this->assertEquals($entity, $result->entity);
     }
 
-    public function testFalseFromDeleteResourceReturnsProblemApiResult()
+    public function testFalseFromDeleteEntityReturnsProblemApiResult()
     {
         $this->resource->getEventManager()->attach('delete', function ($e) {
             return false;
@@ -122,7 +122,7 @@ class RestControllerTest extends TestCase
         $this->assertProblemApiResult(422, 'delete', $result);
     }
 
-    public function testTrueFromDeleteResourceReturnsResponseWithNoContent()
+    public function testTrueFromDeleteEntityReturnsResponseWithNoContent()
     {
         $this->resource->getEventManager()->attach('delete', function ($e) {
             return true;
@@ -133,7 +133,7 @@ class RestControllerTest extends TestCase
         $this->assertEquals(204, $result->getStatusCode());
     }
 
-    public function testFalseFromDeleteResourceCollectionReturnsProblemApiResult()
+    public function testFalseFromDeleteCollectionReturnsProblemApiResult()
     {
         $this->resource->getEventManager()->attach('deleteList', function ($e) {
             return false;
@@ -143,7 +143,7 @@ class RestControllerTest extends TestCase
         $this->assertProblemApiResult(422, 'delete collection', $result);
     }
 
-    public function testTrueFromDeleteResourceCollectionReturnsResponseWithNoContent()
+    public function testTrueFromDeleteCollectionReturnsResponseWithNoContent()
     {
         $this->resource->getEventManager()->attach('deleteList', function ($e) {
             return true;
@@ -164,16 +164,16 @@ class RestControllerTest extends TestCase
         $this->assertProblemApiResult(404, 'not found', $result);
     }
 
-    public function testReturningResourceFromGetReturnsExpectedHalResource()
+    public function testReturningEntityFromGetReturnsExpectedHalEntity()
     {
-        $resource = array('id' => 'foo', 'bar' => 'baz');
-        $this->resource->getEventManager()->attach('fetch', function ($e) use ($resource) {
-            return $resource;
+        $entity = array('id' => 'foo', 'bar' => 'baz');
+        $this->resource->getEventManager()->attach('fetch', function ($e) use ($entity) {
+            return $entity;
         });
 
         $result = $this->controller->get('foo');
-        $this->assertInstanceOf('ZF\Hal\Resource', $result);
-        $this->assertEquals($resource, $result->resource);
+        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $this->assertEquals($entity, $result->entity);
     }
 
     public function testReturnsHalCollectionForNonPaginatedList()
@@ -248,7 +248,7 @@ class RestControllerTest extends TestCase
     public function testHalCollectionReturnedIncludesRoutes($collection)
     {
         $this->assertEquals('resource', $collection->getCollectionRoute());
-        $this->assertEquals('resource', $collection->getResourceRoute());
+        $this->assertEquals('resource', $collection->getEntityRoute());
     }
 
     public function testHeadReturnsListResponseWhenNoIdProvided()
@@ -273,16 +273,16 @@ class RestControllerTest extends TestCase
         $this->assertSame($paginator, $result->getCollection());
     }
 
-    public function testHeadReturnsResourceResponseWhenIdProvided()
+    public function testHeadReturnsEntityResponseWhenIdProvided()
     {
-        $resource = array('id' => 'foo', 'bar' => 'baz');
-        $this->resource->getEventManager()->attach('fetch', function ($e) use ($resource) {
-            return $resource;
+        $entity = array('id' => 'foo', 'bar' => 'baz');
+        $this->resource->getEventManager()->attach('fetch', function ($e) use ($entity) {
+            return $entity;
         });
 
         $result = $this->controller->head('foo');
-        $this->assertInstanceOf('ZF\Hal\Resource', $result);
-        $this->assertEquals($resource, $result->resource);
+        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $this->assertEquals($entity, $result->entity);
     }
 
     public function testOptionsReturnsEmptyResponseWithAllowHeaderPopulatedForCollection()
@@ -305,10 +305,10 @@ class RestControllerTest extends TestCase
         $this->assertEquals($httpMethods, $test);
     }
 
-    public function testOptionsReturnsEmptyResponseWithAllowHeaderPopulatedForResource()
+    public function testOptionsReturnsEmptyResponseWithAllowHeaderPopulatedForEntity()
     {
         $r = new ReflectionObject($this->controller);
-        $httpMethodsProp = $r->getProperty('resourceHttpMethods');
+        $httpMethodsProp = $r->getProperty('entityHttpMethods');
         $httpMethodsProp->setAccessible(true);
         $httpMethods = $httpMethodsProp->getValue($this->controller);
         sort($httpMethods);
@@ -338,16 +338,16 @@ class RestControllerTest extends TestCase
         $this->assertProblemApiResult(500, 'failed', $result);
     }
 
-    public function testPatchReturnsHalResourceOnSuccess()
+    public function testPatchReturnsHalEntityOnSuccess()
     {
-        $resource = array('id' => 'foo', 'bar' => 'baz');
-        $this->resource->getEventManager()->attach('patch', function ($e) use ($resource) {
-            return $resource;
+        $entity = array('id' => 'foo', 'bar' => 'baz');
+        $this->resource->getEventManager()->attach('patch', function ($e) use ($entity) {
+            return $entity;
         });
 
-        $result = $this->controller->patch('foo', $resource);
-        $this->assertInstanceOf('ZF\Hal\Resource', $result);
-        $this->assertEquals($resource, $result->resource);
+        $result = $this->controller->patch('foo', $entity);
+        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $this->assertEquals($entity, $result->entity);
     }
 
     public function testUpdateReturnsProblemResultOnUpdateException()
@@ -360,16 +360,16 @@ class RestControllerTest extends TestCase
         $this->assertProblemApiResult(500, 'failed', $result);
     }
 
-    public function testUpdateReturnsHalResourceOnSuccess()
+    public function testUpdateReturnsHalEntityOnSuccess()
     {
-        $resource = array('id' => 'foo', 'bar' => 'baz');
-        $this->resource->getEventManager()->attach('update', function ($e) use ($resource) {
-            return $resource;
+        $entity = array('id' => 'foo', 'bar' => 'baz');
+        $this->resource->getEventManager()->attach('update', function ($e) use ($entity) {
+            return $entity;
         });
 
-        $result = $this->controller->update('foo', $resource);
-        $this->assertInstanceOf('ZF\Hal\Resource', $result);
-        $this->assertEquals($resource, $result->resource);
+        $result = $this->controller->update('foo', $entity);
+        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $this->assertEquals($entity, $result->entity);
     }
 
     public function testReplaceListReturnsProblemResultOnUpdateException()
@@ -402,10 +402,10 @@ class RestControllerTest extends TestCase
     public function testReplaceListReturnsHalCollectionWithRoutesInjected($collection)
     {
         $this->assertEquals('resource', $collection->getCollectionRoute());
-        $this->assertEquals('resource', $collection->getResourceRoute());
+        $this->assertEquals('resource', $collection->getEntityRoute());
     }
 
-    public function testOnDispatchRaisesDomainExceptionOnMissingResource()
+    public function testOnDispatchRaisesDomainExceptionOnMissingEntity()
     {
         $controller = new RestController();
         $this->setExpectedException('ZF\ApiProblem\Exception\DomainException', 'No resource');
@@ -437,9 +437,9 @@ class RestControllerTest extends TestCase
         $this->assertEquals('GET', $allow->getFieldValue());
     }
 
-    public function testOnDispatchReturns405ResponseForInvalidResourceMethod()
+    public function testOnDispatchReturns405ResponseForInvalidEntityMethod()
     {
-        $this->controller->setResourceHttpMethods(array('GET'));
+        $this->controller->setEntityHttpMethods(array('GET'));
         $request = $this->controller->getRequest();
         $request->setMethod('PUT');
         $this->event->setRequest($request);
@@ -457,12 +457,12 @@ class RestControllerTest extends TestCase
 
     public function testValidMethodReturningHalOrApiValueIsCastToViewModel()
     {
-        $resource = array('id' => 'foo', 'bar' => 'baz');
-        $this->resource->getEventManager()->attach('fetch', function ($e) use ($resource) {
-            return $resource;
+        $entity = array('id' => 'foo', 'bar' => 'baz');
+        $this->resource->getEventManager()->attach('fetch', function ($e) use ($entity) {
+            return $entity;
         });
 
-        $this->controller->setResourceHttpMethods(array('GET'));
+        $this->controller->setEntityHttpMethods(array('GET'));
 
         $request = $this->controller->getRequest();
         $request->setMethod('GET');
@@ -475,12 +475,12 @@ class RestControllerTest extends TestCase
 
     public function testValidMethodReturningHalOrApiValueCastsReturnToContentNegotiationViewModel()
     {
-        $resource = array('id' => 'foo', 'bar' => 'baz');
-        $this->resource->getEventManager()->attach('fetch', function ($e) use ($resource) {
-            return $resource;
+        $entity = array('id' => 'foo', 'bar' => 'baz');
+        $this->resource->getEventManager()->attach('fetch', function ($e) use ($entity) {
+            return $entity;
         });
 
-        $this->controller->setResourceHttpMethods(array('GET'));
+        $this->controller->setEntityHttpMethods(array('GET'));
 
         $request = $this->controller->getRequest();
         $request->setMethod('GET');
@@ -540,28 +540,28 @@ class RestControllerTest extends TestCase
         $this->assertAttributeEquals($types, 'contentTypes', $controller);
     }
 
-    public function testCreateUsesHalResourceReturnedByResource()
+    public function testCreateUsesHalEntityReturnedByResource()
     {
         $data     = array('id' => 'foo', 'data' => 'bar');
-        $resource = new HalResource($data, 'foo', 'resource');
-        $this->resource->getEventManager()->attach('create', function ($e) use ($resource) {
-            return $resource;
+        $entity   = new HalEntity($data, 'foo', 'resource');
+        $this->resource->getEventManager()->attach('create', function ($e) use ($entity) {
+            return $entity;
         });
 
         $result = $this->controller->create($data);
-        $this->assertSame($resource, $result);
+        $this->assertSame($entity, $result);
     }
 
-    public function testGetUsesHalResourceReturnedByResource()
+    public function testGetUsesHalEntityReturnedByResource()
     {
         $data     = array('id' => 'foo', 'data' => 'bar');
-        $resource = new HalResource($data, 'foo', 'resource');
-        $this->resource->getEventManager()->attach('fetch', function ($e) use ($resource) {
-            return $resource;
+        $entity   = new HalEntity($data, 'foo', 'resource');
+        $this->resource->getEventManager()->attach('fetch', function ($e) use ($entity) {
+            return $entity;
         });
 
         $result = $this->controller->get('foo');
-        $this->assertSame($resource, $result);
+        $this->assertSame($entity, $result);
     }
 
     public function testGetListUsesHalCollectionReturnedByResource()
@@ -575,28 +575,28 @@ class RestControllerTest extends TestCase
         $this->assertSame($collection, $result);
     }
 
-    public function testPatchUsesHalResourceReturnedByResource()
+    public function testPatchUsesHalEntityReturnedByResource()
     {
         $data     = array('id' => 'foo', 'data' => 'bar');
-        $resource = new HalResource($data, 'foo', 'resource');
-        $this->resource->getEventManager()->attach('patch', function ($e) use ($resource) {
-            return $resource;
+        $entity   = new HalEntity($data, 'foo', 'resource');
+        $this->resource->getEventManager()->attach('patch', function ($e) use ($entity) {
+            return $entity;
         });
 
         $result = $this->controller->patch('foo', $data);
-        $this->assertSame($resource, $result);
+        $this->assertSame($entity, $result);
     }
 
-    public function testUpdateUsesHalResourceReturnedByResource()
+    public function testUpdateUsesHalEntityReturnedByResource()
     {
         $data     = array('id' => 'foo', 'data' => 'bar');
-        $resource = new HalResource($data, 'foo', 'resource');
-        $this->resource->getEventManager()->attach('update', function ($e) use ($resource) {
-            return $resource;
+        $entity   = new HalEntity($data, 'foo', 'resource');
+        $this->resource->getEventManager()->attach('update', function ($e) use ($entity) {
+            return $entity;
         });
 
         $result = $this->controller->update('foo', $data);
-        $this->assertSame($resource, $result);
+        $this->assertSame($entity, $result);
     }
 
     public function testReplaceListUsesHalCollectionReturnedByResource()
@@ -617,7 +617,7 @@ class RestControllerTest extends TestCase
             'pre_data'  => false,
             'post'      => false,
             'post_data' => false,
-            'resource'  => false,
+            'entity'    => false,
         );
 
         $this->controller->getEventManager()->attach('create.pre', function ($e) use ($test) {
@@ -627,13 +627,13 @@ class RestControllerTest extends TestCase
         $this->controller->getEventManager()->attach('create.post', function ($e) use ($test) {
             $test->post = true;
             $test->post_data = $e->getParam('data');
-            $test->resource = $e->getParam('resource');
+            $test->entity = $e->getParam('entity');
         });
 
-        $data     = array('id' => 'foo', 'data' => 'bar');
-        $resource = new HalResource($data, 'foo', 'resource');
-        $this->resource->getEventManager()->attach('create', function ($e) use ($resource) {
-            return $resource;
+        $data   = array('id' => 'foo', 'data' => 'bar');
+        $entity = new HalEntity($data, 'foo', 'resource');
+        $this->resource->getEventManager()->attach('create', function ($e) use ($entity) {
+            return $entity;
         });
 
         $result = $this->controller->create($data);
@@ -641,7 +641,7 @@ class RestControllerTest extends TestCase
         $this->assertEquals($data, $test->pre_data);
         $this->assertTrue($test->post);
         $this->assertEquals($data, $test->post_data);
-        $this->assertSame($resource, $test->resource);
+        $this->assertSame($entity, $test->entity);
     }
 
     public function testDeleteTriggersPreAndPostEvents()
@@ -703,7 +703,7 @@ class RestControllerTest extends TestCase
             'pre_id'    => false,
             'post'      => false,
             'post_id'   => false,
-            'resource'  => false,
+            'entity'    => false,
         );
 
         $this->controller->getEventManager()->attach('get.pre', function ($e) use ($test) {
@@ -713,13 +713,13 @@ class RestControllerTest extends TestCase
         $this->controller->getEventManager()->attach('get.post', function ($e) use ($test) {
             $test->post = true;
             $test->post_id = $e->getParam('id');
-            $test->resource = $e->getParam('resource');
+            $test->entity = $e->getParam('entity');
         });
 
-        $data     = array('id' => 'foo', 'data' => 'bar');
-        $resource = new HalResource($data, 'foo', 'resource');
-        $this->resource->getEventManager()->attach('fetch', function ($e) use ($resource) {
-            return $resource;
+        $data   = array('id' => 'foo', 'data' => 'bar');
+        $entity = new HalEntity($data, 'foo', 'resource');
+        $this->resource->getEventManager()->attach('fetch', function ($e) use ($entity) {
+            return $entity;
         });
 
         $result = $this->controller->get('foo');
@@ -727,7 +727,7 @@ class RestControllerTest extends TestCase
         $this->assertEquals('foo', $test->pre_id);
         $this->assertTrue($test->post);
         $this->assertEquals('foo', $test->post_id);
-        $this->assertSame($resource, $test->resource);
+        $this->assertSame($entity, $test->entity);
     }
 
     public function testOptionsTriggersPreAndPostEventsForCollection()
@@ -758,10 +758,10 @@ class RestControllerTest extends TestCase
         $this->assertEquals($methods, $test->post_options);
     }
 
-    public function testOptionsTriggersPreAndPostEventsForResource()
+    public function testOptionsTriggersPreAndPostEventsForEntity()
     {
         $methods = array('GET', 'PUT', 'PATCH');
-        $this->controller->setResourceHttpMethods($methods);
+        $this->controller->setEntityHttpMethods($methods);
 
         $test = (object) array(
             'pre'          => false,
@@ -824,7 +824,7 @@ class RestControllerTest extends TestCase
             'post'      => false,
             'post_id'   => false,
             'post_data' => false,
-            'resource'  => false,
+            'entity'    => false,
         );
 
         $this->controller->getEventManager()->attach('patch.pre', function ($e) use ($test) {
@@ -836,13 +836,13 @@ class RestControllerTest extends TestCase
             $test->post = true;
             $test->post_id   = $e->getParam('id');
             $test->post_data = $e->getParam('data');
-            $test->resource  = $e->getParam('resource');
+            $test->entity    = $e->getParam('entity');
         });
 
         $data     = array('id' => 'foo', 'data' => 'bar');
-        $resource = new HalResource($data, 'foo', 'resource');
-        $this->resource->getEventManager()->attach('patch', function ($e) use ($resource) {
-            return $resource;
+        $entity   = new HalEntity($data, 'foo', 'resource');
+        $this->resource->getEventManager()->attach('patch', function ($e) use ($entity) {
+            return $entity;
         });
 
         $result = $this->controller->patch('foo', $data);
@@ -852,7 +852,7 @@ class RestControllerTest extends TestCase
         $this->assertTrue($test->post);
         $this->assertEquals('foo', $test->post_id);
         $this->assertEquals($data, $test->post_data);
-        $this->assertSame($resource, $test->resource);
+        $this->assertSame($entity, $test->entity);
     }
 
     public function testUpdateTriggersPreAndPostEvents()
@@ -864,7 +864,7 @@ class RestControllerTest extends TestCase
             'post'      => false,
             'post_id'   => false,
             'post_data' => false,
-            'resource'  => false,
+            'entity'    => false,
         );
 
         $this->controller->getEventManager()->attach('update.pre', function ($e) use ($test) {
@@ -876,13 +876,13 @@ class RestControllerTest extends TestCase
             $test->post = true;
             $test->post_id   = $e->getParam('id');
             $test->post_data = $e->getParam('data');
-            $test->resource  = $e->getParam('resource');
+            $test->entity    = $e->getParam('entity');
         });
 
         $data     = array('id' => 'foo', 'data' => 'bar');
-        $resource = new HalResource($data, 'foo', 'resource');
-        $this->resource->getEventManager()->attach('update', function ($e) use ($resource) {
-            return $resource;
+        $entity   = new HalEntity($data, 'foo', 'resource');
+        $this->resource->getEventManager()->attach('update', function ($e) use ($entity) {
+            return $entity;
         });
 
         $result = $this->controller->update('foo', $data);
@@ -892,7 +892,7 @@ class RestControllerTest extends TestCase
         $this->assertTrue($test->post);
         $this->assertEquals('foo', $test->post_id);
         $this->assertEquals($data, $test->post_data);
-        $this->assertSame($resource, $test->resource);
+        $this->assertSame($entity, $test->entity);
     }
 
     public function testReplaceListTriggersPreAndPostEvents()
@@ -1167,7 +1167,7 @@ class RestControllerTest extends TestCase
     public function testPatchListReturnsHalCollectionWithRoutesInjected($collection)
     {
         $this->assertEquals('resource', $collection->getCollectionRoute());
-        $this->assertEquals('resource', $collection->getResourceRoute());
+        $this->assertEquals('resource', $collection->getEntityRoute());
     }
 
     public function testPatchListUsesHalCollectionReturnedByResource()
@@ -1310,7 +1310,7 @@ class RestControllerTest extends TestCase
         });
 
         $this->controller->setCollectionHttpMethods(array('GET', 'POST', 'PUT', 'PATCH', 'DELETE'));
-        $this->controller->setResourceHttpMethods(array('GET', 'PUT', 'PATCH', 'DELETE'));
+        $this->controller->setEntityHttpMethods(array('GET', 'PUT', 'PATCH', 'DELETE'));
 
         $request = $this->controller->getRequest();
         $request->setMethod($method);

@@ -237,7 +237,7 @@ class RestControllerFactory implements AbstractFactoryInterface
                     break;
 
                 case 'entity_http_methods':
-                    $controller->setResourceHttpMethods($value);
+                    $controller->setEntityHttpMethods($value);
                     break;
 
                 /**
@@ -260,7 +260,7 @@ class RestControllerFactory implements AbstractFactoryInterface
                  * @todo Remove this by 1.0; BC only, starting in 0.9.0
                  */
                 case 'resource_http_methods':
-                    $controller->setResourceHttpMethods($value);
+                    $controller->setEntityHttpMethods($value);
                     break;
 
                 case 'route_name':
