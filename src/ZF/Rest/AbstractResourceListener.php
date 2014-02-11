@@ -100,6 +100,7 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
         $events->attach('fetch',       array($this, 'dispatch'));
         $events->attach('fetchAll',    array($this, 'dispatch'));
         $events->attach('patch',       array($this, 'dispatch'));
+        $events->attach('patchList',   array($this, 'dispatch'));
         $events->attach('replaceList', array($this, 'dispatch'));
         $events->attach('update',      array($this, 'dispatch'));
     }
@@ -135,6 +136,9 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
                 $id   = $event->getParam('id', null);
                 $data = $event->getParam('data', array());
                 return $this->patch($id, $data);
+            case 'patchList':
+                $data = $event->getParam('data', array());
+                return $this->patchList($data);
             case 'replaceList':
                 $data = $event->getParam('data', array());
                 return $this->replaceList($data);
