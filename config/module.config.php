@@ -30,8 +30,8 @@ return array(
         //     'listener'                   => 'Name of service/class that acts as a listener on the composed Resource',
         //     'page_size'                  => 'Integer specifying the number of results to return per page, if collections are paginated',
         //     'page_size_param'            => 'Name of query string parameter that specifies the number of results to return per page',
-        //     'resource_http_methods'      => array(
-        //         /* array of HTTP methods that are allowed on individual resources */
+        //     'entity_http_methods'      => array(
+        //         /* array of HTTP methods that are allowed on individual entities */
         //         'get', 'post', 'delete'
         //     ),
         //     'route_name'                 => 'Name of the route that will map to this controller',
