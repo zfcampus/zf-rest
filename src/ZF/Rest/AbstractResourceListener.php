@@ -221,7 +221,7 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
     {
         return new ApiProblem(405, 'The PATCH method has not been defined for individual resources');
     }
-    
+
     /**
      * Patch (partial in-place update) a collection or members of a collection
      *
