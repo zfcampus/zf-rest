@@ -41,6 +41,12 @@ class TestResourceListener extends AbstractResourceListener
         $this->testCase->paramsPassedToListener  = func_get_args();
     }
 
+    public function patchList($data)
+    {
+        $this->testCase->methodInvokedInListener = __METHOD__;
+        $this->testCase->paramsPassedToListener  = func_get_args();
+    }
+
     public function delete($id)
     {
         $this->testCase->methodInvokedInListener = __METHOD__;
