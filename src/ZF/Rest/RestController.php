@@ -1,7 +1,7 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2013 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZF\Rest;
@@ -75,8 +75,8 @@ class RestController extends AbstractRestfulController
     );
 
     /**
-     * Number of entities to return per page of a collection.  If 
-     * $pageSizeParameter is specified, then it will override this when 
+     * Number of entities to return per page of a collection.  If
+     * $pageSizeParameter is specified, then it will override this when
      * provided in a request.
      *
      * @var int
@@ -202,7 +202,8 @@ class RestController extends AbstractRestfulController
      *
      * @return string
      */
-    public function getRouteIdentifierName() {
+    public function getRouteIdentifierName()
+    {
         return $this->getIdentifierName();
     }
 
@@ -877,8 +878,8 @@ class RestController extends AbstractRestfulController
 
     /**
      * Override parent - pull from content negotiation helpers
-     * 
-     * @param RequestInterface $request 
+     *
+     * @param RequestInterface $request
      * @return null|array|\Traversable
      */
     public function processPostData(RequestInterface $request)
@@ -888,8 +889,8 @@ class RestController extends AbstractRestfulController
 
     /**
      * Override parent - pull from content negotiation helpers
-     * 
-     * @param Request $request 
+     *
+     * @param Request $request
      * @return null|array|\Traversable
      */
     protected function processBodyContent($request)
