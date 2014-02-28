@@ -104,7 +104,7 @@ class AbstractResourceListenerTest extends TestCase
      */
     public function testDispatchShouldPassWhitelistedQueryParamsToFetchAllMethod()
     {
-        $queryParams = new Parameters(['foo' => 'bar']);
+        $queryParams = new Parameters(array('foo' => 'bar'));
         $event = new ResourceEvent();
         $event->setName('fetchAll');
         $event->setQueryParams($queryParams);

@@ -1231,71 +1231,71 @@ class RestControllerTest extends TestCase
 
     public function validResourcePayloads()
     {
-        return [
-            'GET_collection' => [
+        return array(
+            'GET_collection' => array(
                 'GET',
                 'fetchAll',
                 null,
                 null,
-                [],
-            ],
-            'GET_item' => [
+                array(),
+            ),
+            'GET_item' => array(
                 'GET',
                 'fetch',
                 'foo',
                 null,
-                ['id' => 'foo', 'bar' => 'baz'],
-            ],
-            'POST' => [
+                array('id' => 'foo', 'bar' => 'baz'),
+            ),
+            'POST' => array(
                 'POST',
                 'create',
                 null,
-                ['bar' => 'baz'],
-                ['id' => 'foo', 'bar' => 'baz'],
-            ],
-            'PUT_collection' => [
+                array('bar' => 'baz'),
+                array('id' => 'foo', 'bar' => 'baz'),
+            ),
+            'PUT_collection' => array(
                 'PUT',
                 'replaceList',
                 null,
-                [['id' => 'foo', 'bar' => 'bat']],
-                [['id' => 'foo', 'bar' => 'bat']],
-            ],
-            'PUT_item' => [
+                array(array('id' => 'foo', 'bar' => 'bat')),
+                array(array('id' => 'foo', 'bar' => 'bat')),
+            ),
+            'PUT_item' => array(
                 'PUT',
                 'update',
                 'foo',
-                ['bar' => 'bat'],
-                ['id' => 'foo', 'bar' => 'bat'],
-            ],
-            'PATCH_collection' => [
+                array('bar' => 'bat'),
+                array('id' => 'foo', 'bar' => 'bat'),
+            ),
+            'PATCH_collection' => array(
                 'PATCH',
                 'patchList',
                 null,
-                ['foo' => ['bar' => 'bat']],
-                [['id' => 'foo', 'bar' => 'bat']],
-            ],
-            'PATCH_item' => [
+                array('foo' => array('bar' => 'bat')),
+                array(array('id' => 'foo', 'bar' => 'bat')),
+            ),
+            'PATCH_item' => array(
                 'PATCH',
                 'patch',
                 'foo',
-                ['bar' => 'bat'],
-                ['id' => 'foo', 'bar' => 'bat'],
-            ],
-            'DELETE_collection' => [
+                array('bar' => 'bat'),
+                array('id' => 'foo', 'bar' => 'bat'),
+            ),
+            'DELETE_collection' => array(
                 'DELETE',
                 'deleteList',
                 null,
                 null,
                 true,
-            ],
-            'DELETE_item' => [
+            ),
+            'DELETE_item' => array(
                 'DELETE',
                 'delete',
                 'foo',
                 null,
                 true,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
