@@ -29,22 +29,22 @@
         "zfcampus/zf-api-problem": "~1.0-dev",
         "zfcampus/zf-content-negotiation": "~1.0-dev",
         "zfcampus/zf-hal": "~1.0-dev",
-        "zendframework/zend-eventmanager": "~2.3-dev",
-        "zendframework/zend-json": "~2.3-dev",
-        "zendframework/zend-loader": "~2.3-dev",
-        "zendframework/zend-mvc": "~2.3-dev",
-        "zendframework/zend-paginator": "~2.3-dev",
-        "zendframework/zend-stdlib": "~2.3-dev"
+        "zendframework/zend-eventmanager": "~2.3",
+        "zendframework/zend-json": "~2.3",
+        "zendframework/zend-loader": "~2.3",
+        "zendframework/zend-mvc": "~2.3",
+        "zendframework/zend-paginator": "~2.3",
+        "zendframework/zend-stdlib": "~2.3"
     },
     "require-dev": {
         "phpunit/PHPUnit": "3.7.*",
-        "zendframework/zend-console": "~2.3-dev",
-        "zendframework/zend-escaper": "~2.3-dev",
-        "zendframework/zend-http": "~2.3-dev",
-        "zendframework/zend-servicemanager": "~2.3-dev",
-        "zendframework/zend-uri": "~2.3-dev",
-        "zendframework/zend-validator": "~2.3-dev",
-        "zendframework/zend-view": "~2.3-dev"
+        "zendframework/zend-console": "~2.3",
+        "zendframework/zend-escaper": "~2.3",
+        "zendframework/zend-http": "~2.3",
+        "zendframework/zend-servicemanager": "~2.3",
+        "zendframework/zend-uri": "~2.3",
+        "zendframework/zend-validator": "~2.3",
+        "zendframework/zend-view": "~2.3"
     },
     "autoload": {
         "psr-0": {
