@@ -165,6 +165,10 @@ class OptionsListener extends AbstractListenerAggregate
             && is_array($config['collection_http_methods'])
         ) {
             $collectionConfig = $config['collection_http_methods'];
+            // Ensure the HTTP method names are normalized
+            array_walk($collectionConfig, function (&$value) {
+                $value = strtoupper($value);
+            });
         }
 
         $identifier = false;
@@ -179,7 +183,12 @@ class OptionsListener extends AbstractListenerAggregate
         if (array_key_exists('entity_http_methods', $config)
             && is_array($config['entity_http_methods'])
         ) {
-            return $config['entity_http_methods'];
+            $entityConfig = $config['entity_http_methods'];
+            // Ensure the HTTP method names are normalized
+            array_walk($entityConfig, function (&$value) {
+                $value = strtoupper($value);
+            });
+            return $entityConfig;
         }
 
         return array();
