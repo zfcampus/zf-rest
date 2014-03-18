@@ -43,6 +43,9 @@ return array(
         'invokables' => array(
             'ZF\Rest\RestParametersListener' => 'ZF\Rest\Listener\RestParametersListener',
         ),
+        'factories' => array(
+            'ZF\Rest\OptionsListener' => 'ZF\Rest\Factory\OptionsListenerFactory',
+        ),
     ),
 
     'controllers' => array(
