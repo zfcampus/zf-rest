@@ -326,10 +326,6 @@ class RestController extends AbstractRestfulController
      */
     public function create($data)
     {
-        if (!$this->isMethodAllowedForCollection()) {
-            return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
-        }
-
         $events = $this->getEventManager();
         $events->trigger('create.pre', $this, array('data' => $data));
 
@@ -376,13 +372,6 @@ class RestController extends AbstractRestfulController
      */
     public function delete($id)
     {
-        if ($id && !$this->isMethodAllowedForEntity()) {
-            return $this->createMethodNotAllowedResponse($this->entityHttpMethods);
-        }
-        if (!$id && !$this->isMethodAllowedForCollection()) {
-            return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
-        }
-
         $events = $this->getEventManager();
         $events->trigger('delete.pre', $this, array('id' => $id));
 
@@ -410,10 +399,6 @@ class RestController extends AbstractRestfulController
 
     public function deleteList()
     {
-        if (!$this->isMethodAllowedForCollection()) {
-            return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
-        }
-
         $events = $this->getEventManager();
         $events->trigger('deleteList.pre', $this, array());
 
@@ -448,10 +433,6 @@ class RestController extends AbstractRestfulController
      */
     public function get($id)
     {
-        if (!$this->isMethodAllowedForEntity()) {
-            return $this->createMethodNotAllowedResponse($this->entityHttpMethods);
-        }
-
         $events = $this->getEventManager();
         $events->trigger('get.pre', $this, array('id' => $id));
 
@@ -491,10 +472,6 @@ class RestController extends AbstractRestfulController
      */
     public function getList()
     {
-        if (!$this->isMethodAllowedForCollection()) {
-            return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
-        }
-
         $events = $this->getEventManager();
         $events->trigger('getList.pre', $this, array());
 
@@ -585,10 +562,6 @@ class RestController extends AbstractRestfulController
      */
     public function patch($id, $data)
     {
-        if (!$this->isMethodAllowedForEntity()) {
-            return $this->createMethodNotAllowedResponse($this->entityHttpMethods);
-        }
-
         $events = $this->getEventManager();
         $events->trigger('patch.pre', $this, array('id' => $id, 'data' => $data));
 
@@ -630,13 +603,6 @@ class RestController extends AbstractRestfulController
      */
     public function update($id, $data)
     {
-        if ($id && !$this->isMethodAllowedForEntity()) {
-            return $this->createMethodNotAllowedResponse($this->entityHttpMethods);
-        }
-        if (!$id && !$this->isMethodAllowedForCollection()) {
-            return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
-        }
-
         $events = $this->getEventManager();
         $events->trigger('update.pre', $this, array('id' => $id, 'data' => $data));
 
@@ -673,10 +639,6 @@ class RestController extends AbstractRestfulController
      */
     public function patchList($data)
     {
-        if (!$this->isMethodAllowedForCollection()) {
-            return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
-        }
-
         $events = $this->getEventManager();
         $events->trigger('patchList.pre', $this, array('data' => $data));
 
@@ -713,10 +675,6 @@ class RestController extends AbstractRestfulController
      */
     public function replaceList($data)
     {
-        if (!$this->isMethodAllowedForCollection()) {
-            return $this->createMethodNotAllowedResponse($this->collectionHttpMethods);
-        }
-
         $events = $this->getEventManager();
         $events->trigger('replaceList.pre', $this, array('data' => $data));
 
@@ -764,59 +722,6 @@ class RestController extends AbstractRestfulController
         }
 
         return false;
-    }
-
-    /**
-     * Is the current HTTP method allowed for a entity?
-     *
-     * @return bool
-     */
-    protected function isMethodAllowedForEntity()
-    {
-        array_walk($this->entityHttpMethods, function (&$method) {
-            $method = strtoupper($method);
-        });
-        $options = array_merge($this->entityHttpMethods, array('OPTIONS', 'HEAD'));
-        $request = $this->getRequest();
-        $method  = strtoupper($request->getMethod());
-        if (!in_array($method, $options)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Is the current HTTP method allowed for the collection?
-     *
-     * @return bool
-     */
-    protected function isMethodAllowedForCollection()
-    {
-        array_walk($this->collectionHttpMethods, function (&$method) {
-            $method = strtoupper($method);
-        });
-        $methods = array_merge($this->collectionHttpMethods, array('OPTIONS', 'HEAD'));
-        $request = $this->getRequest();
-        $method  = strtoupper($request->getMethod());
-        if (!in_array($method, $methods)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Creates a "405 Method Not Allowed" response detailing the available methods
-     *
-     * @param  array $methods
-     * @return Response
-     */
-    protected function createMethodNotAllowedResponse(array $methods)
-    {
-        $response = $this->getResponse();
-        $response->setStatusCode(405);
-        $headers = $response->getHeaders();
-        $headers->addHeader($this->createAllowHeaderWithAllowedMethods($methods));
-        return $response;
     }
 
     /**
