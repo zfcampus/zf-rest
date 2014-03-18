@@ -420,41 +420,6 @@ class RestControllerTest extends TestCase
         $controller->onDispatch($this->event);
     }
 
-    public function testOnDispatchReturns405ResponseForInvalidCollectionMethod()
-    {
-        $this->controller->setCollectionHttpMethods(array('GET'));
-        $request = $this->controller->getRequest();
-        $request->setMethod('POST');
-        $this->event->setRequest($request);
-        $this->event->setResponse($this->controller->getResponse());
-
-        $result = $this->controller->onDispatch($this->event);
-        $this->assertInstanceOf('Zend\Http\Response', $result);
-        $this->assertEquals(405, $result->getStatusCode());
-        $headers = $result->getHeaders();
-        $this->assertTrue($headers->has('allow'));
-        $allow = $headers->get('allow');
-        $this->assertEquals('GET', $allow->getFieldValue());
-    }
-
-    public function testOnDispatchReturns405ResponseForInvalidEntityMethod()
-    {
-        $this->controller->setEntityHttpMethods(array('GET'));
-        $request = $this->controller->getRequest();
-        $request->setMethod('PUT');
-        $this->event->setRequest($request);
-        $this->event->setResponse($this->controller->getResponse());
-        $this->event->getRouteMatch()->setParam('id', 'foo');
-
-        $result = $this->controller->onDispatch($this->event);
-        $this->assertInstanceOf('Zend\Http\Response', $result);
-        $this->assertEquals(405, $result->getStatusCode());
-        $headers = $result->getHeaders();
-        $this->assertTrue($headers->has('allow'));
-        $allow = $headers->get('allow');
-        $this->assertEquals('GET', $allow->getFieldValue());
-    }
-
     public function testValidMethodReturningHalOrApiValueIsCastToViewModel()
     {
         $entity = array('id' => 'foo', 'bar' => 'baz');
