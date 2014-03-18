@@ -23,6 +23,13 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
     protected $entityClass;
 
     /**
+     * Current identity, if discovered in the resource event.
+     *
+     * @var \ZF\MvcAuth\Identity\IdentityInterface
+     */
+    protected $identity;
+
+    /**
      * Input filter, if discovered in the resource event.
      *
      * @var \Zend\InputFilter\InputFilterInterface
@@ -62,6 +69,29 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
     public function getEvent()
     {
         return $this->event;
+    }
+
+    /**
+     * Retrieve the identity, if any
+     *
+     * Proxies to the resource event to find the identity, if not already
+     * composed, and composes it.
+     *
+     * @return null|\ZF\MvcAuth\Identity\IdentityInterface
+     */
+    public function getIdentity()
+    {
+        if ($this->identity) {
+            return $this->identity;
+        }
+
+        $event = $this->getEvent();
+        if (! $event instanceof ResourceEvent) {
+            return null;
+        }
+
+        $this->identity = $event->getIdentity();
+        return $this->identity;
     }
 
     /**

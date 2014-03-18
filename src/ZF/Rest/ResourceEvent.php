@@ -10,9 +10,15 @@ use Zend\EventManager\Event;
 use Zend\InputFilter\InputFilterInterface;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
+use ZF\MvcAuth\Identity\IdentityInterface;
 
 class ResourceEvent extends Event
 {
+    /**
+     * @var null|IdentityInterface
+     */
+    protected $identity;
+
     /**
      * @var null|InputFilterInterface
      */
@@ -27,6 +33,24 @@ class ResourceEvent extends Event
      * @var null|RouteMatch
      */
     protected $routeMatch;
+
+    /**
+     * @param null|IdentityInterface $identity
+     * @return self
+     */
+    public function setIdentity(IdentityInterface $identity = null)
+    {
+        $this->identity = $identity;
+        return $this;
+    }
+
+    /**
+     * @return null|IdentityInterface
+     */
+    public function getIdentity()
+    {
+        return $this->identity;
+    }
 
     /**
      * @param null|InputFilterInterface $inputFilter

@@ -16,6 +16,7 @@ use Zend\Stdlib\Parameters;
 use ZF\ApiProblem\ApiProblem;
 use ZF\ApiProblem\ApiProblemResponse;
 use ZF\Hal\Collection as HalCollection;
+use ZF\MvcAuth\Identity\IdentityInterface;
 
 /**
  * Base resource class
@@ -29,6 +30,11 @@ class Resource implements ResourceInterface
      * @var EventManagerInterface
      */
     protected $events;
+
+    /**
+     * @var null|IdentityInterface
+     */
+    protected $identity;
 
     /**
      * @var null|InputFilterInterface
@@ -66,6 +72,24 @@ class Resource implements ResourceInterface
     public function getEventParams()
     {
         return $this->params;
+    }
+
+    /**
+     * @param null|IdentityInterface $identity
+     * @return self
+     */
+    public function setIdentity(IdentityInterface $identity = null)
+    {
+        $this->identity = $identity;
+        return $this;
+    }
+
+    /**
+     * @return null|IdentityInterface
+     */
+    public function getIdentity()
+    {
+        return $this->identity;
     }
 
     /**
@@ -555,6 +579,7 @@ class Resource implements ResourceInterface
     protected function prepareEvent($name, array $args)
     {
         $event = new ResourceEvent($name, $this, $this->prepareEventParams($args));
+        $event->setIdentity($this->getIdentity());
         $event->setInputFilter($this->getInputFilter());
         $event->setQueryParams($this->getQueryParams());
         $event->setRouteMatch($this->getRouteMatch());
