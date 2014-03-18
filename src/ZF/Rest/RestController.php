@@ -230,6 +230,7 @@ class RestController extends AbstractRestfulController
             throw new DomainException('No resource has been set.');
         }
 
+        $this->injectEventIdentityIntoResource();
         $this->injectEventInputFilterIntoResource();
         return $this->resource;
     }
@@ -852,6 +853,28 @@ class RestController extends AbstractRestfulController
             return 500;
         }
         return $code;
+    }
+
+    /**
+     * Injects the resource with the identity composed in the event, if present
+     */
+    protected function injectEventIdentityIntoResource()
+    {
+        if ($this->resource->getIdentity()) {
+            return;
+        }
+
+        $event = $this->getEvent();
+        if (! $event) {
+            return;
+        }
+
+        $identity = $event->getParam('ZF\MvcAuth\Identity');
+        if (! $identity) {
+            return;
+        }
+
+        $this->resource->setIdentity($identity);
     }
 
     /**

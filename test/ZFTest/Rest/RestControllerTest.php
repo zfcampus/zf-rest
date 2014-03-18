@@ -1332,4 +1332,16 @@ class RestControllerTest extends TestCase
         $this->assertInstanceOf('ZF\Rest\ResourceEvent', $resourceEvent);
         $this->assertSame($inputFilter, $resourceEvent->getInputFilter());
     }
+
+
+    /**
+     * @group zf-mvc-auth-20
+     */
+    public function testInjectsIdentityFromMvcEventIntoResourceEvent()
+    {
+        $identity = $this->getMock('ZF\MvcAuth\Identity\IdentityInterface');
+        $this->event->setParam('ZF\MvcAuth\Identity', $identity);
+        $resource = $this->controller->getResource();
+        $this->assertSame($identity, $resource->getIdentity());
+    }
 }

@@ -10,6 +10,7 @@ use PHPUnit_Framework_TestCase as TestCase;
 use Zend\InputFilter\InputFilter;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
+use ZF\MvcAuth\Identity\GuestIdentity;
 use ZF\Rest\ResourceEvent;
 
 class ResourceEventTest extends TestCase
@@ -118,5 +119,29 @@ class ResourceEventTest extends TestCase
     {
         $this->event->setInputFilter(null);
         $this->assertNull($this->event->getInputFilter());
+    }
+
+    public function testIdentityIsUndefinedByDefault()
+    {
+        $this->assertNull($this->event->getIdentity());
+    }
+
+    /**
+     * @depends testIdentityIsUndefinedByDefault
+     */
+    public function testCanComposeIdentity()
+    {
+        $identity = new GuestIdentity();
+        $this->event->setIdentity($identity);
+        $this->assertSame($identity, $this->event->getIdentity());
+    }
+
+    /**
+     * @depends testCanComposeIdentity
+     */
+    public function testCanNullifyIdentity()
+    {
+        $this->event->setIdentity(null);
+        $this->assertNull($this->event->getIdentity());
     }
 }
