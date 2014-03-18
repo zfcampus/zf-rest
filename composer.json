@@ -40,7 +40,9 @@
         "zfcampus/zf-oauth2": "~1.0-dev"
     },
     "require-dev": {
+        "fabpot/php-cs-fixer": "*@dev",
         "phpunit/PHPUnit": "3.7.*",
+        "satooshi/php-coveralls": ">=0.6.0",
         "zendframework/zend-console": "~2.3",
         "zendframework/zend-escaper": "~2.3",
         "zendframework/zend-http": "~2.3",
@@ -50,7 +52,7 @@
         "zendframework/zend-view": "~2.3"
     },
     "autoload": {
-        "psr-0": {
+        "psr-4": {
             "ZF\\Rest\\": "src/",
             "ZFTest\\Rest\\": "test/"
         },
