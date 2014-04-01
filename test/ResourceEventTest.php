@@ -7,6 +7,7 @@
 namespace ZFTest\Rest;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use Zend\Http\Request as HttpRequest;
 use Zend\InputFilter\InputFilter;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
@@ -53,6 +54,19 @@ class ResourceEventTest extends TestCase
         return $this->event;
     }
 
+    public function testRequestIsNullByDefault()
+    {
+        $this->assertNull($this->event->getRequest());
+    }
+
+    public function testRequestIsMutable()
+    {
+        $request = new HttpRequest();
+        $this->event->setRequest($request);
+        $this->assertSame($request, $this->event->getRequest());
+        return $this->event;
+    }
+
     /**
      * @depends testRouteMatchIsMutable
      */
@@ -69,6 +83,22 @@ class ResourceEventTest extends TestCase
     {
         $event->setQueryParams(null);
         $this->assertNull($event->getQueryParams());
+    }
+
+    /**
+     * @depends testRequestIsMutable
+     */
+    public function testRequestIsNullable(ResourceEvent $event)
+    {
+        $event->setRequest(null);
+        $this->assertNull($event->getRequest());
+    }
+
+    public function testCanInjectRequestViaSetParams()
+    {
+        $request = new HttpRequest();
+        $this->event->setParams(array('request' => $request));
+        $this->assertSame($request, $this->event->getRequest());
     }
 
     public function testCanFetchIndividualRouteParameter()

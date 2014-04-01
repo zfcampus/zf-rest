@@ -1309,4 +1309,16 @@ class RestControllerTest extends TestCase
         $resource = $this->controller->getResource();
         $this->assertSame($identity, $resource->getIdentity());
     }
+
+    public function testInjectsRequestFromControllerIntoResourceEvent()
+    {
+        $request = $this->controller->getRequest();
+        $resource = $this->controller->getResource();
+
+        $r = new ReflectionObject($resource);
+        $m = $r->getMethod('prepareEvent');
+        $m->setAccessible(true);
+        $event = $m->invoke($resource, 'fetch', array());
+        $this->assertSame($request, $event->getRequest());
+    }
 }
