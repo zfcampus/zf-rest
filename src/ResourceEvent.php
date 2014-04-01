@@ -6,10 +6,13 @@
 
 namespace ZF\Rest;
 
+use ArrayAccess;
 use Zend\EventManager\Event;
+use Zend\EventManager\Exception\InvalidArgumentException;
 use Zend\InputFilter\InputFilterInterface;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
+use Zend\Stdlib\RequestInterface;
 use ZF\MvcAuth\Identity\IdentityInterface;
 
 class ResourceEvent extends Event
@@ -30,9 +33,40 @@ class ResourceEvent extends Event
     protected $queryParams;
 
     /**
+     * @var null|RequestInterface
+     */
+    protected $request;
+
+    /**
      * @var null|RouteMatch
      */
     protected $routeMatch;
+
+    /**
+     * Overload setParams to inject request object, if passed via params
+     *
+     * @param array|ArrayAccess|object $params
+     * @return self
+     */
+    public function setParams($params)
+    {
+        if (! is_array($params) && ! is_object($params)) {
+            throw new InvalidArgumentException(sprintf(
+                'Event parameters must be an array or object; received "%s"',
+                gettype($params)
+            ));
+        }
+
+        if (is_array($params) || $params instanceof ArrayAccess) {
+            if (isset($params['request'])) {
+                $this->setRequest($params['request']);
+                unset($params['request']);
+            }
+        }
+
+        parent::setParams($params);
+        return $this;
+    }
 
     /**
      * @param null|IdentityInterface $identity
@@ -105,6 +139,24 @@ class ResourceEvent extends Event
         }
 
         return $params->get($name, $default);
+    }
+
+    /**
+     * @param null|RequestInterface $request
+     * @return self
+     */
+    public function setRequest(RequestInterface $request = null)
+    {
+        $this->request = $request;
+        return $this;
+    }
+
+    /**
+     * @return null|RequestInterface
+     */
+    public function getRequest()
+    {
+        return $this->request;
     }
 
     /**

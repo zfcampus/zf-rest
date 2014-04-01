@@ -6,6 +6,7 @@
 
 namespace ZF\Rest;
 
+use ArrayAccess;
 use Zend\Http\Header\Allow;
 use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractRestfulController;
@@ -232,6 +233,7 @@ class RestController extends AbstractRestfulController
 
         $this->injectEventIdentityIntoResource();
         $this->injectEventInputFilterIntoResource();
+        $this->injectRequestIntoResourceEventParams();
         return $this->resource;
     }
 
@@ -802,6 +804,24 @@ class RestController extends AbstractRestfulController
         }
 
         $this->resource->setInputFilter($inputFilter);
+    }
+
+    protected function injectRequestIntoResourceEventParams()
+    {
+        $request = $this->getRequest();
+        if (! $request) {
+            return;
+        }
+
+        $params = $this->resource->getEventParams();
+
+        if (! is_array($params) && ! $params instanceof ArrayAccess) {
+            // If not array-like, no clear path for setting event parameters
+            return;
+        }
+
+        $params['request'] = $request;
+        $this->resource->setEventParams($params);
     }
 
     /**

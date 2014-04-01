@@ -94,6 +94,13 @@ class ResourceEventTest extends TestCase
         $this->assertNull($event->getRequest());
     }
 
+    public function testCanInjectRequestViaSetParams()
+    {
+        $request = new HttpRequest();
+        $this->event->setParams(array('request' => $request));
+        $this->assertSame($request, $this->event->getRequest());
+    }
+
     public function testCanFetchIndividualRouteParameter()
     {
         $this->event->setRouteMatch($this->matches);
