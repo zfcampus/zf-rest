@@ -1309,4 +1309,13 @@ class RestControllerTest extends TestCase
         $resource = $this->controller->getResource();
         $this->assertSame($identity, $resource->getIdentity());
     }
+
+    public function testInjectsRequestFromMvcEventIntoResourceEvent()
+    {
+        $request = $this->getMock('Zend\Http\Request');
+        $this->event->setRequest($request);
+        $resource = $this->controller->getResource();
+        $event = $resource->getEvent();
+        $this->assertSame($request, $event->getRequest());
+    }
 }
