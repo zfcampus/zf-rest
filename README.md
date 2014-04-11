@@ -58,39 +58,86 @@ Configuration
 
 ### User Configuration
 
+The top-level key used to configure this module is `zf-rest`
+
+#### Key: Controller Service Name
+
+##### Sub-key: `collection_http_methods`
+
+An array of HTTP methods that are allowed for the collection.
+
+##### Sub-key: `entity_http_methods`
+
+An arra of HTTP methods that are allowed for the entity.
+
+##### Sub-key: `collection_name`
+
+The name of property denoting collection in response.
+
+##### Sub-key: `collection_query_whitelist`
+
+An array of query string parameters to whitelist and return when generating links to the
+collection. E.g., "sort", "filter", etc.
+
+##### Sub-key: `content_types`
+
+"content type"/array of media type pairs. These can be used to determine how to parse incoming
+data by a listener.  See zf-content-negotiation to get an idea how this may be used.
+
+##### Sub-key: `controller_class` (optional)
+
+The `ZF\Rest\RestController` based class.  This is generally useful when overriding the default,
+which is to use `ZF\Rest\RestController`.
+
+##### Sub-key: `entity_class`
+
+The class to be used as the entity.
+
+##### Sub-key: `route_name`
+
+The back reference to the route name for this REST service.  This is utilized when links need
+to be generated in the response.
+
+##### Sub-key: `route_identifier_name`
+
+The parameter name for the identifier in the route specification.
+
+##### Sub-key: `listener`
+
+The resource class that will be dispatched to handle any collection or entity requests.
+
+##### Sub-key: `page_size`
+
+The maximum size of the collection.
+
+##### Sub-key: `page_size_param`
+
+The name of the parameter that will determine page size, if provided.
+
+Example:
+
 ```php
-'zf-rest' => array(
-    // 'Name of virtual controller' => array(
-    //     'collection_http_methods'    => array(
-    //         /* array of HTTP methods that are allowed on collections */
-    //         'get'
-    //     ),
-    //     'collection_name'            => 'Name of property denoting collection in response',
-    //     'collection_query_whitelist' => array(
-    //         /* array of query string parameters to whitelist and return
-    //          * when generating links to the collection. E.g., "sort",
-    //          * "filter", etc.
-    //          */
-    //     ),
-    //     'content_types'              => array(
-    //         /* "content type"/array of media type pairs. These can be used
-    //          * to determine how to parse incoming data by a listener.
-    //          * See zf-content-negotiation to get an idea how this may be
-    //          * used.
-    //          */
-    //     ),
-    //     'controller_class'           => 'Name of ZF\Rest\RestController derivative, if not using that class',
-    //     'route_identifier_name'      => 'Name of parameter in route that acts as an entity identifier',
-    //     'listener'                   => 'Name of service/class that acts as a listener on the composed Resource',
-    //     'page_size'                  => 'Integer specifying the number of results to return per page, if collections are paginated',
-    //     'page_size_param'            => 'Name of query string parameter that specifies the number of results to return per page',
-    //     'entity_http_methods'      => array(
-    //         /* array of HTTP methods that are allowed on individual entities */
-    //         'get', 'post', 'delete'
-    //     ),
-    //     'route_name'                 => 'Name of the route that will map to this controller',
-    // ),
-    // repeat for each controller you want to define
+'AddressBook\\V1\\Rest\\Contact\\Controller' => array(
+    'listener' => 'AddressBook\\V1\\Rest\\Contact\\ContactResource',
+    'route_name' => 'address-book.rest.contact',
+    'route_identifier_name' => 'contact_id',
+    'collection_name' => 'contact',
+    'entity_http_methods' => array(
+        0 => 'GET',
+        1 => 'PATCH',
+        2 => 'PUT',
+        3 => 'DELETE',
+    ),
+    'collection_http_methods' => array(
+        0 => 'GET',
+        1 => 'POST',
+    ),
+    'collection_query_whitelist' => array(),
+    'page_size' => 25,
+    'page_size_param' => null,
+    'entity_class' => 'AddressBook\\V1\\Rest\\Contact\\ContactEntity',
+    'collection_class' => 'AddressBook\\V1\\Rest\\Contact\\ContactCollection',
+    'service_name' => 'Contact',
 ),
 ```
 
@@ -124,9 +171,11 @@ ZF2 Events
 
 ### Listeners
 
-#### `ZF\Rest\Listener\OptionsListener`
-
 #### `ZF\Rest\Listener\RestParametersListener`
+
+This listener is attached to the shared `dispatch` event at priority `100`.  The primary
+responsibility of this listener is to map query parameters from the Request and the
+RouteMatch into the Resource listener to be dispatched at dispatch time.
 
 ZF2 Services
 ============
@@ -135,6 +184,8 @@ ZF2 Services
 
 #### `ZF\Rest\Resource`
 
+
+
 ### Controller
 
-#### `ZF\Rest\Controller`
+#### `ZF\Rest\RestController`
