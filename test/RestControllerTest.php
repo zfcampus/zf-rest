@@ -491,20 +491,6 @@ class RestControllerTest extends TestCase
         $this->assertEquals('resources', $result->getCollectionName());
     }
 
-    public function testAllowsInjectingContentTypesForRequestMarshalling()
-    {
-        $types = array(
-            RestController::CONTENT_TYPE_JSON => array(
-                'application/problem+json',
-                'text/json',
-            ),
-        );
-        $controller = new RestController();
-        $controller->setContentTypes($types);
-
-        $this->assertAttributeEquals($types, 'contentTypes', $controller);
-    }
-
     public function testCreateUsesHalEntityReturnedByResource()
     {
         $data     = array('id' => 'foo', 'data' => 'bar');
