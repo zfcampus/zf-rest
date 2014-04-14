@@ -64,18 +64,6 @@ class RestController extends AbstractRestfulController
     protected $collectionName = 'items';
 
     /**
-     * Content types that will trigger marshalling data from the request body.
-     *
-     * @var array
-     */
-    protected $contentTypes = array(
-        self::CONTENT_TYPE_JSON => array(
-            'application/json',
-            'application/hal+json',
-        ),
-    );
-
-    /**
      * Number of entities to return per page of a collection.  If
      * $pageSizeParameter is specified, then it will override this when
      * provided in a request.
@@ -154,16 +142,6 @@ class RestController extends AbstractRestfulController
     public function setCollectionName($name)
     {
         $this->collectionName = (string) $name;
-    }
-
-    /**
-     * Set the allowed content types for the resource
-     *
-     * @param  array $contentTypes
-     */
-    public function setContentTypes(array $contentTypes)
-    {
-        $this->contentTypes = $contentTypes;
     }
 
     /**
