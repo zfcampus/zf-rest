@@ -18,13 +18,6 @@ return array(
         //          * "filter", etc.
         //          */
         //     ),
-        //     'content_types'              => array(
-        //         /* "content type"/array of media type pairs. These can be used
-        //          * to determine how to parse incoming data by a listener.
-        //          * See zf-content-negotiation to get an idea how this may be
-        //          * used.
-        //          */
-        //     ),
         //     'controller_class'           => 'Name of ZF\Rest\RestController derivative, if not using that class',
         //     'route_identifier_name'      => 'Name of parameter in route that acts as an entity identifier',
         //     'listener'                   => 'Name of service/class that acts as a listener on the composed Resource',

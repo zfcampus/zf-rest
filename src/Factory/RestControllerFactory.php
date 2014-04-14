@@ -232,10 +232,6 @@ class RestControllerFactory implements AbstractFactoryInterface
                     });
                     break;
 
-                case 'content_types':
-                    $controller->setContentTypes($value);
-                    break;
-
                 case 'entity_http_methods':
                     $controller->setEntityHttpMethods($value);
                     break;
