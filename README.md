@@ -6,9 +6,6 @@ ZF REST
 Introduction
 ------------
 
-[![Build Status](https://travis-ci.org/zfcampus/zf-rest.png)](https://travis-ci.org/zfcampus/zf-rest)
-[![Coverage Status](https://coveralls.io/repos/zfcampus/zf-rest/badge.png?branch=master)](https://coveralls.io/r/zfcampus/zf-rest)
-
 This module provides structure and code for quickly implementing RESTful APIs
 that use JSON as a transport.
 
@@ -91,7 +88,8 @@ which is to use `ZF\Rest\RestController`.
 
 ##### Sub-key: `entity_class`
 
-The class to be used as the entity.
+The class to be used as the entity.  Primarily useful for introspection (for example in the admin
+UI for Apigility).
 
 ##### Sub-key: `route_name`
 
@@ -171,6 +169,13 @@ ZF2 Events
 
 ### Listeners
 
+#### `ZF\Rest\Listener\OptionsListener
+
+This listeners is registered to the `MvcEvent::EVENT_ROUTE` with a priority of -100.  It is
+primarily responsible for ensuring the HTTP response to this REST request includes the properly
+configured and allowed HTTP methods in the `Allow` header.  This uses the configuration from
+the `http_methods` key of the `zf-rest` service configuration for the matching service.
+
 #### `ZF\Rest\Listener\RestParametersListener`
 
 This listener is attached to the shared `dispatch` event at priority `100`.  The primary
@@ -182,10 +187,46 @@ ZF2 Services
 
 ### Models
 
+#### `ZF\Rest\AbstractResourceListener`
+
+This abstract class is the base implementation of a resource listener.  Since dispatching
+of `zf-rest` based REST services is event driven, a listener must be constructed to listen
+for the proper event triggered from `ZF\Rest\Resource` (which is dispached by the
+`RestController`).  This particular listener, in addition to the event wiring, also does
+some introspection to determine if the current HTTP method pertains to the resource
+*collection* (all resources) or a particular *entity* (a single resource, with a particular
+identity).  This is evident in that the route used to get to a particular
+`AbstractResourceListener` will have used a particular `route_identifier_name` present as
+an HTTP query parameter.  The following methods are called during dispatch(), depending
+on the HTTP method and query parameter context:
+
+- `create()` - Generally the code for a POST request to a resource *collection*
+- `delete()` - Generally the code for a DELETE request to a resource *entity*
+- `deleteList()` - Generally the code for a DELETE request to a resource *entity*
+- `fetch()` - Generally the code for a GET request to a resource *entity*
+- `fetchAll()` - Generally the code for a GET request to a resource *collection*
+- `patch()` - Generally the code for a PATCH request to resource *entity*
+- `patchList()` - Generally the code for a PATCH request to a resource *collection*
+- `update()` - Generally the code for a PUT request to a resource *entity*
+- `replaceList()` - Generally the code for a PUT request to a resource *collection*
+
 #### `ZF\Rest\Resource`
 
-
+This is the instance responsible for handling the dispatching of REST based business
+logic.  `Resource` composes an instance of the `EventManager` in order to make and
+event based dispatcher for the delegation to the users instance of the
+`AbstractResourceListener`.  The methods in `Resource` each, when dispatched, will in
+turn trigger an event that instances of `AbstractResourceListener::dispatch()` will
+be listening for.
 
 ### Controller
 
 #### `ZF\Rest\RestController`
+
+This is the base controller implementation which is used when a controller service name
+matches a `zf-rest` configured REST service.  This instance is produced by the
+`ZF\Rest\Factory\RestControllerFactory` abstract factory for controllers.  This controller
+then delegates to the proper method in `ZF\Rest\Resource` based on the HTTP method
+that was utilized for the request.  This implementation builds on the ZF2
+`Zend\Mvc\Controller\AbstractRestfulController`
+
