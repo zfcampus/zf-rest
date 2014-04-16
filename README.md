@@ -11,10 +11,10 @@ that use JSON as a transport.
 
 It allows you to create RESTful JSON APIs that use the following standards:
 
-- [HAL](http://tools.ietf.org/html/draft-kelly-json-hal-03), used for creating
-  hypermedia links
-- [Problem API](http://tools.ietf.org/html/draft-nottingham-http-problem-02),
-  used for reporting API problems
+- [Hypermedia Application Language](http://tools.ietf.org/html/draft-kelly-json-hal-06), aka HAL,
+  used for creating JSON payloads with hypermedia controls.
+- [Problem Details for HTTP APIs](http://tools.ietf.org/html/draft-nottingham-http-problem-06),
+  aka API Problem, used for reporting API problems.
 
 Installation
 ------------
@@ -49,52 +49,53 @@ return array(
 );
 ```
 
-
 Configuration
-=============
+-------------
 
 ### User Configuration
 
-The top-level key used to configure this module is `zf-rest`
+The top-level key used to configure this module is `zf-rest`.
 
 #### Key: Controller Service Name
 
+Each key under `zf-rest` is a controller service name, and the value is an array with one or more of
+the following keys.
+
 ##### Sub-key: `collection_http_methods`
 
-An array of HTTP methods that are allowed for the collection.
+An array of HTTP methods that are allowed when making requests to a collection.
 
 ##### Sub-key: `entity_http_methods`
 
-An arra of HTTP methods that are allowed for the entity.
+An array of HTTP methods that are allowed when making requests for entities.
 
 ##### Sub-key: `collection_name`
 
-The name of property denoting collection in response.
+The name of the embedded property in the representation denoting the collection.
 
-##### Sub-key: `collection_query_whitelist`
+##### Sub-key: `collection_query_whitelist` (optional)
 
-An array of query string parameters to whitelist and return when generating links to the
-collection. E.g., "sort", "filter", etc.
+An array of query string arguments to whitelist for collection requests and when generating links
+to collections. These parameters will be passed to the resource class' `fetchAll()` method. Any of
+these parameters present in the request will also be used when generating links to the collection.
 
-##### Sub-key: `content_types`
-
-"content type"/array of media type pairs. These can be used to determine how to parse incoming
-data by a listener.  See zf-content-negotiation to get an idea how this may be used.
+Examples of query string arguments you may want to whitelist include "sort", "filter", etc.
 
 ##### Sub-key: `controller_class` (optional)
 
-The `ZF\Rest\RestController` based class.  This is generally useful when overriding the default,
-which is to use `ZF\Rest\RestController`.
+An alternate controller class to use when creating the controller service; it **must** extend
+`ZF\Rest\RestController`. Only use this if you are altering the workflow present in the
+`RestController`.
 
 ##### Sub-key: `entity_class`
 
-The class to be used as the entity.  Primarily useful for introspection (for example in the admin
-UI for Apigility).
+The class to be used for representing an entity.  Primarily useful for introspection (for example in
+the Apigility Admin UI).
 
 ##### Sub-key: `route_name`
 
-The back reference to the route name for this REST service.  This is utilized when links need
-to be generated in the response.
+The route name associated with this REST service.  This is utilized when links need to be generated
+in the response.
 
 ##### Sub-key: `route_identifier_name`
 
@@ -106,13 +107,16 @@ The resource class that will be dispatched to handle any collection or entity re
 
 ##### Sub-key: `page_size`
 
-The maximum size of the collection.
+The number of entities to return per "page" of a collection. This is only used if the collection
+returned is a `Zend\Paginator\Paginator` instance or derivative.
 
-##### Sub-key: `page_size_param`
+##### Sub-key: `page_size_param` (optional)
 
-The name of the parameter that will determine page size, if provided.
+The name of a query string argument that will set a per-request page size. Not set by default; we
+recommend having additional logic to ensure a ceiling for the page size as well, to prevent denial
+of service attacks on your API.
 
-Example:
+#### User configuration example:
 
 ```php
 'AddressBook\\V1\\Rest\\Contact\\Controller' => array(
@@ -140,6 +144,9 @@ Example:
 ```
 
 ### System Configuration
+
+The `zf-rest` module provides the following configuration to ensure it operates properly in a Zend
+Framework 2 application.
 
 ```php
 'service_manager' => array(
@@ -171,16 +178,20 @@ ZF2 Events
 
 #### `ZF\Rest\Listener\OptionsListener
 
-This listeners is registered to the `MvcEvent::EVENT_ROUTE` with a priority of -100.  It is
-primarily responsible for ensuring the HTTP response to this REST request includes the properly
-configured and allowed HTTP methods in the `Allow` header.  This uses the configuration from
-the `http_methods` key of the `zf-rest` service configuration for the matching service.
+This listener is registered to the `MvcEvent::EVENT_ROUTE` event with a priority of `-100`. 
+It serves two purposes:
+
+- If a request is made to either a REST entity or collection with a method they do not support, it
+  will return a `405 Method not allowed` response, with a populated `Allow` header indicating which
+  request methods may be used.
+- For `OPTIONS` requests, it will respond with a `200 OK` response and a populated `Allow` header
+  indicating which request methods may be used.
 
 #### `ZF\Rest\Listener\RestParametersListener`
 
-This listener is attached to the shared `dispatch` event at priority `100`.  The primary
-responsibility of this listener is to map query parameters from the Request and the
-RouteMatch into the Resource listener to be dispatched at dispatch time.
+This listener is attached to the shared `dispatch` event at priority `100`.  The listener maps query
+string arguments from the request to the `Resource` object composed in the `RestController`, as well
+as injects the `RouteMatch`.
 
 ZF2 Services
 ============
@@ -189,44 +200,37 @@ ZF2 Services
 
 #### `ZF\Rest\AbstractResourceListener`
 
-This abstract class is the base implementation of a resource listener.  Since dispatching
-of `zf-rest` based REST services is event driven, a listener must be constructed to listen
-for the proper event triggered from `ZF\Rest\Resource` (which is dispached by the
-`RestController`).  This particular listener, in addition to the event wiring, also does
-some introspection to determine if the current HTTP method pertains to the resource
-*collection* (all resources) or a particular *entity* (a single resource, with a particular
-identity).  This is evident in that the route used to get to a particular
-`AbstractResourceListener` will have used a particular `route_identifier_name` present as
-an HTTP query parameter.  The following methods are called during dispatch(), depending
-on the HTTP method and query parameter context:
+This abstract class is the base implementation of a [Resource](zfrestresource) listener.  Since
+dispatching of `zf-rest` based REST services is event driven, a listener must be constructed to
+listen for events triggered from `ZF\Rest\Resource` (which is called from the `RestController`).
+The following methods are called during `dispatch()`, depending on the HTTP method:
 
-- `create()` - Generally the code for a POST request to a resource *collection*
-- `delete()` - Generally the code for a DELETE request to a resource *entity*
-- `deleteList()` - Generally the code for a DELETE request to a resource *entity*
-- `fetch()` - Generally the code for a GET request to a resource *entity*
-- `fetchAll()` - Generally the code for a GET request to a resource *collection*
-- `patch()` - Generally the code for a PATCH request to resource *entity*
-- `patchList()` - Generally the code for a PATCH request to a resource *collection*
-- `update()` - Generally the code for a PUT request to a resource *entity*
-- `replaceList()` - Generally the code for a PUT request to a resource *collection*
+- `create($data)` - Triggered by a `POST` request to a resource *collection*.
+- `delete($id)` - Triggered by a `DELETE` request to a resource *entity*.
+- `deleteList($data)` - Triggered by a `DELETE` request to a resource *collection*.
+- `fetch($id)` - Triggered by a `GET` request to a resource *entity*.
+- `fetchAll($params = array())` - Triggered by a `GET` request to a resource *collection*.
+- `patch($id, $data)` - Triggered by a `PATCH` request to resource *entity*.
+- `patchList($data)` - Triggered by a `PATCH` request to a resource *collection*.
+- `update($id, $data)` - Triggered by a `PUT` request to a resource *entity*.
+- `replaceList($data)` - Triggered by a `PUT` request to a resource *collection*.
 
 #### `ZF\Rest\Resource`
 
-This is the instance responsible for handling the dispatching of REST based business
-logic.  `Resource` composes an instance of the `EventManager` in order to make and
-event based dispatcher for the delegation to the users instance of the
-`AbstractResourceListener`.  The methods in `Resource` each, when dispatched, will in
-turn trigger an event that instances of `AbstractResourceListener::dispatch()` will
-be listening for.
+The `Resource` object handles dispatching business logic for REST requests. It composes an
+`EventManager` instance in order to delegate operations to attached listeners. Additionally, it
+composes request information, such as the `Request`, `RouteMatch`, and `MvcEvent` objects, in order
+to seed the `ResourceEvent` it creates and passes to listeners when triggering events.
 
 ### Controller
 
 #### `ZF\Rest\RestController`
 
-This is the base controller implementation which is used when a controller service name
-matches a `zf-rest` configured REST service.  This instance is produced by the
-`ZF\Rest\Factory\RestControllerFactory` abstract factory for controllers.  This controller
-then delegates to the proper method in `ZF\Rest\Resource` based on the HTTP method
-that was utilized for the request.  This implementation builds on the ZF2
-`Zend\Mvc\Controller\AbstractRestfulController`
+This is the base controller implementation used when a controller service name matches a configured
+REST service. All REST services managed by `zf-rest` will use this controller (though separate
+instances of it), unless they specify a [controller_class](#subkeycontrollerclassoptional) option.
+Instances are created via the `ZF\Rest\Factory\RestControllerFactory` abstract factory.
 
+The `RestController` calls the appropriate method in `ZF\Rest\Resource` based on the requested HTTP
+method. It returns [HAL](https://github.com/zfcampus/zf-hal) payloads on success, and [API
+Problem](https://github.com/zfcampus/zf-api-problem) responses on error.
