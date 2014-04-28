@@ -284,16 +284,7 @@ class RestController extends AbstractRestfulController
         }
 
         if ($return instanceof ApiProblem) {
-            $response    = new ApiProblemResponse($return);
-            $headers     = $response->getHeaders();
-
-            // Merge in original response headers (which may contain CORS information)
-            $mvcResponse = $e->getResponse();
-            foreach ($mvcResponse->getHeaders() as $header) {
-                $headers->addHeader($header);
-            }
-
-            return $response;
+            return new ApiProblemResponse($return);
         }
 
         // Set the fallback content negotiation to use HalJson.
