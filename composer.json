@@ -25,7 +25,6 @@
         }
     },
     "require": {
-        "bshaffer/oauth2-server-php": "dev-develop",
         "php": ">=5.3.23",
         "zendframework/zend-eventmanager": "~2.3",
         "zendframework/zend-json": "~2.3",
