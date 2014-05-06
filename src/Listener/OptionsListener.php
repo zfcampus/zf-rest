@@ -153,9 +153,9 @@ class OptionsListener extends AbstractListenerAggregate
      * appropriate HTTP method configuration.
      *
      * If an entity request was detected, but no entity configuration exists, returns
-     * 
-     * @param mixed $config 
-     * @param mixed $matches 
+     *
+     * @param mixed $config
+     * @param mixed $matches
      * @return void
      */
     protected function getConfigForControllerAndMatches($config, $matches)

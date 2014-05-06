@@ -11,7 +11,6 @@ use Zend\Http\Header\Allow;
 use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractRestfulController;
 use Zend\Mvc\MvcEvent;
-use Zend\Paginator\Paginator;
 use Zend\Stdlib\RequestInterface;
 use ZF\ApiProblem\ApiProblem;
 use ZF\ApiProblem\ApiProblemResponse;
@@ -19,7 +18,6 @@ use ZF\ApiProblem\Exception\DomainException;
 use ZF\ContentNegotiation\ViewModel as ContentNegotiationViewModel;
 use ZF\Hal\Collection as HalCollection;
 use ZF\Hal\Entity as HalEntity;
-use ZF\Hal\View\HalJsonModel;
 
 /**
  * Controller for handling resources.
