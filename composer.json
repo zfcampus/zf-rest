@@ -44,6 +44,7 @@
         "zendframework/zend-console": "~2.3",
         "zendframework/zend-escaper": "~2.3",
         "zendframework/zend-http": "~2.3",
+        "zendframework/zend-inputfilter": "~2.3",
         "zendframework/zend-servicemanager": "~2.3",
         "zendframework/zend-uri": "~2.3",
         "zendframework/zend-validator": "~2.3",
