@@ -13,7 +13,7 @@ use ZF\Rest\Listener\OptionsListener;
 class OptionsListenerFactory implements FactoryInterface
 {
     /**
-     * @param ServiceLocatorInterface $services 
+     * @param ServiceLocatorInterface $services
      * @return OptionsListener
      */
     public function createService(ServiceLocatorInterface $services)
