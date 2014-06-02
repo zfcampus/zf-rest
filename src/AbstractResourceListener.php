@@ -21,7 +21,7 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
      * The entity_class config for the calling controller zf-rest config
      */
     protected $entityClass;
-    
+
     /**
      * The collection_class config for the calling controller zf-rest config
      */
