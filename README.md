@@ -16,6 +16,11 @@ It allows you to create RESTful JSON APIs that use the following standards:
 - [Problem Details for HTTP APIs](http://tools.ietf.org/html/draft-nottingham-http-problem-06),
   aka API Problem, used for reporting API problems.
 
+Requirements
+------------
+  
+Please see the [composer.json](composer.json) file.
+
 Installation
 ------------
 
