@@ -23,6 +23,11 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
     protected $entityClass;
 
     /**
+     * The collection_class config for the calling controller zf-rest config
+     */
+    protected $collectionClass;
+
+    /**
      * Current identity, if discovered in the resource event.
      *
      * @var \ZF\MvcAuth\Identity\IdentityInterface
