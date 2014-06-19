@@ -176,6 +176,7 @@ class CollectionIntegrationTest extends TestCase
         $request = $this->request = new Request();
         $request->setQuery(new Parameters(array(
             'query' => 'foo',
+            'bar' => 'baz',
             'page'  => 2,
         )));
         $request->setUri($uri);
@@ -251,7 +252,7 @@ class CollectionIntegrationTest extends TestCase
                     'route_name'                 => 'resource',
                     'route_identifier_name'            => 'id',
                     'collection_name'            => 'items',
-                    'collection_query_whitelist' => 'query',
+                    'collection_query_whitelist' => array('query'),
                 ),
             ),
         ));
@@ -297,6 +298,24 @@ class CollectionIntegrationTest extends TestCase
                 $this->assertContains('page=', $link['href'], "Link $name ('{$link['href']}') is missing page query param");
             }
             $this->assertContains('query=foo', $link['href'], "Link $name ('{$link['href']}') is missing query query param");
+            $this->assertNotContains('bar=baz', $link['href'], "Link $name ('{$link['href']}') includes query param that should have been omitted");
         }
+    }
+
+    public function testFactoryEnabledListenerInjectsWhitelistedQueryParams()
+    {
+        $services = $this->getServiceManager();
+        $controller = $services->get('ControllerLoader')->get('Api\RestController');
+        $controller->setEvent($this->getEvent());
+        $this->setUpContentNegotiation($controller);
+
+        $controller->dispatch($this->request, $this->response);
+        $resource = $controller->getResource();
+        $this->assertInstanceOf('ZF\Rest\Resource', $resource);
+        $params = $resource->getQueryParams();
+
+        $this->assertInstanceOf('Zend\Stdlib\Parameters', $params);
+        $this->assertSame('foo', $params->get('query'));
+        $this->assertFalse($params->offsetExists('bar'));
     }
 }

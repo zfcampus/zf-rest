@@ -6,6 +6,8 @@
 
 namespace ZF\Rest\Factory;
 
+use Zend\EventManager\Event;
+use Zend\Stdlib\Parameters;
 use ZF\Rest\Resource;
 use ZF\Rest\RestController;
 use Zend\EventManager\ListenerAggregateInterface;
@@ -185,24 +187,50 @@ class RestControllerFactory implements AbstractFactoryInterface
                     // the whitelisted query parameters in order to seed the
                     // collection route options.
                     $whitelist = $value;
-                    $controller->getEventManager()->attach('getList.post', function ($e) use ($whitelist) {
-                        $request = $e->getTarget()->getRequest();
+                    $controller->getEventManager()->attach('getList.pre', function (Event $e) use ($whitelist) {
+                        $controller = $e->getTarget();
+                        if (!$controller instanceof \ZF\Rest\RestController) {
+                            return;
+                        }
+
+                        $resource = $controller->getResource();
+                        if (!$resource instanceof \ZF\Rest\Resource) {
+                            return;
+                        }
+
+                        $request = $controller->getRequest();
                         if (!method_exists($request, 'getQuery')) {
                             return;
                         }
+
                         $query  = $request->getQuery();
-                        $params = array();
+                        $params = new Parameters([]);
                         foreach ($query as $key => $value) {
                             if (!in_array($key, $whitelist)) {
                                 continue;
                             }
-                            $params[$key] = $value;
+                            $params->set($key, $value);
                         }
-                        if (empty($params)) {
+                        $resource->setQueryParams($params);
+                    });
+
+                    $controller->getEventManager()->attach('getList.post', function (Event $e) use ($whitelist) {
+                        $controller = $e->getTarget();
+                        if (!$controller instanceof \ZF\Rest\RestController) {
+                            return;
+                        }
+
+                        $resource = $controller->getResource();
+                        if (!$resource instanceof \ZF\Rest\Resource) {
                             return;
                         }
 
                         $collection = $e->getParam('collection');
+                        if (!$collection instanceof \ZF\Hal\Collection) {
+                            return;
+                        }
+
+                        $params = $resource->getQueryParams()->getArrayCopy();
 
                         // Set collection route options with the captured query whitelist, to
                         // ensure paginated links are generated correctly
@@ -229,6 +257,7 @@ class RestControllerFactory implements AbstractFactoryInterface
                         $self->setRouteOptions(array_merge($options, array(
                             'query' => $params,
                         )));
+
                     });
                     break;
 
