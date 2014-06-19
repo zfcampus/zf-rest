@@ -201,7 +201,7 @@ class RestControllerFactory implements AbstractFactoryInterface
                         }
 
                         $query  = $request->getQuery();
-                        $params = new Parameters([]);
+                        $params = new Parameters(array());
                         foreach ($query as $key => $value) {
                             if (!in_array($key, $whitelist)) {
                                 continue;
