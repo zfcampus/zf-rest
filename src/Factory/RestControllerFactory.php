@@ -6,6 +6,9 @@
 
 namespace ZF\Rest\Factory;
 
+use Zend\EventManager\Event;
+use Zend\Stdlib\Parameters;
+use ZF\Hal\Collection;
 use ZF\Rest\Resource;
 use ZF\Rest\RestController;
 use Zend\EventManager\ListenerAggregateInterface;
@@ -185,24 +188,46 @@ class RestControllerFactory implements AbstractFactoryInterface
                     // the whitelisted query parameters in order to seed the
                     // collection route options.
                     $whitelist = $value;
-                    $controller->getEventManager()->attach('getList.post', function ($e) use ($whitelist) {
-                        $request = $e->getTarget()->getRequest();
-                        if (!method_exists($request, 'getQuery')) {
+                    $controller->getEventManager()->attach('getList.pre', function (Event $e) use ($whitelist) {
+                        $controller = $e->getTarget();
+                        $resource   = $controller->getResource();
+                        if (! $resource instanceof Resource) {
+                            // ResourceInterface does not define setQueryParams, so we need
+                            // specifically a Resource instance
                             return;
                         }
+
+                        $request = $controller->getRequest();
+                        if (! method_exists($request, 'getQuery')) {
+                            return;
+                        }
+
                         $query  = $request->getQuery();
-                        $params = array();
+                        $params = new Parameters(array());
                         foreach ($query as $key => $value) {
-                            if (!in_array($key, $whitelist)) {
+                            if (! in_array($key, $whitelist)) {
                                 continue;
                             }
-                            $params[$key] = $value;
+                            $params->set($key, $value);
                         }
-                        if (empty($params)) {
+                        $resource->setQueryParams($params);
+                    });
+
+                    $controller->getEventManager()->attach('getList.post', function (Event $e) use ($whitelist) {
+                        $controller = $e->getTarget();
+                        $resource   = $controller->getResource();
+                        if (! $resource instanceof Resource) {
+                            // ResourceInterface does not define setQueryParams, so we need
+                            // specifically a Resource instance
                             return;
                         }
 
                         $collection = $e->getParam('collection');
+                        if (! $collection instanceof Collection) {
+                            return;
+                        }
+
+                        $params = $resource->getQueryParams()->getArrayCopy();
 
                         // Set collection route options with the captured query whitelist, to
                         // ensure paginated links are generated correctly
@@ -212,19 +237,19 @@ class RestControllerFactory implements AbstractFactoryInterface
 
                         // If no self link defined, set the options in the collection and return
                         $links = $collection->getLinks();
-                        if (!$links->has('self')) {
+                        if (! $links->has('self')) {
                             return;
                         }
 
                         // If self link is defined, but is not route-based, return
                         $self = $links->get('self');
-                        if (!$self->hasRoute()) {
+                        if (! $self->hasRoute()) {
                             return;
                         }
 
                         // Otherwise, merge the query string parameters with
                         // the self link's route options
-                        $self = $links->get('self');
+                        $self    = $links->get('self');
                         $options = $self->getRouteOptions();
                         $self->setRouteOptions(array_merge($options, array(
                             'query' => $params,
