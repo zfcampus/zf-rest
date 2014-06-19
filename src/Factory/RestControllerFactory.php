@@ -188,11 +188,8 @@ class RestControllerFactory implements AbstractFactoryInterface
                     // collection route options.
                     $whitelist = $value;
                     $controller->getEventManager()->attach('getList.pre', function (Event $e) use ($whitelist) {
+                        /** @var RestController $controller */
                         $controller = $e->getTarget();
-                        if (!$controller instanceof \ZF\Rest\RestController) {
-                            return;
-                        }
-
                         $resource = $controller->getResource();
                         if (!$resource instanceof \ZF\Rest\Resource) {
                             return;
@@ -215,11 +212,8 @@ class RestControllerFactory implements AbstractFactoryInterface
                     });
 
                     $controller->getEventManager()->attach('getList.post', function (Event $e) use ($whitelist) {
+                        /** @var RestController $controller */
                         $controller = $e->getTarget();
-                        if (!$controller instanceof \ZF\Rest\RestController) {
-                            return;
-                        }
-
                         $resource = $controller->getResource();
                         if (!$resource instanceof \ZF\Rest\Resource) {
                             return;
