@@ -327,6 +327,29 @@ class RestControllerTest extends TestCase
         $this->assertEquals($httpMethods, $test);
     }
 
+    public function testOptionsReturnsEmptyResponseWithAllowHeaderPopulatedForEntityWhenRouteIdentifierIsCustomized()
+    {
+        $this->controller->setIdentifierName('user_id');
+
+        $r = new ReflectionObject($this->controller);
+        $httpMethodsProp = $r->getProperty('entityHttpMethods');
+        $httpMethodsProp->setAccessible(true);
+        $httpMethods = $httpMethodsProp->getValue($this->controller);
+        sort($httpMethods);
+
+        $this->event->getRouteMatch()->setParam('user_id', 'foo');
+
+        $result = $this->controller->options();
+        $this->assertInstanceOf('Zend\Http\Response', $result);
+        $this->assertEquals(204, $result->getStatusCode());
+        $headers = $result->getHeaders();
+        $this->assertTrue($headers->has('allow'));
+        $allow = $headers->get('allow');
+        $test  = $allow->getFieldValue();
+        $test  = explode(', ', $test);
+        sort($test);
+        $this->assertEquals($httpMethods, $test);
+    }
 
     public function testPatchReturnsProblemResultOnPatchException()
     {

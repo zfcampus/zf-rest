@@ -507,9 +507,8 @@ class RestController extends AbstractRestfulController
      */
     public function options()
     {
-        if (null === $id = $this->params()->fromRoute('id')) {
-            $id = $this->params()->fromQuery('id');
-        }
+        $e  = $this->getEvent();
+        $id = $this->getIdentifier($e->getRouteMatch(), $e->getRequest());
 
         if ($id) {
             $options = $this->entityHttpMethods;
