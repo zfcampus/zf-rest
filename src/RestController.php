@@ -694,7 +694,7 @@ class RestController extends AbstractRestfulController
     {
         $identifier = $this->getIdentifierName();
         $id = $routeMatch->getParam($identifier, false);
-        if ($id) {
+        if ($id !== null) {
             return $id;
         }
 
