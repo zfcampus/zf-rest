@@ -185,7 +185,7 @@ class Resource implements ResourceInterface
      */
     public function setEventManager(EventManagerInterface $events)
     {
-        $events->setIdentifiers(array(
+        $events->addIdentifiers(array(
             get_class($this),
             __CLASS__,
             'ZF\Rest\ResourceInterface',
