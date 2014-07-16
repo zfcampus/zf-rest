@@ -1330,4 +1330,27 @@ class RestControllerTest extends TestCase
         $event = $m->invoke($resource, 'fetch', array());
         $this->assertSame($request, $event->getRequest());
     }
+
+    public function entitiesReturnedForCollections()
+    {
+        return array(
+            'with-identifier' => array((object) array('id' => 'foo', 'foo' => 'bar')),
+            'no-identifier'   => array((object) array('foo' => 'bar')),
+        );
+    }
+
+    /**
+     * @dataProvider entitiesReturnedForCollections
+     * @group 31
+     */
+    public function testGetListAllowsReturningEntitiesInsteadOfCollections($entity)
+    {
+        $this->resource->getEventManager()->attach('fetchAll', function ($e) use ($entity) {
+            return $entity;
+        });
+
+        $result = $this->controller->getList();
+        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $this->assertSame($entity, $result->entity);
+    }
 }
