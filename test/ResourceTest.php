@@ -332,14 +332,14 @@ class ResourceTest extends TestCase
             'int'      => array(1),
             'float'    => array(1.0),
             'string'   => array('data'),
-            'stdClass' => array(new stdClass),
         );
     }
 
     /**
      * @dataProvider invalidCollection
+     * @group 31
      */
-    public function testFetchAllReturnsEmptyArrayIfLastListenerDoesNotReturnArrayOrTraversable($return)
+    public function testFetchAllReturnsEmptyArrayIfLastListenerReturnsScalar($return)
     {
         $this->events->attach('fetchAll', function ($e) use ($return) {
             return $return;
@@ -504,5 +504,18 @@ class ResourceTest extends TestCase
 
         $test = $this->resource->patchList($data);
         $this->assertSame($data, $test);
+    }
+
+    /**
+     * @group 31
+     */
+    public function testFetchAllShouldAllowReturningArbitraryObjects()
+    {
+        $return = (object) array('foo' => 'bar');
+        $this->events->attach('fetchAll', function ($e) use ($return) {
+            return $return;
+        });
+        $test = $this->resource->fetchAll();
+        $this->assertSame($return, $test);
     }
 }
