@@ -7,6 +7,7 @@
 namespace ZF\Rest;
 
 use ArrayAccess;
+use Traversable;
 use Zend\Http\Header\Allow;
 use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractRestfulController;
@@ -322,8 +323,8 @@ class RestController extends AbstractRestfulController
         $plugin   = $this->plugin('Hal');
         $entity   = $plugin->createEntity($entity, $this->route, $this->getRouteIdentifierName());
 
-        if ($entity instanceof ApiProblem) {
-            return $entity;
+        if (null === $entity->id) {
+            return new ApiProblem(422, 'No entity identifier present following entity creation');
         }
 
         $self = $entity->getLinks()->get('self');
@@ -465,13 +466,24 @@ class RestController extends AbstractRestfulController
             return $collection;
         }
 
+        $plugin = $this->plugin('Hal');
+
+        if (! is_array($collection)
+            && ! $collection instanceof Traversable
+            && ! $collection instanceof HalCollection
+            && is_object($collection)
+        ) {
+            $collection = $plugin->createEntity($collection, $this->route, $this->getRouteIdentifierName());
+            $events->trigger('getList.post', $this, array('collection' => $collection));
+            return $collection;
+        }
+
         $pageSize = $this->pageSizeParam
             ? $this->getRequest()->getQuery($this->pageSizeParam, $this->pageSize)
             : $this->pageSize;
 
         $this->setPageSize($pageSize);
 
-        $plugin     = $this->plugin('Hal');
         $collection = $plugin->createCollection($collection, $this->route);
         $collection->setCollectionRoute($this->route);
         $collection->setRouteIdentifierName($this->getRouteIdentifierName());
