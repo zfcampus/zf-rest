@@ -553,11 +553,11 @@ class Resource implements ResourceInterface
             );
         });
         $last    = $results->last();
-        if (!is_array($last)
-            && !$last instanceof HalCollection
-            && !$last instanceof ApiProblem
-            && !$last instanceof ApiProblemResponse
-            && !$last instanceof Traversable
+        if (! is_array($last)
+            && ! $last instanceof HalCollection
+            && ! $last instanceof ApiProblem
+            && ! $last instanceof ApiProblemResponse
+            && ! is_object($last)
         ) {
             return array();
         }
