@@ -217,7 +217,7 @@ class RestController extends AbstractRestfulController
     /**
      * Set the allowed HTTP OPTIONS for a resource
      *
-     * @param  array $options
+     * @param  array $methods
      */
     public function setEntityHttpMethods(array $methods)
     {
