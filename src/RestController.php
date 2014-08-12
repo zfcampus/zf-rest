@@ -323,16 +323,14 @@ class RestController extends AbstractRestfulController
         $plugin   = $this->plugin('Hal');
         $entity   = $plugin->createEntity($entity, $this->route, $this->getRouteIdentifierName());
 
-        if (null === $entity->id) {
-            return new ApiProblem(422, 'No entity identifier present following entity creation');
+        if ($entity->id) {
+            $self = $entity->getLinks()->get('self');
+            $self = $plugin->fromLink($self);
+
+            $response = $this->getResponse();
+            $response->setStatusCode(201);
+            $response->getHeaders()->addHeaderLine('Location', $self);
         }
-
-        $self = $entity->getLinks()->get('self');
-        $self = $plugin->fromLink($self);
-
-        $response = $this->getResponse();
-        $response->setStatusCode(201);
-        $response->getHeaders()->addHeaderLine('Location', $self);
 
         $events->trigger('create.post', $this, array(
             'data'     => $data,

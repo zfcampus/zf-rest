@@ -90,14 +90,22 @@ class RestControllerTest extends TestCase
         $this->assertProblemApiResult(500, 'failed', $result);
     }
 
-    public function testCreateReturnsProblemResultOnBadEntityIdentifier()
+    /**
+     * Addresses zfcampus/zf-hal#51
+     *
+     * @group 43
+     */
+    public function testCreateDoesNotSetLocationHeaderOnMissingEntityIdentifier()
     {
         $this->resource->getEventManager()->attach('create', function ($e) {
             return array('foo' => 'bar');
         });
 
         $result = $this->controller->create(array());
-        $this->assertProblemApiResult(422, 'entity identifier', $result);
+        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $response = $this->controller->getResponse();
+        $headers  = $response->getHeaders();
+        $this->assertFalse($headers->has('Location'));
     }
 
     public function testCreateReturnsHalEntityOnSuccess()
@@ -110,6 +118,16 @@ class RestControllerTest extends TestCase
         $result = $this->controller->create(array());
         $this->assertInstanceOf('ZF\Hal\Entity', $result);
         $this->assertEquals($entity, $result->entity);
+        return $this->controller->getResponse();
+    }
+
+    /**
+     * @depends testCreateReturnsHalEntityOnSuccess
+     */
+    public function testSuccessfulCreationWithEntityIdentifierSetsResponseLocationheader($response)
+    {
+        $headers = $response->getHeaders();
+        $this->assertTrue($headers->has('Location'));
     }
 
     public function testFalseFromDeleteEntityReturnsProblemApiResult()
