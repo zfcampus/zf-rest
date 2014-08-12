@@ -91,7 +91,9 @@ class RestControllerTest extends TestCase
     }
 
     /**
-     * @group 51
+     * Addresses zfcampus/zf-hal#51
+     *
+     * @group 43
      */
     public function testCreateDoesNotSetLocationHeaderOnMissingEntityIdentifier()
     {
