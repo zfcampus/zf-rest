@@ -92,6 +92,15 @@ An alternate controller class to use when creating the controller service; it **
 `ZF\Rest\RestController`. Only use this if you are altering the workflow present in the
 `RestController`.
 
+##### Sub-key: `identifier` (optional)
+
+The name of event identifier for controller. It allows multiple instances of controller to react
+to different sets of shared events.
+
+##### Sub-key: `resource_identifiers` (optional)
+
+The name or an array of names of event identifier/s for resource.
+
 ##### Sub-key: `entity_class`
 
 The class to be used for representing an entity.  Primarily useful for introspection (for example in
