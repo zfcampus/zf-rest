@@ -75,14 +75,10 @@ class RestParametersListener implements
     public function onDispatch(MvcEvent $e)
     {
         $controller = $e->getTarget();
-        if (!$controller instanceof RestController) {
-            return;
-        }
-
-        $request  = $e->getRequest();
-        $query    = $request->getQuery();
-        $matches  = $e->getRouteMatch();
-        $resource = $controller->getResource();
+        $request    = $e->getRequest();
+        $query      = $request->getQuery();
+        $matches    = $e->getRouteMatch();
+        $resource   = $controller->getResource();
         $resource->setQueryParams($query);
         $resource->setRouteMatch($matches);
     }
