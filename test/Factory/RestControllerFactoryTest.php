@@ -59,4 +59,31 @@ class RestControllerFactoryTest extends TestCase
         $controller = $this->controllers->get('ApiController');
         $this->assertInstanceOf('ZFTest\Rest\Factory\TestAsset\CustomController', $controller);
     }
+
+    public function testDefaultControllerEventManagerIdentifiersAreAsExpected()
+    {
+        $controller = $this->controllers->get('ApiController');
+        $events = $controller->getEventManager();
+
+        $identifiers = $events->getIdentifiers();
+
+        $this->assertContains('ZF\Rest\RestController', $identifiers);
+        $this->assertContains('ApiController', $identifiers);
+    }
+
+    public function testControllerEventManagerIdentifiersAreAsSpecified()
+    {
+        $config = $this->services->get('Config');
+        $config['zf-rest']['ApiController']['identifier'] = 'ZFTest\Rest\Factory\TestAsset\ExtraControllerListener';
+        $this->services->setAllowOverride(true);
+        $this->services->setService('Config', $config);
+
+        $controller = $this->controllers->get('ApiController');
+        $events = $controller->getEventManager();
+
+        $identifiers = $events->getIdentifiers();
+
+        $this->assertContains('ZF\Rest\RestController', $identifiers);
+        $this->assertContains('ZFTest\Rest\Factory\TestAsset\ExtraControllerListener', $identifiers);
+    }
 }
