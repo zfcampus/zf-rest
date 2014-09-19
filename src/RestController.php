@@ -63,13 +63,29 @@ class RestController extends AbstractRestfulController
     protected $collectionName = 'items';
 
     /**
+     * Minimum number of entities to return per page of a collection.  If
+     * $pageSize parameter is out of range an ApiProblem will be returned
+     *
+     * @var int
+     */
+    protected $minPageSize;
+
+    /**
      * Number of entities to return per page of a collection.  If
-     * $pageSizeParameter is specified, then it will override this when
+     * $pageSize parameter is specified, then it will override this when
      * provided in a request.
      *
      * @var int
      */
     protected $pageSize = 30;
+    
+    /**
+     * Maximum number of entities to return per page of a collection.  If
+     * $pageSize parameter is out of range an ApiProblem will be returned
+     *
+     * @var int
+     */
+    protected $maxPageSize;
 
     /**
      * A query parameter to use to specify the number of records to return in
@@ -142,6 +158,26 @@ class RestController extends AbstractRestfulController
     {
         $this->collectionName = (string) $name;
     }
+    
+    /**
+     * Set the minimum page size for paginated responses
+     *
+     * @param  int
+     */
+    public function setMinPageSize($count)
+    {
+        $this->minPageSize = (int) $count;
+    }
+
+    /**
+     * Return the minimum page size
+     *
+     * @return int
+     */
+    public function getMinPageSize()
+    {
+        return $this->minPageSize;
+    }
 
     /**
      * Set the default page size for paginated responses
@@ -154,13 +190,33 @@ class RestController extends AbstractRestfulController
     }
 
     /**
-     * Return the page size
+     * Return the default page size
      *
      * @return int
      */
     public function getPageSize()
     {
         return $this->pageSize;
+    }
+
+    /**
+     * Set the maximum page size for paginated responses
+     *
+     * @param  int
+     */
+    public function setMaxPageSize($count)
+    {
+        $this->maxPageSize = (int) $count;
+    }
+
+    /**
+     * Return the maximum page size
+     *
+     * @return int
+     */
+    public function getMaxPageSize()
+    {
+        return $this->maxPageSize;
     }
 
     /**
@@ -479,6 +535,14 @@ class RestController extends AbstractRestfulController
         $pageSize = $this->pageSizeParam
             ? $this->getRequest()->getQuery($this->pageSizeParam, $this->pageSize)
             : $this->pageSize;
+
+        if(isset($this->minPageSize) && $pageSize < $this->minPageSize ){
+            return new ApiProblem(500, sprintf("Page size is out of range, minimum page size is %s", $this->minPageSize ));
+        }
+
+        if(isset($this->maxPageSize) && $pageSize > $this->maxPageSize ){
+            return new ApiProblem(500, sprintf("Page size is out of range, maximum page size is %s", $this->maxPageSize ));
+        }
 
         $this->setPageSize($pageSize);
 
