@@ -6,6 +6,7 @@
 
 namespace ZFTest\Rest\Listener;
 
+use Zend\EventManager\SharedEventManager;
 use ZF\Rest\Listener\RestParametersListener;
 use ZF\Rest\Resource;
 use ZF\Rest\RestController;
@@ -39,15 +40,6 @@ class RestParametersListenerTest extends TestCase
         $this->listener = new RestParametersListener();
     }
 
-    public function testIgnoresNonRestControllers()
-    {
-        $controller = $this->getMock('Zend\Mvc\Controller\AbstractRestfulController');
-        $this->event->setTarget($controller);
-        $this->listener->onDispatch($this->event);
-        $this->assertNull($this->resource->getRouteMatch());
-        $this->assertNull($this->resource->getQueryParams());
-    }
-
     public function testInjectsRouteMatchOnDispatchOfRestController()
     {
         $this->listener->onDispatch($this->event);
@@ -58,5 +50,27 @@ class RestParametersListenerTest extends TestCase
     {
         $this->listener->onDispatch($this->event);
         $this->assertSame($this->query, $this->resource->getQueryParams());
+    }
+
+    public function testAttachSharedAttachOneListenerOnEventDispatch()
+    {
+        $sharedEventManager = new SharedEventManager();
+        $sharedEventManager->attachAggregate($this->listener);
+
+        $listener = $sharedEventManager->getListeners('ZF\Rest\RestController', MvcEvent::EVENT_DISPATCH);
+
+        $this->assertEquals(1, $listener->count());
+    }
+
+    public function testDetachSharedDetachAttachedListener()
+    {
+        $sharedEventManager = new SharedEventManager();
+        $sharedEventManager->attachAggregate($this->listener);
+
+        $sharedEventManager->detachAggregate($this->listener);
+
+        $listener = $sharedEventManager->getListeners('ZF\Rest\RestController', MvcEvent::EVENT_DISPATCH);
+
+        $this->assertEquals(0, $listener->count());
     }
 }
