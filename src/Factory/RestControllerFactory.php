@@ -143,7 +143,6 @@ class RestControllerFactory implements AbstractFactoryInterface
             ));
         }
 
-        $controller->setEventManager($events);
         $controller->setResource($resource);
         $this->setControllerOptions($config, $controller);
 
