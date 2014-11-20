@@ -176,7 +176,7 @@ class OptionsListener extends AbstractListenerAggregate
             $identifier = $config['route_identifier_name'];
         }
 
-        if (! $identifier || ! $matches->getParam($identifier, false)) {
+        if (! $identifier || $matches->getParam($identifier, false) === false) {
             return $collectionConfig;
         }
 
