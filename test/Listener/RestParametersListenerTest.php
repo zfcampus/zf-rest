@@ -40,6 +40,15 @@ class RestParametersListenerTest extends TestCase
         $this->listener = new RestParametersListener();
     }
 
+    public function testIgnoresNonRestControllers()
+    {
+        $controller = $this->getMock('Zend\Mvc\Controller\AbstractRestfulController');
+        $this->event->setTarget($controller);
+        $this->listener->onDispatch($this->event);
+        $this->assertNull($this->resource->getRouteMatch());
+        $this->assertNull($this->resource->getQueryParams());
+    }
+
     public function testInjectsRouteMatchOnDispatchOfRestController()
     {
         $this->listener->onDispatch($this->event);
