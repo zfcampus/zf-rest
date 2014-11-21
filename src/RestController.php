@@ -256,7 +256,8 @@ class RestController extends AbstractRestfulController
         if (!$this->getResource()) {
             throw new DomainException(sprintf(
                 '%s requires that a %s\ResourceInterface object is composed; none provided',
-                __CLASS__, __NAMESPACE__
+                __CLASS__,
+                __NAMESPACE__
             ));
         }
 

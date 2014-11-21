@@ -166,8 +166,7 @@ class Resource implements ResourceInterface
      */
     public function getEventParam($name, $default = null)
     {
-        if (isSet($this->params[$name])) {
-
+        if (isset($this->params[$name])) {
             return $this->params[$name];
         }
 
@@ -313,7 +312,8 @@ class Resource implements ResourceInterface
     {
         if (!is_array($data)) {
             throw new Exception\InvalidArgumentException(sprintf(
-                'Data provided to replaceList must be either a multidimensional array or array of objects; received "%s"',
+                'Data provided to replaceList must be either a multi-dimensional array '
+                . 'or array of objects; received "%s"',
                 gettype($data)
             ));
         }

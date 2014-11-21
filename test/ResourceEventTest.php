@@ -108,7 +108,7 @@ class ResourceEventTest extends TestCase
         $this->assertEquals('inga', $this->event->getRouteParam('baz'));
     }
 
-    public function testCanFetchIndividualQueryParameter(/* ResourceEvent $event */)
+    public function testCanFetchIndividualQueryParameter()
     {
         $this->event->setQueryParams($this->query);
         $this->assertEquals('bar', $this->event->getQueryParam('foo'));
