@@ -106,7 +106,8 @@ class RestControllerFactoryTest extends TestCase
     public function testResourceEventManagerIdentifiersAreAsSpecifiedString()
     {
         $config = $this->services->get('Config');
-        $config['zf-rest']['ApiController']['resource_identifiers'] = 'ZFTest\Rest\Factory\TestAsset\ExtraResourceListener';
+        $config['zf-rest']['ApiController']['resource_identifiers'] =
+            'ZFTest\Rest\Factory\TestAsset\ExtraResourceListener';
         $this->services->setAllowOverride(true);
         $this->services->setService('Config', $config);
 

@@ -96,7 +96,11 @@ class AbstractResourceListenerTest extends TestCase
         }
 
         $this->assertEquals($expectedMethod, $this->methodInvokedInListener);
-        $this->assertEquals($expectedParams, $this->paramsPassedToListener, var_export($this->paramsPassedToListener, 1));
+        $this->assertEquals(
+            $expectedParams,
+            $this->paramsPassedToListener,
+            var_export($this->paramsPassedToListener, 1)
+        );
     }
 
     /**

@@ -52,7 +52,12 @@ class RestParametersListener implements
      */
     public function attachShared(SharedEventManagerInterface $events)
     {
-        $this->sharedListeners[] = $events->attach('ZF\Rest\RestController', MvcEvent::EVENT_DISPATCH, array($this, 'onDispatch'), 100);
+        $this->sharedListeners[] = $events->attach(
+            'ZF\Rest\RestController',
+            MvcEvent::EVENT_DISPATCH,
+            array($this, 'onDispatch'),
+            100
+        );
     }
 
     /**

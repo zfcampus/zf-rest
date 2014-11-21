@@ -804,7 +804,11 @@ class RestControllerTest extends TestCase
         $result = $this->controller->getList();
         $this->assertTrue($test->pre);
         $this->assertTrue($test->post);
-        $this->assertSame($collection, $test->collection, 'Expected ' . get_class($collection) . ', received ' . get_class($test->collection));
+        $this->assertSame(
+            $collection,
+            $test->collection,
+            'Expected ' . get_class($collection) . ', received ' . get_class($test->collection)
+        );
     }
 
     public function testPatchTriggersPreAndPostEvents()
@@ -1022,7 +1026,13 @@ class RestControllerTest extends TestCase
      */
     public function testCreateAllowsReturningApiProblemFromResource()
     {
-        $problem = new ApiProblem(400, 'Validation error', null, null, array('email' => 'Invalid email address provided'));
+        $problem = new ApiProblem(
+            400,
+            'Validation error',
+            null,
+            null,
+            array('email' => 'Invalid email address provided')
+        );
         $this->resource->getEventManager()->attach('create', function ($e) use ($problem) {
             return $problem;
         });
@@ -1036,7 +1046,13 @@ class RestControllerTest extends TestCase
      */
     public function testDeleteAllowsReturningApiProblemFromResource()
     {
-        $problem = new ApiProblem(400, 'Invalid identifier', null, null, array('delete' => 'Invalid identifier provided'));
+        $problem = new ApiProblem(
+            400,
+            'Invalid identifier',
+            null,
+            null,
+            array('delete' => 'Invalid identifier provided')
+        );
         $this->resource->getEventManager()->attach('delete', function ($e) use ($problem) {
             return $problem;
         });
@@ -1092,7 +1108,13 @@ class RestControllerTest extends TestCase
      */
     public function testPatchAllowsReturningApiProblemFromResource()
     {
-        $problem = new ApiProblem(400, 'Validation error', null, null, array('email' => 'Invalid email address provided'));
+        $problem = new ApiProblem(
+            400,
+            'Validation error',
+            null,
+            null,
+            array('email' => 'Invalid email address provided')
+        );
         $this->resource->getEventManager()->attach('patch', function ($e) use ($problem) {
             return $problem;
         });
@@ -1106,7 +1128,13 @@ class RestControllerTest extends TestCase
      */
     public function testUpdateAllowsReturningApiProblemFromResource()
     {
-        $problem = new ApiProblem(400, 'Validation error', null, null, array('email' => 'Invalid email address provided'));
+        $problem = new ApiProblem(
+            400,
+            'Validation error',
+            null,
+            null,
+            array('email' => 'Invalid email address provided')
+        );
         $this->resource->getEventManager()->attach('update', function ($e) use ($problem) {
             return $problem;
         });
@@ -1120,7 +1148,13 @@ class RestControllerTest extends TestCase
      */
     public function testReplaceListAllowsReturningApiProblemFromResource()
     {
-        $problem = new ApiProblem(400, 'Validation error', null, null, array('email' => 'Invalid email address provided'));
+        $problem = new ApiProblem(
+            400,
+            'Validation error',
+            null,
+            null,
+            array('email' => 'Invalid email address provided')
+        );
         $this->resource->getEventManager()->attach('replaceList', function ($e) use ($problem) {
             return $problem;
         });
@@ -1212,7 +1246,13 @@ class RestControllerTest extends TestCase
      */
     public function testPatchListAllowsReturningApiProblemFromResource()
     {
-        $problem = new ApiProblem(400, 'Validation error', null, null, array('email' => 'Invalid email address provided'));
+        $problem = new ApiProblem(
+            400,
+            'Validation error',
+            null,
+            null,
+            array('email' => 'Invalid email address provided')
+        );
         $this->resource->getEventManager()->attach('patchList', function ($e) use ($problem) {
             return $problem;
         });
@@ -1293,8 +1333,13 @@ class RestControllerTest extends TestCase
     /**
      * @dataProvider validResourcePayloads
      */
-    public function testInjectsContentValidationInputFilterFromMvcEventIntoResourceEvent($method, $event, $id, $data, $returnValue)
-    {
+    public function testInjectsContentValidationInputFilterFromMvcEventIntoResourceEvent(
+        $method,
+        $event,
+        $id,
+        $data,
+        $returnValue
+    ) {
         $resourceEvent = null;
         $this->resource->getEventManager()->attach($event, function ($e) use ($returnValue, & $resourceEvent) {
             $resourceEvent = $e;
