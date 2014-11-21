@@ -290,7 +290,10 @@ class ChildResourcesIntegrationTest extends TestCase
             $this->assertObjectHasAttribute('_links', $child);
             $this->assertObjectHasAttribute('self', $child->_links);
             $this->assertObjectHasAttribute('href', $child->_links->self);
-            $this->assertRegexp('#^http://localhost.localdomain/api/parent/anakin/child/[^/]+$#', $child->_links->self->href);
+            $this->assertRegexp(
+                '#^http://localhost.localdomain/api/parent/anakin/child/[^/]+$#',
+                $child->_links->self->href
+            );
         }
     }
 }

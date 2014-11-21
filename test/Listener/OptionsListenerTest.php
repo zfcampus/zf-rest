@@ -250,8 +250,11 @@ class OptionsListenerTest extends TestCase
     /**
      * @dataProvider invalidMethodsProvider
      */
-    public function testListenerReturns405ResponseWithAllowHeaderForInvalidRequestMethod($method, $matchParams, $expectedAllow)
-    {
+    public function testListenerReturns405ResponseWithAllowHeaderForInvalidRequestMethod(
+        $method,
+        $matchParams,
+        $expectedAllow
+    ) {
         $listener = new OptionsListener($this->seedListenerConfig());
         $request  = new Request();
         $request->setMethod($method);

@@ -107,7 +107,8 @@ class RestControllerFactory implements AbstractFactoryInterface
 
         if (!$listener instanceof ListenerAggregateInterface) {
             throw new ServiceNotCreatedException(sprintf(
-                '%s expects that the "listener" reference a service that implements Zend\EventManager\ListenerAggregateInterface; received %s',
+                '%s expects that the "listener" reference a service that implements '
+                . 'Zend\EventManager\ListenerAggregateInterface; received %s',
                 __METHOD__,
                 (is_object($listener) ? get_class($listener) : gettype($listener))
             ));

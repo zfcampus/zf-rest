@@ -230,9 +230,17 @@ class CollectionIntegrationTest extends TestCase
         foreach ($links as $name => $link) {
             $this->assertArrayHasKey('href', $link);
             if ('first' !== $name) {
-                $this->assertContains('page=', $link['href'], "Link $name ('{$link['href']}') is missing page query param");
+                $this->assertContains(
+                    'page=',
+                    $link['href'],
+                    "Link $name ('{$link['href']}') is missing page query param"
+                );
             }
-            $this->assertContains('query=foo', $link['href'], "Link $name ('{$link['href']}') is missing query query param");
+            $this->assertContains(
+                'query=foo',
+                $link['href'],
+                "Link $name ('{$link['href']}') is missing query query param"
+            );
         }
     }
 
@@ -250,16 +258,28 @@ class CollectionIntegrationTest extends TestCase
                     'listener'                   => 'CollectionIntegrationListener',
                     'page_size'                  => 3,
                     'route_name'                 => 'resource',
-                    'route_identifier_name'            => 'id',
+                    'route_identifier_name'      => 'id',
                     'collection_name'            => 'items',
                     'collection_query_whitelist' => array('query'),
                 ),
             ),
         ));
-        $services->setInvokableClass('SharedEventManager', 'Zend\EventManager\SharedEventManager');
-        $services->setInvokableClass('CollectionIntegrationListener', 'ZFTest\Rest\TestAsset\CollectionIntegrationListener');
-        $services->setFactory('EventManager', 'Zend\Mvc\Service\EventManagerFactory');
-        $services->setFactory('ControllerPluginManager', 'Zend\Mvc\Service\ControllerPluginManagerFactory');
+        $services->setInvokableClass(
+            'SharedEventManager',
+            'Zend\EventManager\SharedEventManager'
+        );
+        $services->setInvokableClass(
+            'CollectionIntegrationListener',
+            'ZFTest\Rest\TestAsset\CollectionIntegrationListener'
+        );
+        $services->setFactory(
+            'EventManager',
+            'Zend\Mvc\Service\EventManagerFactory'
+        );
+        $services->setFactory(
+            'ControllerPluginManager',
+            'Zend\Mvc\Service\ControllerPluginManagerFactory'
+        );
         $services->setShared('EventManager', false);
 
         $collection = $this->setUpCollection();
@@ -295,10 +315,22 @@ class CollectionIntegrationTest extends TestCase
         foreach ($links as $name => $link) {
             $this->assertArrayHasKey('href', $link);
             if ('first' !== $name) {
-                $this->assertContains('page=', $link['href'], "Link $name ('{$link['href']}') is missing page query param");
+                $this->assertContains(
+                    'page=',
+                    $link['href'],
+                    "Link $name ('{$link['href']}') is missing page query param"
+                );
             }
-            $this->assertContains('query=foo', $link['href'], "Link $name ('{$link['href']}') is missing query query param");
-            $this->assertNotContains('bar=baz', $link['href'], "Link $name ('{$link['href']}') includes query param that should have been omitted");
+            $this->assertContains(
+                'query=foo',
+                $link['href'],
+                "Link $name ('{$link['href']}') is missing query query param"
+            );
+            $this->assertNotContains(
+                'bar=baz',
+                $link['href'],
+                "Link $name ('{$link['href']}') includes query param that should have been omitted"
+            );
         }
     }
 

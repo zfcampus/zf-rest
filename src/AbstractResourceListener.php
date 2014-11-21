@@ -129,15 +129,15 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
      */
     public function attach(EventManagerInterface $events)
     {
-        $events->attach('create',      array($this, 'dispatch'));
-        $events->attach('delete',      array($this, 'dispatch'));
-        $events->attach('deleteList',  array($this, 'dispatch'));
-        $events->attach('fetch',       array($this, 'dispatch'));
-        $events->attach('fetchAll',    array($this, 'dispatch'));
-        $events->attach('patch',       array($this, 'dispatch'));
-        $events->attach('patchList',   array($this, 'dispatch'));
+        $events->attach('create', array($this, 'dispatch'));
+        $events->attach('delete', array($this, 'dispatch'));
+        $events->attach('deleteList', array($this, 'dispatch'));
+        $events->attach('fetch', array($this, 'dispatch'));
+        $events->attach('fetchAll', array($this, 'dispatch'));
+        $events->attach('patch', array($this, 'dispatch'));
+        $events->attach('patchList', array($this, 'dispatch'));
         $events->attach('replaceList', array($this, 'dispatch'));
-        $events->attach('update',      array($this, 'dispatch'));
+        $events->attach('update', array($this, 'dispatch'));
     }
 
     /**
