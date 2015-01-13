@@ -71,6 +71,56 @@ class RestControllerTest extends TestCase
         $this->resource = $resource = new Resource();
         $controller->setResource($resource);
     }
+    
+    public function testReturnsErrorResponseWhenPageSizeExceedsMax()
+    {
+        $items = array(
+            array('id' => 'foo', 'bar' => 'baz'),
+            array('id' => 'bar', 'bar' => 'baz'),
+            array('id' => 'baz', 'bar' => 'baz'),
+        );
+        $adapter   = new ArrayPaginator($items);
+        $paginator = new Paginator($adapter);
+        $this->resource->getEventManager()->attach('fetchAll', function ($e) use ($paginator) {
+            return $paginator;
+        });
+
+        $this->controller->setPageSizeParam('page_size');
+        $this->controller->setMaxPageSize(2);
+        $request = $this->controller->getRequest();
+        $request->setQuery(new Parameters(array(
+            'page'      => 1,
+            'page_size' => 3,
+        )));
+
+        $result = $this->controller->getList();
+        $this->assertProblemApiResult(500, "Page size is out of range, maximum page size is 2", $result);
+    }
+
+    public function testReturnsErrorResponseWhenPageSizeBelowMin()
+    {
+        $items = array(
+            array('id' => 'foo', 'bar' => 'baz'),
+            array('id' => 'bar', 'bar' => 'baz'),
+            array('id' => 'baz', 'bar' => 'baz'),
+        );
+        $adapter   = new ArrayPaginator($items);
+        $paginator = new Paginator($adapter);
+        $this->resource->getEventManager()->attach('fetchAll', function ($e) use ($paginator) {
+            return $paginator;
+        });
+
+        $this->controller->setPageSizeParam('page_size');
+        $this->controller->setMinPageSize(2);
+        $request = $this->controller->getRequest();
+        $request->setQuery(new Parameters(array(
+            'page'      => 1,
+            'page_size' => 1,
+        )));
+
+        $result = $this->controller->getList();
+        $this->assertProblemApiResult(500, "Page size is out of range, minimum page size is 2", $result);
+    }
 
     public function assertProblemApiResult($expectedStatus, $expectedDetail, $result)
     {
