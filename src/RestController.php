@@ -78,7 +78,7 @@ class RestController extends AbstractRestfulController
      * @var int
      */
     protected $pageSize = 30;
-    
+
     /**
      * Maximum number of entities to return per page of a collection.  If
      * $pageSize parameter is out of range an ApiProblem will be returned
@@ -158,7 +158,7 @@ class RestController extends AbstractRestfulController
     {
         $this->collectionName = (string) $name;
     }
-    
+
     /**
      * Set the minimum page size for paginated responses
      *
@@ -327,7 +327,13 @@ class RestController extends AbstractRestfulController
         // Check for an API-Problem in the event
         $return = $e->getParam('api-problem', false);
 
-        // If no API-Problem, dispatch the parent event
+        // Override RESTful deleteList method
+        if (strtolower($e->getRequest()->getMethod()) == 'delete' &&
+            $this->getIdentifier($e->getRouteMatch(), $e->getRequest()) === false) {
+            $return = $this->deleteList($this->processBodyContent($e->getRequest()));
+        }
+
+        // If no return value dispatch the parent event
         if (!$return) {
             $return = parent::onDispatch($e);
         }
@@ -350,6 +356,7 @@ class RestController extends AbstractRestfulController
         $viewModel = new ContentNegotiationViewModel(array('payload' => $return));
         $viewModel->setTerminal(true);
         $e->setResult($viewModel);
+
         return $viewModel;
     }
 
@@ -431,13 +438,13 @@ class RestController extends AbstractRestfulController
         return $response;
     }
 
-    public function deleteList()
+    public function deleteList($data = null)
     {
         $events = $this->getEventManager();
         $events->trigger('deleteList.pre', $this, array());
 
         try {
-            $result = $this->getResource()->deleteList();
+            $result = $this->getResource()->deleteList($data);
         } catch (\Exception $e) {
             return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }

@@ -71,7 +71,7 @@ class RestControllerTest extends TestCase
         $this->resource = $resource = new Resource();
         $controller->setResource($resource);
     }
-    
+
     public function testReturnsErrorResponseWhenPageSizeExceedsMax()
     {
         $items = array(
@@ -212,6 +212,17 @@ class RestControllerTest extends TestCase
     }
 
     public function testTrueFromDeleteCollectionReturnsResponseWithNoContent()
+    {
+        $this->resource->getEventManager()->attach('deleteList', function ($e) {
+            return true;
+        });
+
+        $result = $this->controller->deleteList(array(1, 2, 3));
+        $this->assertInstanceOf('Zend\Http\Response', $result);
+        $this->assertEquals(204, $result->getStatusCode());
+    }
+
+    public function testDeleteCollectionBackwardsCompatibleWithNoData()
     {
         $this->resource->getEventManager()->attach('deleteList', function ($e) {
             return true;
