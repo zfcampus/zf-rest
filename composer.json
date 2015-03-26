@@ -30,7 +30,7 @@
         "zendframework/zend-eventmanager": "~2.3",
         "zendframework/zend-json": "~2.3",
         "zendframework/zend-loader": "~2.3",
-        "zendframework/zend-mvc": "~2.3",
+        "zendframework/zend-mvc": "~2.3.0",
         "zendframework/zend-paginator": "~2.3",
         "zendframework/zend-stdlib": "~2.3",
         "zfcampus/zf-api-problem": "~1.0",
