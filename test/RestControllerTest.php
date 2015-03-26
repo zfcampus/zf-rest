@@ -207,7 +207,7 @@ class RestControllerTest extends TestCase
             return false;
         });
 
-        $result = $this->controller->deleteList();
+        $result = $this->controller->deleteList(null);
         $this->assertProblemApiResult(422, 'delete collection', $result);
     }
 
@@ -228,7 +228,7 @@ class RestControllerTest extends TestCase
             return true;
         });
 
-        $result = $this->controller->deleteList();
+        $result = $this->controller->deleteList(null);
         $this->assertInstanceOf('Zend\Http\Response', $result);
         $this->assertEquals(204, $result->getStatusCode());
     }
@@ -744,7 +744,7 @@ class RestControllerTest extends TestCase
             return true;
         });
 
-        $result = $this->controller->deleteList();
+        $result = $this->controller->deleteList(null);
         $this->assertTrue($test->pre);
         $this->assertTrue($test->post);
     }
@@ -1132,7 +1132,7 @@ class RestControllerTest extends TestCase
             return $problem;
         });
 
-        $result = $this->controller->deleteList();
+        $result = $this->controller->deleteList(null);
         $this->assertSame($problem, $result);
     }
 
