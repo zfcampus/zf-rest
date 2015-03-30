@@ -127,12 +127,12 @@ returned is a `Zend\Paginator\Paginator` instance or derivative.
 ##### Sub-key: `max_page_size` (optional)
 
 The maximum number of entities to return per "page" of a collection.  This is tested against the
-page_size_param. This parameter can be set to help prevent denial of service attacks against your API.
+`page_size_param`. This parameter can be set to help prevent denial of service attacks against your API.
 
 ##### Sub-key: `min_page_size` (optional)
 
 The minimum number of entities to return per "page" of a collection.  This is tested against the
-page_size_param.
+`page_size_param`.
 
 ##### Sub-key: `page_size_param` (optional)
 
