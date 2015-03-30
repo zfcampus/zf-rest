@@ -214,7 +214,7 @@ ZF2 Services
 
 #### ZF\Rest\AbstractResourceListener
 
-This abstract class is the base implementation of a [Resource](https://github.com/zfcampus/zf-rest/blob/master/src/AbstractResourceListener.php) listener.  Since
+This abstract class is the base implementation of a [Resource](#zfrestresource) listener.  Since
 dispatching of `zf-rest` based REST services is event driven, a listener must be constructed to
 listen for events triggered from `ZF\Rest\Resource` (which is called from the `RestController`).
 The following methods are called during `dispatch()`, depending on the HTTP method:
