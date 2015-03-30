@@ -124,6 +124,16 @@ The resource class that will be dispatched to handle any collection or entity re
 The number of entities to return per "page" of a collection. This is only used if the collection
 returned is a `Zend\Paginator\Paginator` instance or derivative.
 
+##### Sub-key: `max_page_size` (optional)
+
+The maximum number of entities to return per "page" of a collection.  This is tested against the
+`page_size_param`. This parameter can be set to help prevent denial of service attacks against your API.
+
+##### Sub-key: `min_page_size` (optional)
+
+The minimum number of entities to return per "page" of a collection.  This is tested against the
+`page_size_param`.
+
 ##### Sub-key: `page_size_param` (optional)
 
 The name of a query string argument that will set a per-request page size. Not set by default; we
