@@ -437,7 +437,13 @@ class RestController extends AbstractRestfulController
         return $response;
     }
 
-    public function deleteList($data = null)
+    /**
+     * Delete a collection of entities as specified.
+     *
+     * @param mixed $data Typically an array
+     * @return Response|ApiProblem
+     */
+    public function deleteList($data)
     {
         $events = $this->getEventManager();
         $events->trigger('deleteList.pre', $this, array());
