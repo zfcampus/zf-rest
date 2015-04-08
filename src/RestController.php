@@ -309,7 +309,7 @@ class RestController extends AbstractRestfulController
      */
     public function onDispatch(MvcEvent $e)
     {
-        if (!$this->getResource()) {
+        if (! $this->getResource()) {
             throw new DomainException(sprintf(
                 '%s requires that a %s\ResourceInterface object is composed; none provided',
                 __CLASS__,
@@ -317,7 +317,7 @@ class RestController extends AbstractRestfulController
             ));
         }
 
-        if (!$this->route) {
+        if (! $this->route) {
             throw new DomainException(sprintf(
                 '%s requires that a route name for the resource is composed; none provided',
                 __CLASS__
@@ -327,20 +327,14 @@ class RestController extends AbstractRestfulController
         // Check for an API-Problem in the event
         $return = $e->getParam('api-problem', false);
 
-        // Override RESTful deleteList method
-        if (strtolower($e->getRequest()->getMethod()) == 'delete' &&
-            $this->getIdentifier($e->getRouteMatch(), $e->getRequest()) === false) {
-            $return = $this->deleteList($this->processBodyContent($e->getRequest()));
-        }
-
         // If no return value dispatch the parent event
-        if (!$return) {
+        if (! $return) {
             $return = parent::onDispatch($e);
         }
 
-        if (!$return instanceof ApiProblem
-            && !$return instanceof HalEntity
-            && !$return instanceof HalCollection
+        if (! $return instanceof ApiProblem
+            && ! $return instanceof HalEntity
+            && ! $return instanceof HalCollection
         ) {
             return $return;
         }
