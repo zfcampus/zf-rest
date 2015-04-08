@@ -10,6 +10,7 @@ use ArrayIterator;
 use PHPUnit_Framework_TestCase as TestCase;
 use stdClass;
 use Zend\EventManager\EventManager;
+use Zend\Http\Response;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\ArrayObject;
 use Zend\Stdlib\Parameters;
@@ -517,5 +518,38 @@ class ResourceTest extends TestCase
         });
         $test = $this->resource->fetchAll();
         $this->assertSame($return, $test);
+    }
+
+    public function actions()
+    {
+        return array(
+            'get-list'    => array('fetchAll', array(null)),
+            'get'         => array('fetch', array(1)),
+            'post'        => array('create', array(array())),
+            'put-list'    => array('replaceList', array(array())),
+            'put'         => array('update', array(1, array())),
+            'patch-list'  => array('patchList', array(array())),
+            'patch'       => array('patch', array(1, array())),
+            'delete-list' => array('deleteList', array(array())),
+            'delete'      => array('delete', array(1)),
+        );
+    }
+
+    /**
+     * @group 68
+     * @dataProvider actions
+     */
+    public function testAllowsReturningResponsesReturnedFromResources($action, $argv)
+    {
+        $response = new Response();
+        $response->setStatusCode(418);
+
+        $events = $this->resource->getEventManager();
+        $events->attach($action, function ($e) use ($response) {
+            return $response;
+        });
+
+        $result = call_user_func_array(array($this->resource, $action), $argv);
+        $this->assertSame($response, $result);
     }
 }
