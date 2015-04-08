@@ -387,7 +387,7 @@ class RestController extends AbstractRestfulController
         $plugin   = $this->plugin('Hal');
         $entity   = $plugin->createEntity($entity, $this->route, $this->getRouteIdentifierName());
 
-        if ($entity->id) {
+        if ($entity->getId()) {
             $self = $entity->getLinks()->get('self');
             $self = $plugin->fromLink($self);
 
