@@ -373,6 +373,7 @@ class RestController extends AbstractRestfulController
 
         if ($entity instanceof ApiProblem
             || $entity instanceof ApiProblemResponse
+            || $entity instanceof Response
         ) {
             return $entity;
         }
@@ -419,6 +420,7 @@ class RestController extends AbstractRestfulController
 
         if ($result instanceof ApiProblem
             || $result instanceof ApiProblemResponse
+            || $result instanceof Response
         ) {
             return $result;
         }
@@ -452,6 +454,7 @@ class RestController extends AbstractRestfulController
 
         if ($result instanceof ApiProblem
             || $result instanceof ApiProblemResponse
+            || $result instanceof Response
         ) {
             return $result;
         }
@@ -486,6 +489,7 @@ class RestController extends AbstractRestfulController
 
         if ($entity instanceof ApiProblem
             || $entity instanceof ApiProblemResponse
+            || $entity instanceof Response
         ) {
             return $entity;
         }
@@ -523,6 +527,7 @@ class RestController extends AbstractRestfulController
 
         if ($collection instanceof ApiProblem
             || $collection instanceof ApiProblemResponse
+            || $collection instanceof Response
         ) {
             return $collection;
         }
@@ -637,6 +642,7 @@ class RestController extends AbstractRestfulController
 
         if ($entity instanceof ApiProblem
             || $entity instanceof ApiProblemResponse
+            || $entity instanceof Response
         ) {
             return $entity;
         }
@@ -678,6 +684,7 @@ class RestController extends AbstractRestfulController
 
         if ($entity instanceof ApiProblem
             || $entity instanceof ApiProblemResponse
+            || $entity instanceof Response
         ) {
             return $entity;
         }
@@ -714,6 +721,7 @@ class RestController extends AbstractRestfulController
 
         if ($collection instanceof ApiProblem
             || $collection instanceof ApiProblemResponse
+            || $collection instanceof Response
         ) {
             return $collection;
         }
@@ -750,6 +758,7 @@ class RestController extends AbstractRestfulController
 
         if ($collection instanceof ApiProblem
             || $collection instanceof ApiProblemResponse
+            || $collection instanceof Response
         ) {
             return $collection;
         }

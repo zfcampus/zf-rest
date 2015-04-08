@@ -10,6 +10,7 @@ use ArrayObject;
 use Traversable;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\EventManagerInterface;
+use Zend\Http\Response;
 use Zend\InputFilter\InputFilterInterface;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
@@ -240,6 +241,7 @@ class Resource implements ResourceInterface
         $results = $events->trigger($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
+                || $result instanceof Response
             );
         });
         $last    = $results->last();
@@ -283,6 +285,7 @@ class Resource implements ResourceInterface
         $results = $events->trigger($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
+                || $result instanceof Response
             );
         });
         $last    = $results->last();
@@ -335,6 +338,7 @@ class Resource implements ResourceInterface
         $results = $events->trigger($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
+                || $result instanceof Response
             );
         });
         $last    = $results->last();
@@ -379,6 +383,7 @@ class Resource implements ResourceInterface
         $results = $events->trigger($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
+                || $result instanceof Response
             );
         });
         $last    = $results->last();
@@ -436,6 +441,7 @@ class Resource implements ResourceInterface
         $results  = $events->trigger($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
+                || $result instanceof Response
             );
         });
         $last     = $results->last();
@@ -462,10 +468,15 @@ class Resource implements ResourceInterface
         $results = $events->trigger($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
+                || $result instanceof Response
             );
         });
         $last    = $results->last();
-        if (!is_bool($last) && (!$last instanceof ApiProblem) && (!$last instanceof ApiProblemResponse)) {
+        if (!is_bool($last)
+            && ! $last instanceof ApiProblem
+            && ! $last instanceof ApiProblemResponse
+            && ! $last instanceof Response
+        ) {
             return false;
         }
         return $last;
@@ -493,10 +504,15 @@ class Resource implements ResourceInterface
         $results = $events->trigger($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
+                || $result instanceof Response
             );
         });
         $last    = $results->last();
-        if (!is_bool($last) && (!$last instanceof ApiProblem) && (!$last instanceof ApiProblemResponse)) {
+        if (! is_bool($last)
+            && ! $last instanceof ApiProblem
+            && ! $last instanceof ApiProblemResponse
+            && ! $last instanceof Response
+        ) {
             return false;
         }
         return $last;
@@ -520,6 +536,7 @@ class Resource implements ResourceInterface
         $results = $events->trigger($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
+                || $result instanceof Response
             );
         });
         $last    = $results->last();
@@ -550,6 +567,7 @@ class Resource implements ResourceInterface
         $results = $events->trigger($event, function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
+                || $result instanceof Response
             );
         });
         $last    = $results->last();
