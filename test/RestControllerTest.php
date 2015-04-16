@@ -1416,7 +1416,7 @@ class RestControllerTest extends TestCase
         $this->event->setRequest($request);
 
         $container = new ParameterDataContainer();
-        $container->setBodyParams($data);
+        $container->setBodyParams((null === $data) ? array() : $data);
         $this->event->setParam('ZFContentNegotiationParameterData', $container);
 
         if ($id) {
