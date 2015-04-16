@@ -11,6 +11,7 @@ use ReflectionObject;
 use stdClass;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\SharedEventManager;
+use Zend\Http\Response;
 use Zend\InputFilter\InputFilter;
 use Zend\Mvc\Controller\PluginManager;
 use Zend\Mvc\MvcEvent;
@@ -207,7 +208,7 @@ class RestControllerTest extends TestCase
             return false;
         });
 
-        $result = $this->controller->deleteList();
+        $result = $this->controller->deleteList(null);
         $this->assertProblemApiResult(422, 'delete collection', $result);
     }
 
@@ -228,7 +229,7 @@ class RestControllerTest extends TestCase
             return true;
         });
 
-        $result = $this->controller->deleteList();
+        $result = $this->controller->deleteList(null);
         $this->assertInstanceOf('Zend\Http\Response', $result);
         $this->assertEquals(204, $result->getStatusCode());
     }
@@ -744,7 +745,7 @@ class RestControllerTest extends TestCase
             return true;
         });
 
-        $result = $this->controller->deleteList();
+        $result = $this->controller->deleteList(null);
         $this->assertTrue($test->pre);
         $this->assertTrue($test->post);
     }
@@ -1132,7 +1133,7 @@ class RestControllerTest extends TestCase
             return $problem;
         });
 
-        $result = $this->controller->deleteList();
+        $result = $this->controller->deleteList(null);
         $this->assertSame($problem, $result);
     }
 
@@ -1476,5 +1477,38 @@ class RestControllerTest extends TestCase
         $result = $this->controller->getList();
         $this->assertInstanceOf('ZF\Hal\Entity', $result);
         $this->assertSame($entity, $result->entity);
+    }
+
+    public function methods()
+    {
+        return array(
+            'get-list'    => array('getList', 'fetchAll', array(null)),
+            'get'         => array('get', 'fetch', array(1)),
+            'post'        => array('create', 'create', array(array())),
+            'put-list'    => array('replaceList', 'replaceList', array(array())),
+            'put'         => array('update', 'update', array(1, array())),
+            'patch-list'  => array('patchList', 'patchList', array(array())),
+            'patch'       => array('patch', 'patch', array(1, array())),
+            'delete-list' => array('deleteList', 'deleteList', array(array())),
+            'delete'      => array('delete', 'delete', array(1)),
+        );
+    }
+
+    /**
+     * @group 68
+     * @dataProvider methods
+     */
+    public function testAllowsReturningResponsesReturnedFromResources($method, $event, $argv)
+    {
+        $response = new Response();
+        $response->setStatusCode(418);
+
+        $events = $this->resource->getEventManager();
+        $events->attach($event, function ($e) use ($response) {
+            return $response;
+        });
+
+        $result = call_user_func_array(array($this->controller, $method), $argv);
+        $this->assertSame($response, $result);
     }
 }
