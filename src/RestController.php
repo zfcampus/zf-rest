@@ -309,7 +309,7 @@ class RestController extends AbstractRestfulController
      */
     public function onDispatch(MvcEvent $e)
     {
-        if (!$this->getResource()) {
+        if (! $this->getResource()) {
             throw new DomainException(sprintf(
                 '%s requires that a %s\ResourceInterface object is composed; none provided',
                 __CLASS__,
@@ -317,7 +317,7 @@ class RestController extends AbstractRestfulController
             ));
         }
 
-        if (!$this->route) {
+        if (! $this->route) {
             throw new DomainException(sprintf(
                 '%s requires that a route name for the resource is composed; none provided',
                 __CLASS__
@@ -327,20 +327,14 @@ class RestController extends AbstractRestfulController
         // Check for an API-Problem in the event
         $return = $e->getParam('api-problem', false);
 
-        // Override RESTful deleteList method
-        if (strtolower($e->getRequest()->getMethod()) == 'delete' &&
-            $this->getIdentifier($e->getRouteMatch(), $e->getRequest()) === false) {
-            $return = $this->deleteList($this->processBodyContent($e->getRequest()));
-        }
-
         // If no return value dispatch the parent event
-        if (!$return) {
+        if (! $return) {
             $return = parent::onDispatch($e);
         }
 
-        if (!$return instanceof ApiProblem
-            && !$return instanceof HalEntity
-            && !$return instanceof HalCollection
+        if (! $return instanceof ApiProblem
+            && ! $return instanceof HalEntity
+            && ! $return instanceof HalCollection
         ) {
             return $return;
         }
@@ -354,7 +348,6 @@ class RestController extends AbstractRestfulController
 
         // Use content negotiation for creating the view model
         $viewModel = new ContentNegotiationViewModel(array('payload' => $return));
-        $viewModel->setTerminal(true);
         $e->setResult($viewModel);
 
         return $viewModel;
@@ -380,6 +373,7 @@ class RestController extends AbstractRestfulController
 
         if ($entity instanceof ApiProblem
             || $entity instanceof ApiProblemResponse
+            || $entity instanceof Response
         ) {
             return $entity;
         }
@@ -426,6 +420,7 @@ class RestController extends AbstractRestfulController
 
         if ($result instanceof ApiProblem
             || $result instanceof ApiProblemResponse
+            || $result instanceof Response
         ) {
             return $result;
         }
@@ -438,7 +433,13 @@ class RestController extends AbstractRestfulController
         return $response;
     }
 
-    public function deleteList($data = null)
+    /**
+     * Delete a collection of entities as specified.
+     *
+     * @param mixed $data Typically an array
+     * @return Response|ApiProblem
+     */
+    public function deleteList($data)
     {
         $events = $this->getEventManager();
         $events->trigger('deleteList.pre', $this, array());
@@ -453,6 +454,7 @@ class RestController extends AbstractRestfulController
 
         if ($result instanceof ApiProblem
             || $result instanceof ApiProblemResponse
+            || $result instanceof Response
         ) {
             return $result;
         }
@@ -487,6 +489,7 @@ class RestController extends AbstractRestfulController
 
         if ($entity instanceof ApiProblem
             || $entity instanceof ApiProblemResponse
+            || $entity instanceof Response
         ) {
             return $entity;
         }
@@ -524,6 +527,7 @@ class RestController extends AbstractRestfulController
 
         if ($collection instanceof ApiProblem
             || $collection instanceof ApiProblemResponse
+            || $collection instanceof Response
         ) {
             return $collection;
         }
@@ -638,6 +642,7 @@ class RestController extends AbstractRestfulController
 
         if ($entity instanceof ApiProblem
             || $entity instanceof ApiProblemResponse
+            || $entity instanceof Response
         ) {
             return $entity;
         }
@@ -679,6 +684,7 @@ class RestController extends AbstractRestfulController
 
         if ($entity instanceof ApiProblem
             || $entity instanceof ApiProblemResponse
+            || $entity instanceof Response
         ) {
             return $entity;
         }
@@ -715,6 +721,7 @@ class RestController extends AbstractRestfulController
 
         if ($collection instanceof ApiProblem
             || $collection instanceof ApiProblemResponse
+            || $collection instanceof Response
         ) {
             return $collection;
         }
@@ -751,6 +758,7 @@ class RestController extends AbstractRestfulController
 
         if ($collection instanceof ApiProblem
             || $collection instanceof ApiProblemResponse
+            || $collection instanceof Response
         ) {
             return $collection;
         }
