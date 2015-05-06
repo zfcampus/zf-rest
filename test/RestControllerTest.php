@@ -1519,7 +1519,7 @@ class RestControllerTest extends TestCase
     {
         /** @var ApiProblem $response */
         $response = $this->controller->replaceList(new stdClass());
-        $this->assertInstanceOf(ApiProblem::class, $response);
+        $this->assertInstanceOf('ZF\ApiProblem\ApiProblem', $response);
         $details = $response->toArray();
         $this->assertEquals(400, $details['status']);
     }
