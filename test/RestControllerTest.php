@@ -1511,4 +1511,16 @@ class RestControllerTest extends TestCase
         $result = call_user_func_array(array($this->controller, $method), $argv);
         $this->assertSame($response, $result);
     }
+
+    /**
+     * @group 74
+     */
+    public function testNonArrayToReplaceListReturnsApiProblem()
+    {
+        /** @var ApiProblem $response */
+        $response = $this->controller->replaceList(new stdClass());
+        $this->assertInstanceOf(ApiProblem::class, $response);
+        $details = $response->toArray();
+        $this->assertEquals(400, $details['status']);
+    }
 }
