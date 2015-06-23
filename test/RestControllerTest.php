@@ -1253,7 +1253,8 @@ class RestControllerTest extends TestCase
     {
         $items = array(
             array('id' => 'foo', 'bar' => 'baz'),
-            array('id' => 'bar', 'bar' => 'baz'));
+            array('id' => 'bar', 'bar' => 'baz'),
+        );
         $this->resource->getEventManager()->attach('patchList', function ($e) use ($items) {
             return $items;
         });
