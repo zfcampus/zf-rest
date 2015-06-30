@@ -95,7 +95,7 @@ class RestControllerTest extends TestCase
         )));
 
         $result = $this->controller->getList();
-        $this->assertProblemApiResult(500, "Page size is out of range, maximum page size is 2", $result);
+        $this->assertProblemApiResult(416, "Page size is out of range, maximum page size is 2", $result);
     }
 
     public function testReturnsErrorResponseWhenPageSizeBelowMin()
@@ -120,7 +120,7 @@ class RestControllerTest extends TestCase
         )));
 
         $result = $this->controller->getList();
-        $this->assertProblemApiResult(500, "Page size is out of range, minimum page size is 2", $result);
+        $this->assertProblemApiResult(416, "Page size is out of range, minimum page size is 2", $result);
     }
 
     /**

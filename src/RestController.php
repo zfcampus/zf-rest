@@ -531,14 +531,14 @@ class RestController extends AbstractRestfulController
 
         if (isset($this->minPageSize) && $pageSize < $this->minPageSize) {
             return new ApiProblem(
-                500,
+                416,
                 sprintf("Page size is out of range, minimum page size is %s", $this->minPageSize)
             );
         }
 
         if (isset($this->maxPageSize) && $pageSize > $this->maxPageSize) {
             return new ApiProblem(
-                500,
+                416,
                 sprintf("Page size is out of range, maximum page size is %s", $this->maxPageSize)
             );
         }
