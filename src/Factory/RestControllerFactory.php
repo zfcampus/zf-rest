@@ -268,7 +268,7 @@ class RestControllerFactory implements AbstractFactoryInterface
                 case 'route_identifier_name':
                     $controller->setIdentifierName($value);
                     break;
-                    
+
                 case 'min_page_size':
                     $controller->setMinPageSize($value);
                     break;
