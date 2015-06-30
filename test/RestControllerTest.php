@@ -123,6 +123,20 @@ class RestControllerTest extends TestCase
         $this->assertProblemApiResult(500, "Page size is out of range, minimum page size is 2", $result);
     }
 
+    /**
+     * @group hotfix/77
+     */
+    public function testReturnsErrorResponseWhenPageNonInteger()
+    {
+        $request = $this->controller->getRequest();
+        $request->setQuery(new Parameters(array(
+            'page'      => '1/',
+        )));
+
+        $result = $this->controller->getList();
+        $this->assertProblemApiResult(400, 'Page must be an integer; received "string"', $result);
+    }
+
     public function assertProblemApiResult($expectedStatus, $expectedDetail, $result)
     {
         $this->assertInstanceOf('ZF\ApiProblem\ApiProblem', $result);

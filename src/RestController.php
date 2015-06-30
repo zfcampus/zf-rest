@@ -19,7 +19,7 @@ use ZF\ApiProblem\Exception\DomainException;
 use ZF\ContentNegotiation\ViewModel as ContentNegotiationViewModel;
 use ZF\Hal\Collection as HalCollection;
 use ZF\Hal\Entity as HalEntity;
-use ZF\Rest\Exception\InvalidArgumentException;
+use ZF\Hal\Exception\InvalidArgumentException as HalInvalidArgumentException;
 
 /**
  * Controller for handling resources.
@@ -569,9 +569,14 @@ class RestController extends AbstractRestfulController
         $collection->setCollectionRoute($this->route);
         $collection->setRouteIdentifierName($this->getRouteIdentifierName());
         $collection->setEntityRoute($this->route);
-        $collection->setPage($this->getRequest()->getQuery('page', 1));
         $collection->setCollectionName($this->collectionName);
         $collection->setPageSize($this->getPageSize());
+
+        try {
+            $collection->setPage($this->getRequest()->getQuery('page', 1));
+        } catch (HalInvalidArgumentException $e) {
+            return new ApiProblem(400, $e->getMessage());
+        }
 
         $events->trigger('getList.post', $this, array('collection' => $collection));
         return $collection;
@@ -753,7 +758,7 @@ class RestController extends AbstractRestfulController
 
         try {
             $collection = $this->getResource()->replaceList($data);
-        } catch (InvalidArgumentException $e) {
+        } catch (Exception\InvalidArgumentException $e) {
             return new ApiProblem(400, $e->getMessage());
         } catch (\Exception $e) {
             return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
