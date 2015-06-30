@@ -19,6 +19,7 @@ use ZF\ApiProblem\Exception\DomainException;
 use ZF\ContentNegotiation\ViewModel as ContentNegotiationViewModel;
 use ZF\Hal\Collection as HalCollection;
 use ZF\Hal\Entity as HalEntity;
+use ZF\Rest\Exception\InvalidArgumentException;
 
 /**
  * Controller for handling resources.
@@ -752,6 +753,8 @@ class RestController extends AbstractRestfulController
 
         try {
             $collection = $this->getResource()->replaceList($data);
+        } catch (InvalidArgumentException $e) {
+            return new ApiProblem(400, $e->getMessage());
         } catch (\Exception $e) {
             return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
         }
