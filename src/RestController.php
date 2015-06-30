@@ -359,7 +359,7 @@ class RestController extends AbstractRestfulController
      *
      * @todo   Remove 'resource' from the create.post event parameters for 1.0.0
      * @param  array $data
-     * @return Response|ApiProblem|HalEntity
+     * @return Response|ApiProblem|ApiProblemResponse|HalEntity
      */
     public function create($data)
     {
@@ -369,42 +369,40 @@ class RestController extends AbstractRestfulController
         try {
             $entity = $this->getResource()->create($data);
         } catch (\Exception $e) {
-            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
+            return $this->createApiProblemFromException($e);
         }
 
-        if ($entity instanceof ApiProblem
-            || $entity instanceof ApiProblemResponse
-            || $entity instanceof Response
-        ) {
+        if ($this->isPreparedResponse($entity)) {
             return $entity;
         }
 
-        $plugin   = $this->plugin('Hal');
-        $entity   = $plugin->createEntity($entity, $this->route, $this->getRouteIdentifierName());
+        $halEntity = $this->createHalEntity($entity);
 
-        if ($entity->id) {
-            $self = $entity->getLinks()->get('self');
-            $self = $plugin->fromLink($self);
+        if ($halEntity->id) {
+            $plugin = $this->plugin('Hal');
+
+            $self = $halEntity->getLinks()->get('self');
+            $selfLinkUrl = $plugin->fromLink($self);
 
             $response = $this->getResponse();
             $response->setStatusCode(201);
-            $response->getHeaders()->addHeaderLine('Location', $self);
+            $response->getHeaders()->addHeaderLine('Location', $selfLinkUrl);
         }
 
         $events->trigger('create.post', $this, array(
             'data'     => $data,
-            'entity'   => $entity,
-            'resource' => $entity,
+            'entity'   => $halEntity,
+            'resource' => $halEntity,
         ));
 
-        return $entity;
+        return $halEntity;
     }
 
     /**
      * Delete an existing entity
      *
      * @param  int|string $id
-     * @return Response|ApiProblem
+     * @return Response|ApiProblem|ApiProblemResponse
      */
     public function delete($id)
     {
@@ -414,15 +412,12 @@ class RestController extends AbstractRestfulController
         try {
             $result = $this->getResource()->delete($id);
         } catch (\Exception $e) {
-            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
+            return $this->createApiProblemFromException($e);
         }
 
         $result = $result ?: new ApiProblem(422, 'Unable to delete entity.');
 
-        if ($result instanceof ApiProblem
-            || $result instanceof ApiProblemResponse
-            || $result instanceof Response
-        ) {
+        if ($this->isPreparedResponse($result)) {
             return $result;
         }
 
@@ -438,7 +433,7 @@ class RestController extends AbstractRestfulController
      * Delete a collection of entities as specified.
      *
      * @param mixed $data Typically an array
-     * @return Response|ApiProblem
+     * @return Response|ApiProblem|ApiProblemResponse
      */
     public function deleteList($data)
     {
@@ -448,15 +443,12 @@ class RestController extends AbstractRestfulController
         try {
             $result = $this->getResource()->deleteList($data);
         } catch (\Exception $e) {
-            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
+            return $this->createApiProblemFromException($e);
         }
 
         $result = $result ?: new ApiProblem(422, 'Unable to delete collection.');
 
-        if ($result instanceof ApiProblem
-            || $result instanceof ApiProblemResponse
-            || $result instanceof Response
-        ) {
+        if ($this->isPreparedResponse($result)) {
             return $result;
         }
 
@@ -473,7 +465,7 @@ class RestController extends AbstractRestfulController
      *
      * @todo   Remove 'resource' from get.post event for 1.0.0
      * @param  int|string $id
-     * @return Response|ApiProblem|HalEntity
+     * @return Response|ApiProblem|ApiProblemResponse|HalEntity
      */
     public function get($id)
     {
@@ -483,31 +475,24 @@ class RestController extends AbstractRestfulController
         try {
             $entity = $this->getResource()->fetch($id);
         } catch (\Exception $e) {
-            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
+            return $this->createApiProblemFromException($e);
         }
 
         $entity = $entity ?: new ApiProblem(404, 'Entity not found.');
 
-        if ($entity instanceof ApiProblem
-            || $entity instanceof ApiProblemResponse
-            || $entity instanceof Response
-        ) {
+        if ($this->isPreparedResponse($entity)) {
             return $entity;
         }
 
-        $plugin   = $this->plugin('Hal');
-        $entity   = $plugin->createEntity($entity, $this->route, $this->getRouteIdentifierName());
-
-        if ($entity instanceof ApiProblem) {
-            return $entity;
-        }
+        $halEntity = $this->createHalEntity($entity);
 
         $events->trigger('get.post', $this, array(
             'id'       => $id,
-            'entity'   => $entity,
-            'resource' => $entity,
+            'entity'   => $halEntity,
+            'resource' => $halEntity,
         ));
-        return $entity;
+
+        return $halEntity;
     }
 
     /**
@@ -523,26 +508,21 @@ class RestController extends AbstractRestfulController
         try {
             $collection = $this->getResource()->fetchAll();
         } catch (\Exception $e) {
-            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
+            return $this->createApiProblemFromException($e);
         }
 
-        if ($collection instanceof ApiProblem
-            || $collection instanceof ApiProblemResponse
-            || $collection instanceof Response
-        ) {
+        if ($this->isPreparedResponse($collection)) {
             return $collection;
         }
-
-        $plugin = $this->plugin('Hal');
 
         if (! is_array($collection)
             && ! $collection instanceof Traversable
             && ! $collection instanceof HalCollection
             && is_object($collection)
         ) {
-            $collection = $plugin->createEntity($collection, $this->route, $this->getRouteIdentifierName());
-            $events->trigger('getList.post', $this, array('collection' => $collection));
-            return $collection;
+            $halEntity = $this->createHalEntity($collection);
+            $events->trigger('getList.post', $this, array('collection' => $halEntity));
+            return $halEntity;
         }
 
         $pageSize = $this->pageSizeParam
@@ -565,28 +545,24 @@ class RestController extends AbstractRestfulController
 
         $this->setPageSize($pageSize);
 
-        $collection = $plugin->createCollection($collection, $this->route);
-        $collection->setCollectionRoute($this->route);
-        $collection->setRouteIdentifierName($this->getRouteIdentifierName());
-        $collection->setEntityRoute($this->route);
-        $collection->setCollectionName($this->collectionName);
-        $collection->setPageSize($this->getPageSize());
+        $halCollection = $this->createHalCollection($collection);
 
-        try {
-            $collection->setPage($this->getRequest()->getQuery('page', 1));
-        } catch (HalInvalidArgumentException $e) {
-            return new ApiProblem(400, $e->getMessage());
+        if ($this->isPreparedResponse($halCollection)) {
+            return $halCollection;
         }
 
-        $events->trigger('getList.post', $this, array('collection' => $collection));
-        return $collection;
+        $events->trigger('getList.post', $this, array(
+            'collection' => $halCollection,
+        ));
+
+        return $halCollection;
     }
 
     /**
      * Retrieve HEAD metadata for the entity and/or collection
      *
      * @param  null|mixed $id
-     * @return Response|ApiProblem|HalEntity|HalCollection
+     * @return Response|ApiProblem|ApiProblemResponse|HalEntity|HalCollection
      */
     public function head($id = null)
     {
@@ -633,7 +609,7 @@ class RestController extends AbstractRestfulController
      * @todo   Remove 'resource' from patch.post event for 1.0.0
      * @param  int|string $id
      * @param  array $data
-     * @return Response|ApiProblem|HalEntity
+     * @return Response|ApiProblem|ApiProblemResponse|HalEntity
      */
     public function patch($id, $data)
     {
@@ -643,30 +619,23 @@ class RestController extends AbstractRestfulController
         try {
             $entity = $this->getResource()->patch($id, $data);
         } catch (\Exception $e) {
-            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
+            return $this->createApiProblemFromException($e);
         }
 
-        if ($entity instanceof ApiProblem
-            || $entity instanceof ApiProblemResponse
-            || $entity instanceof Response
-        ) {
+        if ($this->isPreparedResponse($entity)) {
             return $entity;
         }
 
-        $plugin   = $this->plugin('Hal');
-        $entity   = $plugin->createEntity($entity, $this->route, $this->getRouteIdentifierName());
-
-        if ($entity instanceof ApiProblem) {
-            return $entity;
-        }
+        $halEntity = $this->createHalEntity($entity);
 
         $events->trigger('patch.post', $this, array(
             'id'       => $id,
             'data'     => $data,
-            'entity'   => $entity,
-            'resource' => $entity,
+            'entity'   => $halEntity,
+            'resource' => $halEntity,
         ));
-        return $entity;
+
+        return $halEntity;
     }
 
     /**
@@ -675,7 +644,7 @@ class RestController extends AbstractRestfulController
      * @todo   Remove 'resource' from update.post event for 1.0.0
      * @param  int|string $id
      * @param  array $data
-     * @return Response|ApiProblem|HalEntity
+     * @return Response|ApiProblem|ApiProblemResponse|HalEntity
      */
     public function update($id, $data)
     {
@@ -685,26 +654,23 @@ class RestController extends AbstractRestfulController
         try {
             $entity = $this->getResource()->update($id, $data);
         } catch (\Exception $e) {
-            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
+            return $this->createApiProblemFromException($e);
         }
 
-        if ($entity instanceof ApiProblem
-            || $entity instanceof ApiProblemResponse
-            || $entity instanceof Response
-        ) {
+        if ($this->isPreparedResponse($entity)) {
             return $entity;
         }
 
-        $plugin   = $this->plugin('Hal');
-        $entity   = $plugin->createEntity($entity, $this->route, $this->getRouteIdentifierName());
+        $halEntity = $this->createHalEntity($entity);
 
         $events->trigger('update.post', $this, array(
             'id'       => $id,
             'data'     => $data,
-            'entity'   => $entity,
-            'resource' => $entity,
+            'entity'   => $halEntity,
+            'resource' => $halEntity,
         ));
-        return $entity;
+
+        return $halEntity;
     }
 
     /**
@@ -722,27 +688,21 @@ class RestController extends AbstractRestfulController
         try {
             $collection = $this->getResource()->patchList($data);
         } catch (\Exception $e) {
-            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
+            return $this->createApiProblemFromException($e);
         }
 
-        if ($collection instanceof ApiProblem
-            || $collection instanceof ApiProblemResponse
-            || $collection instanceof Response
-        ) {
+        if ($this->isPreparedResponse($collection)) {
             return $collection;
         }
 
-        $plugin = $this->plugin('Hal');
-        $collection = $plugin->createCollection($collection, $this->route);
-        $collection->setCollectionRoute($this->route);
-        $collection->setRouteIdentifierName($this->getRouteIdentifierName());
-        $collection->setEntityRoute($this->route);
-        $collection->setPage($this->getRequest()->getQuery('page', 1));
-        $collection->setPageSize($this->getPageSize());
-        $collection->setCollectionName($this->collectionName);
+        $halCollection = $this->createHalCollection($collection);
 
-        $events->trigger('patchList.post', $this, array('data' => $data, 'collection' => $collection));
-        return $collection;
+        $events->trigger('patchList.post', $this, array(
+            'data'       => $data,
+            'collection' => $halCollection,
+        ));
+
+        return $halCollection;
     }
 
     /**
@@ -761,27 +721,21 @@ class RestController extends AbstractRestfulController
         } catch (Exception\InvalidArgumentException $e) {
             return new ApiProblem(400, $e->getMessage());
         } catch (\Exception $e) {
-            return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
+            return $this->createApiProblemFromException($e);
         }
 
-        if ($collection instanceof ApiProblem
-            || $collection instanceof ApiProblemResponse
-            || $collection instanceof Response
-        ) {
+        if ($this->isPreparedResponse($collection)) {
             return $collection;
         }
 
-        $plugin = $this->plugin('Hal');
-        $collection = $plugin->createCollection($collection, $this->route);
-        $collection->setCollectionRoute($this->route);
-        $collection->setRouteIdentifierName($this->getRouteIdentifierName());
-        $collection->setEntityRoute($this->route);
-        $collection->setPage($this->getRequest()->getQuery('page', 1));
-        $collection->setPageSize($this->getPageSize());
-        $collection->setCollectionName($this->collectionName);
+        $halCollection = $this->createHalCollection($collection);
 
-        $events->trigger('replaceList.post', $this, array('data' => $data, 'collection' => $collection));
-        return $collection;
+        $events->trigger('replaceList.post', $this, array(
+            'data'       => $data,
+            'collection' => $halCollection,
+        ));
+
+        return $halCollection;
     }
 
     /**
@@ -821,6 +775,15 @@ class RestController extends AbstractRestfulController
         $allow->disallowMethods(array_keys($allMethods));
         $allow->allowMethods($methods);
         return $allow;
+    }
+
+    /**
+     * @param \Exception $e
+     * @return ApiProblem
+     */
+    protected function createApiProblemFromException(\Exception $e)
+    {
+        return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
     }
 
     /**
@@ -923,5 +886,60 @@ class RestController extends AbstractRestfulController
     protected function processBodyContent($request)
     {
         return $this->bodyParams();
+    }
+
+    /**
+     * @param  mixed $object
+     * @return bool
+     */
+    protected function isPreparedResponse($object)
+    {
+        if ($object instanceof ApiProblem
+            || $object instanceof ApiProblemResponse
+            || $object instanceof Response
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  mixed $collection
+     * @return HalCollection
+     */
+    protected function createHalCollection($collection)
+    {
+        $halPlugin     = $this->plugin('Hal');
+        $halCollection = $halPlugin->createCollection($collection, $this->route);
+
+        $halCollection->setCollectionRoute($this->route);
+        $halCollection->setRouteIdentifierName($this->getRouteIdentifierName());
+        $halCollection->setEntityRoute($this->route);
+        $halCollection->setCollectionName($this->collectionName);
+        $halCollection->setPageSize($this->getPageSize());
+
+        try {
+            $halCollection->setPage($this->getRequest()->getQuery('page', 1));
+        } catch (HalInvalidArgumentException $e) {
+            return new ApiProblem(400, $e->getMessage());
+        }
+
+        return $halCollection;
+    }
+
+    /**
+     * @param  mixed $entity
+     * @return HalEntity
+     */
+    protected function createHalEntity($entity)
+    {
+        $plugin = $this->plugin('Hal');
+
+        return $plugin->createEntity(
+            $entity,
+            $this->route,
+            $this->getRouteIdentifierName()
+        );
     }
 }
