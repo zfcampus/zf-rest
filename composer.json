@@ -39,8 +39,8 @@
         "zfcampus/zf-mvc-auth": "~1.1"
     },
     "require-dev": {
-        "phpunit/PHPUnit": "3.7.*",
-        "squizlabs/php_codesniffer": "~2.0",
+        "phpunit/phpunit": "~4.7",
+        "squizlabs/php_codesniffer": "^2.3",
         "zendframework/zend-console": "~2.4.0",
         "zendframework/zend-escaper": "~2.4.0",
         "zendframework/zend-http": "~2.4.0",
