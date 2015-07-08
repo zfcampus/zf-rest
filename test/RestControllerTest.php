@@ -7,6 +7,7 @@
 namespace ZFTest\Rest;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use ReflectionMethod;
 use ReflectionObject;
 use stdClass;
 use Zend\EventManager\EventManager;
@@ -28,6 +29,7 @@ use ZF\ContentNegotiation\ControllerPlugin\BodyParams;
 use ZF\ContentNegotiation\ParameterDataContainer;
 use ZF\Hal\Collection as HalCollection;
 use ZF\Hal\Entity as HalEntity;
+use ZF\Hal\Link\Link;
 use ZF\Hal\Plugin\Hal as HalHelper;
 use ZF\Rest\Exception;
 use ZF\Rest\Resource;
@@ -160,10 +162,10 @@ class RestControllerTest extends TestCase
      *
      * @group 43
      */
-    public function testCreateDoesNotSetLocationHeaderOnMissingEntityIdentifier()
+    public function testCreateDoesNotSetLocationHeaderOnMissingSelfRelationalLink()
     {
         $this->resource->getEventManager()->attach('create', function ($e) {
-            return array('foo' => 'bar');
+            return new HalEntity(array('foo' => 'bar'));
         });
 
         $result = $this->controller->create(array());
@@ -1532,10 +1534,195 @@ class RestControllerTest extends TestCase
      */
     public function testNonArrayToReplaceListReturnsApiProblem()
     {
-        /** @var ApiProblem $response */
         $response = $this->controller->replaceList(new stdClass());
         $this->assertInstanceOf('ZF\ApiProblem\ApiProblem', $response);
         $details = $response->toArray();
         $this->assertEquals(400, $details['status']);
+    }
+
+    /**
+     * @group 79
+     */
+    public function testAllowsReturningHalCollectionFromCreate()
+    {
+        $collection = array(
+            array(
+                'id'  => 1,
+                'foo' => 'bar',
+            ),
+            array(
+                'id'  => 2,
+                'foo' => 'bar',
+            ),
+            array(
+                'id'  => 3,
+                'foo' => 'bar',
+            ),
+        );
+        $halCollection = new HalCollection($collection);
+
+        $resource = $this->getMockBuilder('ZF\Rest\Resource')->getMock();
+        $resource
+            ->expects($this->once())
+            ->method('create')
+            ->with($this->anything())
+            ->willReturn($halCollection);
+
+        $this->controller->setResource($resource);
+        $this->controller->setCollectionName('foo');
+        $this->controller->setPageSize(5);
+
+        $request = $this->controller->getRequest();
+        $request->getQuery()->set('page', 3);
+
+        $result = $this->controller->create(array());
+
+        $this->assertSame($halCollection, $result);
+        $this->assertEquals('resource', $halCollection->getCollectionRoute());
+        $this->assertEquals('resource', $halCollection->getEntityRoute());
+        $this->assertEquals($this->controller->getRouteIdentifierName(), $halCollection->getRouteIdentifierName());
+        $this->assertEquals('foo', $halCollection->getCollectionName());
+        $this->assertEquals(5, $halCollection->getPageSize());
+        $this->assertEquals(3, $halCollection->getPage());
+        $this->assertTrue($halCollection->getLinks()->has('self'));
+    }
+
+    /**
+     * @group 79
+     */
+    public function testAllowsReturningHalEntityFromCreate()
+    {
+        $entity = array(
+            'id'  => 1,
+            'foo' => 'bar',
+        );
+        $halEntity = new HalEntity($entity, 1);
+
+        $resource = $this->getMockBuilder('ZF\Rest\Resource')->getMock();
+        $resource
+            ->expects($this->once())
+            ->method('create')
+            ->with($this->anything())
+            ->willReturn($halEntity);
+
+        $this->controller->setResource($resource);
+
+        $result = $this->controller->create(array());
+
+        $this->assertSame($halEntity, $result);
+        $this->assertTrue($halEntity->getLinks()->has('self'));
+    }
+
+    /**
+     * @group 79
+     */
+    public function testCreateHalEntityInjectsExistingEntityWithSelfRelationalLinkIfNotPresent()
+    {
+        $entity = array(
+            'id'  => 1,
+            'foo' => 'bar',
+        );
+        $halEntity = new HalEntity($entity, 1);
+
+        $r = new ReflectionMethod($this->controller, 'createHalEntity');
+        $r->setAccessible(true);
+
+        $result = $r->invoke($this->controller, $halEntity);
+        $this->assertSame($result, $halEntity);
+        $this->assertTrue($result->getLinks()->has('self'));
+    }
+
+    /**
+     * @group 79
+     */
+    public function testCreateHalEntityDoesNotInjectExistingEntityWithSelfRelationalLinkIfAlreadyPresent()
+    {
+        $entity = array(
+            'id'  => 1,
+            'foo' => 'bar',
+        );
+        $halEntity = new HalEntity($entity, 1);
+        $self = Link::factory(array(
+            'rel' => 'self',
+            'url' => 'http://example.com/foo/1',
+        ));
+        $halEntity->getLinks()->add($self);
+
+        $r = new ReflectionMethod($this->controller, 'createHalEntity');
+        $r->setAccessible(true);
+
+        $result = $r->invoke($this->controller, $halEntity);
+        $this->assertSame($result, $halEntity);
+        $this->assertTrue($result->getLinks()->has('self'));
+        $this->assertSame($self, $result->getLinks()->get('self'));
+    }
+
+    /**
+     * @group 79
+     */
+    public function testCreateHalCollectionInjectsExistingCollectionWithSelfRelationalLinkIfNotPresent()
+    {
+        $collection = array(
+            array(
+                'id'  => 1,
+                'foo' => 'bar',
+            ),
+            array(
+                'id'  => 2,
+                'foo' => 'bar',
+            ),
+            array(
+                'id'  => 3,
+                'foo' => 'bar',
+            ),
+        );
+        $halCollection = new HalCollection($collection);
+
+        $r = new ReflectionMethod($this->controller, 'createHalCollection');
+        $r->setAccessible(true);
+
+        $result = $r->invoke($this->controller, $halCollection);
+        $this->assertSame($halCollection, $result);
+        $this->assertTrue($result->getLinks()->has('self'));
+    }
+
+    /**
+     * @group 79
+     */
+    public function testCreateHalCollectionInjectsExistingCollectionWithMetadataIfMissing()
+    {
+        $collection = array(
+            array(
+                'id'  => 1,
+                'foo' => 'bar',
+            ),
+            array(
+                'id'  => 2,
+                'foo' => 'bar',
+            ),
+            array(
+                'id'  => 3,
+                'foo' => 'bar',
+            ),
+        );
+        $halCollection = new HalCollection($collection);
+
+        $this->controller->setCollectionName('foo');
+        $this->controller->setPageSize(5);
+
+        $request = $this->controller->getRequest();
+        $request->getQuery()->set('page', 3);
+
+        $r = new ReflectionMethod($this->controller, 'createHalCollection');
+        $r->setAccessible(true);
+
+        $result = $r->invoke($this->controller, $halCollection);
+        $this->assertSame($halCollection, $result);
+        $this->assertEquals('resource', $halCollection->getCollectionRoute());
+        $this->assertEquals('resource', $halCollection->getEntityRoute());
+        $this->assertEquals($this->controller->getRouteIdentifierName(), $halCollection->getRouteIdentifierName());
+        $this->assertEquals('foo', $halCollection->getCollectionName());
+        $this->assertEquals(5, $halCollection->getPageSize());
+        $this->assertEquals(3, $halCollection->getPage());
     }
 }

@@ -367,20 +367,32 @@ class RestController extends AbstractRestfulController
         $events->trigger('create.pre', $this, array('data' => $data));
 
         try {
-            $entity = $this->getResource()->create($data);
+            $value = $this->getResource()->create($data);
         } catch (\Exception $e) {
             return $this->createApiProblemFromException($e);
         }
 
-        if ($this->isPreparedResponse($entity)) {
-            return $entity;
+        if ($this->isPreparedResponse($value)) {
+            return $value;
         }
 
-        $halEntity = $this->createHalEntity($entity);
+        if ($value instanceof HalCollection) {
+            $halCollection = $this->prepareHalCollection($value);
 
-        if ($halEntity->id) {
+            $events->trigger('create.post', $this, array(
+                'data'       => $data,
+                'entity'     => $halCollection,
+                'collection' => $halCollection,
+                'resource'   => $halCollection,
+            ));
+
+            return $halCollection;
+        }
+
+        $halEntity = $this->createHalEntity($value);
+
+        if ($halEntity->getLinks()->has('self')) {
             $plugin = $this->plugin('Hal');
-
             $self = $halEntity->getLinks()->get('self');
             $selfLinkUrl = $plugin->fromLink($self);
 
@@ -910,22 +922,40 @@ class RestController extends AbstractRestfulController
      */
     protected function createHalCollection($collection)
     {
-        $halPlugin     = $this->plugin('Hal');
-        $halCollection = $halPlugin->createCollection($collection, $this->route);
+        if (! $collection instanceof HalCollection) {
+            $halPlugin  = $this->plugin('Hal');
+            $collection = $halPlugin->createCollection($collection, $this->route);
+        }
 
-        $halCollection->setCollectionRoute($this->route);
-        $halCollection->setRouteIdentifierName($this->getRouteIdentifierName());
-        $halCollection->setEntityRoute($this->route);
-        $halCollection->setCollectionName($this->collectionName);
-        $halCollection->setPageSize($this->getPageSize());
+        return $this->prepareHalCollection($collection);
+    }
+
+    /**
+     * Prepare a HAL collection with the metadata for the current instance.
+     *
+     * @param HalCollection $collection
+     * @return HalCollection|ApiProblem
+     */
+    protected function prepareHalCollection(HalCollection $collection)
+    {
+        if (! $collection->getLinks()->has('self')) {
+            $plugin = $this->plugin('Hal');
+            $plugin->injectSelfLink($collection, $this->route);
+        }
+
+        $collection->setCollectionRoute($this->route);
+        $collection->setRouteIdentifierName($this->getRouteIdentifierName());
+        $collection->setEntityRoute($this->route);
+        $collection->setCollectionName($this->collectionName);
+        $collection->setPageSize($this->getPageSize());
 
         try {
-            $halCollection->setPage($this->getRequest()->getQuery('page', 1));
+            $collection->setPage($this->getRequest()->getQuery('page', 1));
         } catch (HalInvalidArgumentException $e) {
             return new ApiProblem(400, $e->getMessage());
         }
 
-        return $halCollection;
+        return $collection;
     }
 
     /**
@@ -934,6 +964,12 @@ class RestController extends AbstractRestfulController
      */
     protected function createHalEntity($entity)
     {
+        if ($entity instanceof HalEntity &&
+            ($entity->getLinks()->has('self') || ! $entity->id)
+        ) {
+            return $entity;
+        }
+
         $plugin = $this->plugin('Hal');
 
         return $plugin->createEntity(
