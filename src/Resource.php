@@ -297,12 +297,12 @@ class Resource implements ResourceInterface
      */
     public function replaceList($data)
     {
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Data provided to replaceList must be either a multi-dimensional array '
                 . 'or array of objects; received "%s"',
                 gettype($data)
-            ));
+            ), 400);
         }
 
         array_walk($data, function ($value, $key) use (&$data) {
@@ -311,17 +311,17 @@ class Resource implements ResourceInterface
                 return;
             }
 
-            if (!is_object($value)) {
+            if (! is_object($value)) {
                 throw new Exception\InvalidArgumentException(sprintf(
                     'Data provided to replaceList must contain only arrays or objects; received "%s"',
                     gettype($value)
-                ));
+                ), 400);
             }
         });
 
         $results = $this->triggerEvent(__FUNCTION__, array('data' => $data));
         $last    = $results->last();
-        if (!is_array($last) && !is_object($last)) {
+        if (! is_array($last) && ! is_object($last)) {
             return $data;
         }
         return $last;
@@ -385,11 +385,11 @@ class Resource implements ResourceInterface
      */
     public function patchList($data)
     {
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Data provided to patchList must be either a multidimensional array or array of objects; received "%s"',
                 gettype($data)
-            ));
+            ), 400);
         }
 
         $original = $data;
@@ -399,18 +399,18 @@ class Resource implements ResourceInterface
                 return;
             }
 
-            if (!is_object($value)) {
+            if (! is_object($value)) {
                 throw new Exception\InvalidArgumentException(sprintf(
                     'Data provided to patchList must contain only arrays or objects; received "%s"',
                     gettype($value)
-                ));
+                ), 400);
             }
         });
 
         $data    = new ArrayObject($data);
         $results = $this->triggerEvent(__FUNCTION__, array('data' => $data));
         $last    = $results->last();
-        if (!is_array($last) && !is_object($last)) {
+        if (! is_array($last) && !is_object($last)) {
             return $original;
         }
         return $last;
