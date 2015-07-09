@@ -156,7 +156,7 @@ class ResourceTest extends TestCase
      */
     public function testReplaceListRaisesExceptionWithInvalidData($data)
     {
-        $this->setExpectedException('ZF\Rest\Exception\InvalidArgumentException');
+        $this->setExpectedException('ZF\Rest\Exception\InvalidArgumentException', 'Data', 400);
         $this->resource->replaceList($data);
     }
 
@@ -474,7 +474,7 @@ class ResourceTest extends TestCase
      */
     public function testPatchListListRaisesExceptionWithInvalidData($data)
     {
-        $this->setExpectedException('ZF\Rest\Exception\InvalidArgumentException');
+        $this->setExpectedException('ZF\Rest\Exception\InvalidArgumentException', 'Data', 400);
         $this->resource->patchList($data);
     }
 
