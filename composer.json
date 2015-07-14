@@ -52,11 +52,15 @@
     },
     "autoload": {
         "psr-4": {
-            "ZF\\Rest\\": "src/",
-            "ZFTest\\Rest\\": "test/"
+            "ZF\\Rest\\": "src/"
         },
         "classmap": [
             "Module.php"
         ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ZFTest\\Rest\\": "test/"
+        }
     }
 }
