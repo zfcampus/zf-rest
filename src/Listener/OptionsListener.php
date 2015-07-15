@@ -32,7 +32,7 @@ class OptionsListener extends AbstractListenerAggregate
      */
     public function attach(EventManagerInterface $events)
     {
-        $this->listeners[] = $events->attach(MvcEvent::EVENT_ROUTE, array($this, 'onRoute'), -100);
+        $this->listeners[] = $events->attach(MvcEvent::EVENT_ROUTE, [$this, 'onRoute'], -100);
     }
 
     /**
@@ -160,7 +160,7 @@ class OptionsListener extends AbstractListenerAggregate
      */
     protected function getConfigForControllerAndMatches($config, $matches)
     {
-        $collectionConfig = array();
+        $collectionConfig = [];
         if (array_key_exists('collection_http_methods', $config)
             && is_array($config['collection_http_methods'])
         ) {
@@ -191,6 +191,6 @@ class OptionsListener extends AbstractListenerAggregate
             return $entityConfig;
         }
 
-        return array();
+        return [];
     }
 }

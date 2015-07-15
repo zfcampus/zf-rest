@@ -129,15 +129,15 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
      */
     public function attach(EventManagerInterface $events)
     {
-        $events->attach('create', array($this, 'dispatch'));
-        $events->attach('delete', array($this, 'dispatch'));
-        $events->attach('deleteList', array($this, 'dispatch'));
-        $events->attach('fetch', array($this, 'dispatch'));
-        $events->attach('fetchAll', array($this, 'dispatch'));
-        $events->attach('patch', array($this, 'dispatch'));
-        $events->attach('patchList', array($this, 'dispatch'));
-        $events->attach('replaceList', array($this, 'dispatch'));
-        $events->attach('update', array($this, 'dispatch'));
+        $events->attach('create', [$this, 'dispatch']);
+        $events->attach('delete', [$this, 'dispatch']);
+        $events->attach('deleteList', [$this, 'dispatch']);
+        $events->attach('fetch', [$this, 'dispatch']);
+        $events->attach('fetchAll', [$this, 'dispatch']);
+        $events->attach('patch', [$this, 'dispatch']);
+        $events->attach('patchList', [$this, 'dispatch']);
+        $events->attach('replaceList', [$this, 'dispatch']);
+        $events->attach('update', [$this, 'dispatch']);
     }
 
     /**
@@ -153,33 +153,33 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
         $this->event = $event;
         switch ($event->getName()) {
             case 'create':
-                $data = $event->getParam('data', array());
+                $data = $event->getParam('data', []);
                 return $this->create($data);
             case 'delete':
                 $id   = $event->getParam('id', null);
                 return $this->delete($id);
             case 'deleteList':
-                $data = $event->getParam('data', array());
+                $data = $event->getParam('data', []);
                 return $this->deleteList($data);
             case 'fetch':
                 $id   = $event->getParam('id', null);
                 return $this->fetch($id);
             case 'fetchAll':
-                $queryParams = $event->getQueryParams() ?: array();
+                $queryParams = $event->getQueryParams() ?: [];
                 return $this->fetchAll($queryParams);
             case 'patch':
                 $id   = $event->getParam('id', null);
-                $data = $event->getParam('data', array());
+                $data = $event->getParam('data', []);
                 return $this->patch($id, $data);
             case 'patchList':
-                $data = $event->getParam('data', array());
+                $data = $event->getParam('data', []);
                 return $this->patchList($data);
             case 'replaceList':
-                $data = $event->getParam('data', array());
+                $data = $event->getParam('data', []);
                 return $this->replaceList($data);
             case 'update':
                 $id   = $event->getParam('id', null);
-                $data = $event->getParam('data', array());
+                $data = $event->getParam('data', []);
                 return $this->update($id, $data);
             default:
                 throw new Exception\RuntimeException(sprintf(
@@ -240,7 +240,7 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
      * @param  array $params
      * @return ApiProblem|mixed
      */
-    public function fetchAll($params = array())
+    public function fetchAll($params = [])
     {
         return new ApiProblem(405, 'The GET method has not been defined for collections');
     }

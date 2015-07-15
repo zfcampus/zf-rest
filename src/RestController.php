@@ -51,10 +51,10 @@ class RestController extends AbstractRestfulController
      *
      * @var array
      */
-    protected $collectionHttpMethods = array(
+    protected $collectionHttpMethods = [
         'GET',
         'POST',
-    );
+    ];
 
     /**
      * Name of the collections entry in a Collection
@@ -111,12 +111,12 @@ class RestController extends AbstractRestfulController
      *
      * @var array
      */
-    protected $entityHttpMethods = array(
+    protected $entityHttpMethods = [
         'DELETE',
         'GET',
         'PATCH',
         'PUT',
-    );
+    ];
 
     /**
      * Route name that resolves to this resource; used to generate links.
@@ -348,7 +348,7 @@ class RestController extends AbstractRestfulController
         $e->setParam('ZFContentNegotiationFallback', 'HalJson');
 
         // Use content negotiation for creating the view model
-        $viewModel = new ContentNegotiationViewModel(array('payload' => $return));
+        $viewModel = new ContentNegotiationViewModel(['payload' => $return]);
         $e->setResult($viewModel);
 
         return $viewModel;
@@ -364,7 +364,7 @@ class RestController extends AbstractRestfulController
     public function create($data)
     {
         $events = $this->getEventManager();
-        $events->trigger('create.pre', $this, array('data' => $data));
+        $events->trigger('create.pre', $this, ['data' => $data]);
 
         try {
             $value = $this->getResource()->create($data);
@@ -379,12 +379,12 @@ class RestController extends AbstractRestfulController
         if ($value instanceof HalCollection) {
             $halCollection = $this->prepareHalCollection($value);
 
-            $events->trigger('create.post', $this, array(
+            $events->trigger('create.post', $this, [
                 'data'       => $data,
                 'entity'     => $halCollection,
                 'collection' => $halCollection,
                 'resource'   => $halCollection,
-            ));
+            ]);
 
             return $halCollection;
         }
@@ -401,11 +401,11 @@ class RestController extends AbstractRestfulController
             $response->getHeaders()->addHeaderLine('Location', $selfLinkUrl);
         }
 
-        $events->trigger('create.post', $this, array(
+        $events->trigger('create.post', $this, [
             'data'     => $data,
             'entity'   => $halEntity,
             'resource' => $halEntity,
-        ));
+        ]);
 
         return $halEntity;
     }
@@ -419,7 +419,7 @@ class RestController extends AbstractRestfulController
     public function delete($id)
     {
         $events = $this->getEventManager();
-        $events->trigger('delete.pre', $this, array('id' => $id));
+        $events->trigger('delete.pre', $this, ['id' => $id]);
 
         try {
             $result = $this->getResource()->delete($id);
@@ -436,7 +436,7 @@ class RestController extends AbstractRestfulController
         $response = $this->getResponse();
         $response->setStatusCode(204);
 
-        $events->trigger('delete.post', $this, array('id' => $id));
+        $events->trigger('delete.post', $this, ['id' => $id]);
 
         return $response;
     }
@@ -450,7 +450,7 @@ class RestController extends AbstractRestfulController
     public function deleteList($data)
     {
         $events = $this->getEventManager();
-        $events->trigger('deleteList.pre', $this, array());
+        $events->trigger('deleteList.pre', $this, []);
 
         try {
             $result = $this->getResource()->deleteList($data);
@@ -467,7 +467,7 @@ class RestController extends AbstractRestfulController
         $response = $this->getResponse();
         $response->setStatusCode(204);
 
-        $events->trigger('deleteList.post', $this, array());
+        $events->trigger('deleteList.post', $this, []);
 
         return $response;
     }
@@ -482,7 +482,7 @@ class RestController extends AbstractRestfulController
     public function get($id)
     {
         $events = $this->getEventManager();
-        $events->trigger('get.pre', $this, array('id' => $id));
+        $events->trigger('get.pre', $this, ['id' => $id]);
 
         try {
             $entity = $this->getResource()->fetch($id);
@@ -498,11 +498,11 @@ class RestController extends AbstractRestfulController
 
         $halEntity = $this->createHalEntity($entity);
 
-        $events->trigger('get.post', $this, array(
+        $events->trigger('get.post', $this, [
             'id'       => $id,
             'entity'   => $halEntity,
             'resource' => $halEntity,
-        ));
+        ]);
 
         return $halEntity;
     }
@@ -515,7 +515,7 @@ class RestController extends AbstractRestfulController
     public function getList()
     {
         $events = $this->getEventManager();
-        $events->trigger('getList.pre', $this, array());
+        $events->trigger('getList.pre', $this, []);
 
         try {
             $collection = $this->getResource()->fetchAll();
@@ -533,7 +533,7 @@ class RestController extends AbstractRestfulController
             && is_object($collection)
         ) {
             $halEntity = $this->createHalEntity($collection);
-            $events->trigger('getList.post', $this, array('collection' => $halEntity));
+            $events->trigger('getList.post', $this, ['collection' => $halEntity]);
             return $halEntity;
         }
 
@@ -563,9 +563,9 @@ class RestController extends AbstractRestfulController
             return $halCollection;
         }
 
-        $events->trigger('getList.post', $this, array(
+        $events->trigger('getList.post', $this, [
             'collection' => $halCollection,
-        ));
+        ]);
 
         return $halCollection;
     }
@@ -603,14 +603,14 @@ class RestController extends AbstractRestfulController
         }
 
         $events = $this->getEventManager();
-        $events->trigger('options.pre', $this, array('options' => $options));
+        $events->trigger('options.pre', $this, ['options' => $options]);
 
         $response = $this->getResponse();
         $response->setStatusCode(204);
         $headers  = $response->getHeaders();
         $headers->addHeader($this->createAllowHeaderWithAllowedMethods($options));
 
-        $events->trigger('options.post', $this, array('options' => $options));
+        $events->trigger('options.post', $this, ['options' => $options]);
 
         return $response;
     }
@@ -626,7 +626,7 @@ class RestController extends AbstractRestfulController
     public function patch($id, $data)
     {
         $events = $this->getEventManager();
-        $events->trigger('patch.pre', $this, array('id' => $id, 'data' => $data));
+        $events->trigger('patch.pre', $this, ['id' => $id, 'data' => $data]);
 
         try {
             $entity = $this->getResource()->patch($id, $data);
@@ -640,12 +640,12 @@ class RestController extends AbstractRestfulController
 
         $halEntity = $this->createHalEntity($entity);
 
-        $events->trigger('patch.post', $this, array(
+        $events->trigger('patch.post', $this, [
             'id'       => $id,
             'data'     => $data,
             'entity'   => $halEntity,
             'resource' => $halEntity,
-        ));
+        ]);
 
         return $halEntity;
     }
@@ -661,7 +661,7 @@ class RestController extends AbstractRestfulController
     public function update($id, $data)
     {
         $events = $this->getEventManager();
-        $events->trigger('update.pre', $this, array('id' => $id, 'data' => $data));
+        $events->trigger('update.pre', $this, ['id' => $id, 'data' => $data]);
 
         try {
             $entity = $this->getResource()->update($id, $data);
@@ -675,12 +675,12 @@ class RestController extends AbstractRestfulController
 
         $halEntity = $this->createHalEntity($entity);
 
-        $events->trigger('update.post', $this, array(
+        $events->trigger('update.post', $this, [
             'id'       => $id,
             'data'     => $data,
             'entity'   => $halEntity,
             'resource' => $halEntity,
-        ));
+        ]);
 
         return $halEntity;
     }
@@ -695,7 +695,7 @@ class RestController extends AbstractRestfulController
     public function patchList($data)
     {
         $events = $this->getEventManager();
-        $events->trigger('patchList.pre', $this, array('data' => $data));
+        $events->trigger('patchList.pre', $this, ['data' => $data]);
 
         try {
             $collection = $this->getResource()->patchList($data);
@@ -709,10 +709,10 @@ class RestController extends AbstractRestfulController
 
         $halCollection = $this->createHalCollection($collection);
 
-        $events->trigger('patchList.post', $this, array(
+        $events->trigger('patchList.post', $this, [
             'data'       => $data,
             'collection' => $halCollection,
-        ));
+        ]);
 
         return $halCollection;
     }
@@ -726,7 +726,7 @@ class RestController extends AbstractRestfulController
     public function replaceList($data)
     {
         $events = $this->getEventManager();
-        $events->trigger('replaceList.pre', $this, array('data' => $data));
+        $events->trigger('replaceList.pre', $this, ['data' => $data]);
 
         try {
             $collection = $this->getResource()->replaceList($data);
@@ -742,10 +742,10 @@ class RestController extends AbstractRestfulController
 
         $halCollection = $this->createHalCollection($collection);
 
-        $events->trigger('replaceList.post', $this, array(
+        $events->trigger('replaceList.post', $this, [
             'data'       => $data,
             'collection' => $halCollection,
-        ));
+        ]);
 
         return $halCollection;
     }
