@@ -33,14 +33,14 @@ class RestControllerFactoryTest extends TestCase
 
     public function getConfig()
     {
-        return array(
-            'zf-rest' => array(
-                'ApiController' => array(
+        return [
+            'zf-rest' => [
+                'ApiController' => [
                     'listener'   => 'ZFTest\Rest\Factory\TestAsset\Listener',
                     'route_name' => 'api',
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
     }
 
     public function testWillInstantiateListenerIfServiceNotFoundButClassExists()
@@ -93,11 +93,11 @@ class RestControllerFactoryTest extends TestCase
         $resource = $controller->getResource();
         $events = $resource->getEventManager();
 
-        $expected = array(
+        $expected = [
             'ZFTest\Rest\Factory\TestAsset\Listener',
             'ZF\Rest\Resource',
             'ZF\Rest\ResourceInterface',
-        );
+        ];
         $identifiers = $events->getIdentifiers();
 
         $this->assertEquals(array_values($expected), array_values($identifiers));
@@ -115,12 +115,12 @@ class RestControllerFactoryTest extends TestCase
         $resource = $controller->getResource();
         $events = $resource->getEventManager();
 
-        $expected = array(
+        $expected = [
             'ZFTest\Rest\Factory\TestAsset\Listener',
             'ZFTest\Rest\Factory\TestAsset\ExtraResourceListener',
             'ZF\Rest\Resource',
             'ZF\Rest\ResourceInterface',
-        );
+        ];
         $identifiers = $events->getIdentifiers();
 
         $this->assertEquals(array_values($expected), array_values($identifiers));
@@ -129,10 +129,10 @@ class RestControllerFactoryTest extends TestCase
     public function testResourceEventManagerIdentifiersAreAsSpecifiedArray()
     {
         $config = $this->services->get('Config');
-        $config['zf-rest']['ApiController']['resource_identifiers'] = array(
+        $config['zf-rest']['ApiController']['resource_identifiers'] = [
             'ZFTest\Rest\Factory\TestAsset\ExtraResourceListener1',
             'ZFTest\Rest\Factory\TestAsset\ExtraResourceListener2',
-        );
+        ];
         $this->services->setAllowOverride(true);
         $this->services->setService('Config', $config);
 
@@ -140,13 +140,13 @@ class RestControllerFactoryTest extends TestCase
         $resource = $controller->getResource();
         $events = $resource->getEventManager();
 
-        $expected = array(
+        $expected = [
             'ZFTest\Rest\Factory\TestAsset\Listener',
             'ZFTest\Rest\Factory\TestAsset\ExtraResourceListener1',
             'ZFTest\Rest\Factory\TestAsset\ExtraResourceListener2',
             'ZF\Rest\Resource',
             'ZF\Rest\ResourceInterface',
-        );
+        ];
         $identifiers = $events->getIdentifiers();
 
         $this->assertEquals(array_values($expected), array_values($identifiers));

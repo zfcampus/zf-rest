@@ -21,17 +21,17 @@ class OptionsListenerFactoryTest extends TestCase
 
     public function seedConfigService()
     {
-        return array('zf-rest' => array(
-            'some-controller' => array(
+        return ['zf-rest' => [
+            'some-controller' => [
                 'listener'                => 'SomeListener',
                 'route_name'              => 'api.rest.some',
                 'route_identifer_name'    => 'some_id',
                 'entity_class'            => 'SomeEntity',
-                'entity_http_methods'     => array('GET', 'PATCH', 'DELETE'),
+                'entity_http_methods'     => ['GET', 'PATCH', 'DELETE'],
                 'collection_name'         => 'some',
-                'collection_http_methods' => array('GET', 'POST'),
-            ),
-        ));
+                'collection_http_methods' => ['GET', 'POST'],
+            ],
+        ]];
     }
 
     public function testFactoryCreatesOptionsListenerFromRestConfiguration()
