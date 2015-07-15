@@ -45,7 +45,7 @@ class Resource implements ResourceInterface
     /**
      * @var array
      */
-    protected $params = array();
+    protected $params = [];
 
     /**
      * @var null|Parameters
@@ -183,11 +183,11 @@ class Resource implements ResourceInterface
      */
     public function setEventManager(EventManagerInterface $events)
     {
-        $events->addIdentifiers(array(
+        $events->addIdentifiers([
             get_class($this),
             __CLASS__,
             'ZF\Rest\ResourceInterface',
-        ));
+        ]);
         $this->events = $events;
         return $this;
     }
@@ -234,7 +234,7 @@ class Resource implements ResourceInterface
             ));
         }
 
-        $results = $this->triggerEvent(__FUNCTION__, array('data' => $data));
+        $results = $this->triggerEvent(__FUNCTION__, ['data' => $data]);
         $last    = $results->last();
         if (!is_array($last) && !is_object($last)) {
             return $data;
@@ -319,7 +319,7 @@ class Resource implements ResourceInterface
             }
         });
 
-        $results = $this->triggerEvent(__FUNCTION__, array('data' => $data));
+        $results = $this->triggerEvent(__FUNCTION__, ['data' => $data]);
         $last    = $results->last();
         if (! is_array($last) && ! is_object($last)) {
             return $data;
@@ -408,7 +408,7 @@ class Resource implements ResourceInterface
         });
 
         $data    = new ArrayObject($data);
-        $results = $this->triggerEvent(__FUNCTION__, array('data' => $data));
+        $results = $this->triggerEvent(__FUNCTION__, ['data' => $data]);
         $last    = $results->last();
         if (! is_array($last) && !is_object($last)) {
             return $original;
@@ -428,7 +428,7 @@ class Resource implements ResourceInterface
      */
     public function delete($id)
     {
-        $results = $this->triggerEvent(__FUNCTION__, array('id' => $id));
+        $results = $this->triggerEvent(__FUNCTION__, ['id' => $id]);
         $last    = $results->last();
         if (!is_bool($last)
             && ! $last instanceof ApiProblem
@@ -458,7 +458,7 @@ class Resource implements ResourceInterface
             ));
         }
 
-        $results = $this->triggerEvent(__FUNCTION__, array('data' => $data));
+        $results = $this->triggerEvent(__FUNCTION__, ['data' => $data]);
         $last    = $results->last();
         if (! is_bool($last)
             && ! $last instanceof ApiProblem
@@ -483,7 +483,7 @@ class Resource implements ResourceInterface
      */
     public function fetch($id)
     {
-        $results = $this->triggerEvent(__FUNCTION__, array('id' => $id));
+        $results = $this->triggerEvent(__FUNCTION__, ['id' => $id]);
         $last    = $results->last();
         if (!is_array($last) && !is_object($last)) {
             return false;
@@ -515,7 +515,7 @@ class Resource implements ResourceInterface
             && ! $last instanceof ApiProblemResponse
             && ! is_object($last)
         ) {
-            return array();
+            return [];
         }
         return $last;
     }

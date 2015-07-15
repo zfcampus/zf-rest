@@ -19,7 +19,7 @@ class OptionsListenerTest extends TestCase
 {
     public function testListenerRegistersAtExpectedPriority()
     {
-        $listener = new OptionsListener(array());
+        $listener = new OptionsListener([]);
         $events   = new EventManager();
         $listener->attach($events);
         $listeners = $events->getListeners('route');
@@ -28,149 +28,149 @@ class OptionsListenerTest extends TestCase
             break;
         }
         $this->assertInstanceOf('Zend\Stdlib\CallbackHandler', $test);
-        $this->assertEquals(array($listener, 'onRoute'), $test->getCallback());
+        $this->assertEquals([$listener, 'onRoute'], $test->getCallback());
         $this->assertEquals(-100, $test->getMetadatum('priority'));
     }
 
     public function seedListenerConfig()
     {
-        return array(
-            'controller-without-config' => array(),
-            'controller-with-entity-config' => array(
+        return [
+            'controller-without-config' => [],
+            'controller-with-entity-config' => [
                 'route_identifier_name' => 'entity_id',
-                'entity_http_methods' => array(
+                'entity_http_methods' => [
                     'GET',
                     'PATCH',
                     'DELETE',
-                ),
-            ),
-            'controller-with-collection-config' => array(
-                'collection_http_methods' => array(
+                ],
+            ],
+            'controller-with-collection-config' => [
+                'collection_http_methods' => [
                     'GET',
                     'POST',
-                ),
-            ),
-            'controller-with-all-config' => array(
+                ],
+            ],
+            'controller-with-all-config' => [
                 'route_identifier_name' => 'entity_id',
-                'entity_http_methods' => array(
+                'entity_http_methods' => [
                     'GET',
                     'PATCH',
                     'DELETE',
-                ),
-                'collection_http_methods' => array(
+                ],
+                'collection_http_methods' => [
                     'GET',
                     'POST',
-                ),
-            ),
-            'controller-with-all-config-except-entity-id' => array(
-                'entity_http_methods' => array(
+                ],
+            ],
+            'controller-with-all-config-except-entity-id' => [
+                'entity_http_methods' => [
                     'GET',
                     'PATCH',
                     'DELETE',
-                ),
-                'collection_http_methods' => array(
+                ],
+                'collection_http_methods' => [
                     'GET',
                     'POST',
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
     }
 
     public function validMethodsProvider()
     {
-        return array(
-            'collection-get' => array('GET', array(
+        return [
+            'collection-get' => ['GET', [
                 'controller' => 'controller-with-collection-config',
-            )),
-            'collection-post' => array('POST', array(
+            ]],
+            'collection-post' => ['POST', [
                 'controller' => 'controller-with-collection-config',
-            )),
-            'entity-get' => array('GET', array(
+            ]],
+            'entity-get' => ['GET', [
                 'controller' => 'controller-with-entity-config',
                 'entity_id'  => 'foo',
-            )),
-            'entity-patch' => array('PATCH', array(
+            ]],
+            'entity-patch' => ['PATCH', [
                 'controller' => 'controller-with-entity-config',
                 'entity_id'  => 'foo',
-            )),
-            'entity-delete' => array('DELETE', array(
+            ]],
+            'entity-delete' => ['DELETE', [
                 'controller' => 'controller-with-entity-config',
                 'entity_id'  => 'foo',
-            )),
-            'all-collection-get' => array('GET', array(
+            ]],
+            'all-collection-get' => ['GET', [
                 'controller' => 'controller-with-all-config',
-            )),
-            'all-collection-post' => array('POST', array(
+            ]],
+            'all-collection-post' => ['POST', [
                 'controller' => 'controller-with-all-config',
-            )),
-            'all-entity-get' => array('GET', array(
-                'controller' => 'controller-with-all-config',
-                'entity_id'  => 'foo',
-            )),
-            'all-entity-patch' => array('PATCH', array(
+            ]],
+            'all-entity-get' => ['GET', [
                 'controller' => 'controller-with-all-config',
                 'entity_id'  => 'foo',
-            )),
-            'all-entity-delete' => array('DELETE', array(
+            ]],
+            'all-entity-patch' => ['PATCH', [
                 'controller' => 'controller-with-all-config',
                 'entity_id'  => 'foo',
-            )),
-            'all-except-collection-get' => array('GET', array(
+            ]],
+            'all-entity-delete' => ['DELETE', [
+                'controller' => 'controller-with-all-config',
+                'entity_id'  => 'foo',
+            ]],
+            'all-except-collection-get' => ['GET', [
                 'controller' => 'controller-with-all-config-except-entity-id',
-            )),
-            'all-except-collection-post' => array('POST', array(
+            ]],
+            'all-except-collection-post' => ['POST', [
                 'controller' => 'controller-with-all-config-except-entity-id',
-            )),
-        );
+            ]],
+        ];
     }
 
     public function invalidMethodsProvider()
     {
-        return array(
-            'collection-patch' => array('PATCH', array(
+        return [
+            'collection-patch' => ['PATCH', [
                 'controller' => 'controller-with-collection-config',
-            ), array('GET', 'POST')),
-            'collection-put' => array('PUT', array(
+            ], ['GET', 'POST']],
+            'collection-put' => ['PUT', [
                 'controller' => 'controller-with-collection-config',
-            ), array('GET', 'POST')),
-            'collection-delete' => array('DELETE', array(
+            ], ['GET', 'POST']],
+            'collection-delete' => ['DELETE', [
                 'controller' => 'controller-with-collection-config',
-            ), array('GET', 'POST')),
-            'entity-post' => array('POST', array(
+            ], ['GET', 'POST']],
+            'entity-post' => ['POST', [
                 'controller' => 'controller-with-entity-config',
                 'entity_id'  => 'foo',
-            ), array('GET', 'PATCH', 'DELETE')),
-            'entity-put' => array('PUT', array(
+            ], ['GET', 'PATCH', 'DELETE']],
+            'entity-put' => ['PUT', [
                 'controller' => 'controller-with-entity-config',
                 'entity_id'  => 'foo',
-            ), array('GET', 'PATCH', 'DELETE')),
-            'all-collection-patch' => array('PATCH', array(
+            ], ['GET', 'PATCH', 'DELETE']],
+            'all-collection-patch' => ['PATCH', [
                 'controller' => 'controller-with-all-config',
-            ), array('GET', 'POST')),
-            'all-collection-put' => array('PUT', array(
+            ], ['GET', 'POST']],
+            'all-collection-put' => ['PUT', [
                 'controller' => 'controller-with-all-config',
-            ), array('GET', 'POST')),
-            'all-collection-delete' => array('DELETE', array(
+            ], ['GET', 'POST']],
+            'all-collection-delete' => ['DELETE', [
                 'controller' => 'controller-with-all-config',
-            ), array('GET', 'POST')),
-            'all-entity-post' => array('POST', array(
-                'controller' => 'controller-with-all-config',
-                'entity_id'  => 'foo',
-            ), array('GET', 'PATCH', 'DELETE')),
-            'all-entity-put' => array('PUT', array(
+            ], ['GET', 'POST']],
+            'all-entity-post' => ['POST', [
                 'controller' => 'controller-with-all-config',
                 'entity_id'  => 'foo',
-            ), array('GET', 'PATCH', 'DELETE')),
-            'except-collection-patch' => array('PATCH', array(
+            ], ['GET', 'PATCH', 'DELETE']],
+            'all-entity-put' => ['PUT', [
+                'controller' => 'controller-with-all-config',
+                'entity_id'  => 'foo',
+            ], ['GET', 'PATCH', 'DELETE']],
+            'except-collection-patch' => ['PATCH', [
                 'controller' => 'controller-with-all-config-except-entity-id',
-            ), array('GET', 'POST')),
-            'except-collection-put' => array('PUT', array(
+            ], ['GET', 'POST']],
+            'except-collection-put' => ['PUT', [
                 'controller' => 'controller-with-all-config-except-entity-id',
-            ), array('GET', 'POST')),
-            'except-collection-delete' => array('DELETE', array(
+            ], ['GET', 'POST']],
+            'except-collection-delete' => ['DELETE', [
                 'controller' => 'controller-with-all-config-except-entity-id',
-            ), array('GET', 'POST')),
-        );
+            ], ['GET', 'POST']],
+        ];
     }
 
     /**
@@ -226,7 +226,7 @@ class OptionsListenerTest extends TestCase
         $listener = new OptionsListener($this->seedListenerConfig());
         $request  = new Request();
         $request->setMethod('GET');
-        $matches  = new RouteMatch(array());
+        $matches  = new RouteMatch([]);
         $mvcEvent = new MvcEvent();
         $mvcEvent->setRequest($request);
         $mvcEvent->setResponse(new Response());
@@ -238,9 +238,9 @@ class OptionsListenerTest extends TestCase
     {
         $listener = new OptionsListener($this->seedListenerConfig());
         $request  = new Request('GET');
-        $matches  = new RouteMatch(array(
+        $matches  = new RouteMatch([
             'controller' => 'controller-without-config',
-        ));
+        ]);
         $mvcEvent = new MvcEvent();
         $mvcEvent->setRequest($request);
 

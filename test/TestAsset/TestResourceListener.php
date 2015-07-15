@@ -65,7 +65,7 @@ class TestResourceListener extends AbstractResourceListener
         $this->testCase->paramsPassedToListener  = func_get_args();
     }
 
-    public function fetchAll($params = array())
+    public function fetchAll($params = [])
     {
         $this->testCase->methodInvokedInListener = __METHOD__;
         $this->testCase->paramsPassedToListener  = $params;
