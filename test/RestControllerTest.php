@@ -29,6 +29,8 @@ use ZF\ContentNegotiation\ControllerPlugin\BodyParams;
 use ZF\ContentNegotiation\ParameterDataContainer;
 use ZF\Hal\Collection as HalCollection;
 use ZF\Hal\Entity as HalEntity;
+use ZF\Hal\Extractor\LinkCollectionExtractor;
+use ZF\Hal\Extractor\LinkExtractor;
 use ZF\Hal\Link\Link;
 use ZF\Hal\Plugin\Hal as HalHelper;
 use ZF\Rest\Exception;
@@ -67,6 +69,10 @@ class RestControllerTest extends TestCase
         $linksHelper = new HalHelper();
         $linksHelper->setUrlHelper($urlHelper);
         $linksHelper->setServerUrlHelper($serverUrlHelper);
+
+        $linkExtractor = new LinkExtractor($serverUrlHelper, $urlHelper);
+        $linkCollectionExtractor = new LinkCollectionExtractor($linkExtractor);
+        $linksHelper->setLinkCollectionExtractor($linkCollectionExtractor);
 
         $pluginManager->setService('Hal', $linksHelper);
         $linksHelper->setController($controller);

@@ -24,8 +24,9 @@ use Zend\View\Helper\ServerUrl as ServerUrlHelper;
 use Zend\View\Helper\Url as UrlHelper;
 use ZF\ApiProblem\View\ApiProblemRenderer;
 use ZF\ContentNegotiation\AcceptListener;
+use ZF\Hal\Extractor\LinkCollectionExtractor;
+use ZF\Hal\Extractor\LinkExtractor;
 use ZF\Hal\Plugin\Hal as HalHelper;
-use ZF\Hal\View\HalJsonModel;
 use ZF\Hal\View\HalJsonRenderer;
 use ZF\Rest\Resource;
 use ZF\Rest\RestController;
@@ -58,6 +59,10 @@ class CollectionIntegrationTest extends TestCase
         $this->linksHelper = $linksHelper = new HalHelper();
         $linksHelper->setUrlHelper($urlHelper);
         $linksHelper->setServerUrlHelper($serverUrlHelper);
+
+        $linkExtractor = new LinkExtractor($serverUrlHelper, $urlHelper);
+        $linkCollectionExtractor = new LinkCollectionExtractor($linkExtractor);
+        $linksHelper->setLinkCollectionExtractor($linkCollectionExtractor);
 
         $this->helpers = $helpers = new HelperPluginManager();
         $helpers->setService('url', $urlHelper);
