@@ -948,7 +948,6 @@ class RestController extends AbstractRestfulController
         $collection->setEntityRoute($this->route);
         $collection->setCollectionName($this->collectionName);
 
-
         try {
             $collection->setPageSize($this->getPageSize());
             $collection->setPage($this->getRequest()->getQuery('page', 1));
