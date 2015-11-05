@@ -947,9 +947,10 @@ class RestController extends AbstractRestfulController
         $collection->setRouteIdentifierName($this->getRouteIdentifierName());
         $collection->setEntityRoute($this->route);
         $collection->setCollectionName($this->collectionName);
-        $collection->setPageSize($this->getPageSize());
+
 
         try {
+            $collection->setPageSize($this->getPageSize());
             $collection->setPage($this->getRequest()->getQuery('page', 1));
         } catch (HalInvalidArgumentException $e) {
             return new ApiProblem(400, $e->getMessage());

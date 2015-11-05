@@ -106,6 +106,30 @@ class RestControllerTest extends TestCase
         $this->assertProblemApiResult(416, "Page size is out of range, maximum page size is 2", $result);
     }
 
+    public function testReturnsErrorResponseWhenPageSizeInNotPositive()
+    {
+        $items = [
+            ['id' => 'foo', 'bar' => 'baz'],
+            ['id' => 'bar', 'bar' => 'baz'],
+            ['id' => 'baz', 'bar' => 'baz'],
+        ];
+        $adapter   = new ArrayPaginator($items);
+        $paginator = new Paginator($adapter);
+        $this->resource->getEventManager()->attach('fetchAll', function ($e) use ($paginator) {
+            return $paginator;
+        });
+
+        $request = $this->controller->getRequest();
+        $this->controller->setPageSizeParam('page_size');
+        $request->setQuery(new Parameters([
+            'page'      => 1,
+            'page_size' => 0,
+        ]));
+
+        $result = $this->controller->getList();
+        $this->assertProblemApiResult(400, 'size must be a positive integer or -1 (to disable pagination); received "0"', $result);
+    }
+
     public function testReturnsErrorResponseWhenPageSizeBelowMin()
     {
         $items = [
