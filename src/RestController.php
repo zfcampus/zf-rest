@@ -399,6 +399,7 @@ class RestController extends AbstractRestfulController
             $response = $this->getResponse();
             $response->setStatusCode(201);
             $response->getHeaders()->addHeaderLine('Location', $selfLinkUrl);
+            $response->getHeaders()->addHeaderLine('Content-Location', $selfLinkUrl);
         }
 
         $events->trigger('create.post', $this, [
