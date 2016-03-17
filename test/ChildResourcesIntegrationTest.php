@@ -17,6 +17,8 @@ use Zend\View\Helper\Url as UrlHelper;
 use ZF\ApiProblem\View\ApiProblemRenderer;
 use ZF\Hal\Collection as HalCollection;
 use ZF\Hal\Entity as HalEntity;
+use ZF\Hal\Extractor\LinkCollectionExtractor;
+use ZF\Hal\Extractor\LinkExtractor;
 use ZF\Hal\Link\Link;
 use ZF\Hal\Plugin\Hal as HalHelper;
 use ZF\Hal\View\HalJsonModel;
@@ -53,6 +55,10 @@ class ChildResourcesIntegrationTest extends TestCase
         $linksHelper->setUrlHelper($urlHelper);
         $linksHelper->setServerUrlHelper($serverUrlHelper);
 
+        $linkExtractor = new LinkExtractor($serverUrlHelper, $urlHelper);
+        $linkCollectionExtractor = new LinkCollectionExtractor($linkExtractor);
+        $linksHelper->setLinkCollectionExtractor($linkCollectionExtractor);
+
         $this->helpers = $helpers = new HelperPluginManager();
         $helpers->setService('url', $urlHelper);
         $helpers->setService('serverUrl', $serverUrlHelper);
@@ -73,44 +79,44 @@ class ChildResourcesIntegrationTest extends TestCase
 
     public function setupRouter()
     {
-        $routes = array(
-            'parent' => array(
+        $routes = [
+            'parent' => [
                 'type' => 'Segment',
-                'options' => array(
+                'options' => [
                     'route' => '/api/parent[/:parent]',
-                    'defaults' => array(
+                    'defaults' => [
                         'controller' => 'Api\ParentController',
-                    ),
-                ),
+                    ],
+                ],
                 'may_terminate' => true,
-                'child_routes' => array(
-                    'child' => array(
+                'child_routes' => [
+                    'child' => [
                         'type' => 'Segment',
-                        'options' => array(
+                        'options' => [
                             'route' => '/child[/:child]',
-                            'defaults' => array(
+                            'defaults' => [
                                 'controller' => 'Api\ChildController',
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        );
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
         $this->router = $router = new TreeRouteStack();
         $router->addRoutes($routes);
     }
 
     public function setUpParentResource()
     {
-        $this->parent = (object) array(
+        $this->parent = (object) [
             'id'   => 'anakin',
             'name' => 'Anakin Skywalker',
-        );
+        ];
         $resource = new HalEntity($this->parent, 'anakin');
 
         $link = new Link('self');
         $link->setRoute('parent');
-        $link->setRouteParams(array('parent'=> 'anakin'));
+        $link->setRouteParams(['parent'=> 'anakin']);
         $resource->getLinks()->add($link);
 
         return $resource;
@@ -118,15 +124,15 @@ class ChildResourcesIntegrationTest extends TestCase
 
     public function setUpChildResource($id, $name)
     {
-        $this->child = (object) array(
+        $this->child = (object) [
             'id'   => $id,
             'name' => $name,
-        );
+        ];
         $resource = new HalEntity($this->child, $id);
 
         $link = new Link('self');
         $link->setRoute('parent/child');
-        $link->setRouteParams(array('child'=> $id));
+        $link->setRouteParams(['child'=> $id]);
         $resource->getLinks()->add($link);
 
         return $resource;
@@ -134,13 +140,13 @@ class ChildResourcesIntegrationTest extends TestCase
 
     public function setUpChildCollection()
     {
-        $children = array(
-            array('luke', 'Luke Skywalker'),
-            array('leia', 'Leia Organa'),
-        );
-        $this->collection = array();
+        $children = [
+            ['luke', 'Luke Skywalker'],
+            ['leia', 'Leia Organa'],
+        ];
+        $this->collection = [];
         foreach ($children as $info) {
-            $collection[] = call_user_func_array(array($this, 'setUpChildResource'), $info);
+            $collection[] = call_user_func_array([$this, 'setUpChildResource'], $info);
         }
         $collection = new HalCollection($this->collection);
         $collection->setCollectionRoute('parent/child');
@@ -158,29 +164,29 @@ class ChildResourcesIntegrationTest extends TestCase
 
     public function setUpAlternateRouter()
     {
-        $routes = array(
-            'parent' => array(
+        $routes = [
+            'parent' => [
                 'type' => 'Segment',
-                'options' => array(
+                'options' => [
                     'route' => '/api/parent[/:id]',
-                    'defaults' => array(
+                    'defaults' => [
                         'controller' => 'Api\ParentController',
-                    ),
-                ),
+                    ],
+                ],
                 'may_terminate' => true,
-                'child_routes' => array(
-                    'child' => array(
+                'child_routes' => [
+                    'child' => [
                         'type' => 'Segment',
-                        'options' => array(
+                        'options' => [
                             'route' => '/child[/:child_id]',
-                            'defaults' => array(
+                            'defaults' => [
                                 'controller' => 'Api\ChildController',
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        );
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
         $this->router = $router = new TreeRouteStack();
         $router->addRoutes($routes);
         $this->helpers->get('url')->setRouter($router);
@@ -192,10 +198,10 @@ class ChildResourcesIntegrationTest extends TestCase
 
         $resource = new Resource();
         $resource->getEventManager()->attach('fetch', function ($e) {
-            return (object) array(
+            return (object) [
                 'id'   => 'luke',
                 'name' => 'Luke Skywalker',
-            );
+            ];
         });
         $controller = new RestController();
         $controller->setPluginManager($this->plugins);
@@ -235,16 +241,16 @@ class ChildResourcesIntegrationTest extends TestCase
 
         $resource = new Resource();
         $resource->getEventManager()->attach('fetchAll', function ($e) {
-            return array(
-                (object) array(
+            return [
+                (object) [
                     'id'   => 'luke',
                     'name' => 'Luke Skywalker',
-                ),
-                (object) array(
+                ],
+                (object) [
                     'id'   => 'leia',
                     'name' => 'Leia Organa',
-                ),
-            );
+                ],
+            ];
         });
         $controller = new RestController();
         $controller->setPluginManager($this->plugins);

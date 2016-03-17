@@ -18,14 +18,14 @@ class ResourceEventTest extends TestCase
 {
     public function setUp()
     {
-        $this->matches = new RouteMatch(array(
+        $this->matches = new RouteMatch([
             'foo' => 'bar',
             'baz' => 'inga',
-        ));
-        $this->query = new Parameters(array(
+        ]);
+        $this->query = new Parameters([
             'foo' => 'bar',
             'baz' => 'inga',
-        ));
+        ]);
 
         $this->event = new ResourceEvent();
     }
@@ -97,7 +97,7 @@ class ResourceEventTest extends TestCase
     public function testCanInjectRequestViaSetParams()
     {
         $request = new HttpRequest();
-        $this->event->setParams(array('request' => $request));
+        $this->event->setParams(['request' => $request]);
         $this->assertSame($request, $this->event->getRequest());
     }
 

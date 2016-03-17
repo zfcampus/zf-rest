@@ -20,19 +20,19 @@ class RestParametersListener implements
     /**
      * @var \Zend\Stdlib\CallbackHandler[]
      */
-    protected $listeners = array();
+    protected $listeners = [];
 
     /**
      * @var \Zend\Stdlib\CallbackHandler[]
      */
-    protected $sharedListeners = array();
+    protected $sharedListeners = [];
 
     /**
      * @param EventManagerInterface $events
      */
     public function attach(EventManagerInterface $events)
     {
-        $this->listeners[] = $events->attach(MvcEvent::EVENT_DISPATCH, array($this, 'onDispatch'), 100);
+        $this->listeners[] = $events->attach(MvcEvent::EVENT_DISPATCH, [$this, 'onDispatch'], 100);
     }
 
     /**
@@ -55,7 +55,7 @@ class RestParametersListener implements
         $this->sharedListeners[] = $events->attach(
             'ZF\Rest\RestController',
             MvcEvent::EVENT_DISPATCH,
-            array($this, 'onDispatch'),
+            [$this, 'onDispatch'],
             100
         );
     }

@@ -37,17 +37,17 @@ class AbstractResourceListenerTest extends TestCase
     {
         // Casting arrays to objects when the associated Resource method will
         // cast to object.
-        return array(
-            'create'      => array('create', array('data' => (object) array('foo' => 'bar'))),
-            'update'      => array('update', array('id' => 'identifier', 'data' => (object) array('foo' => 'bar'))),
-            'replaceList' => array('replaceList', array('data' => array((object) array('foo' => 'bar')))),
-            'patchList'   => array('patchList', array('data' => array((object) array('foo' => 'bar')))),
-            'patch'       => array('patch', array('id' => 'identifier', 'data' => (object) array('foo' => 'bar'))),
-            'delete'      => array('delete', array('id' => 'identifier')),
-            'deleteList'  => array('deleteList', array('data' => array('foo' => 'bar'))),
-            'fetch'       => array('fetch', array('id' => 'identifier')),
-            'fetchAll'    => array('fetchAll', array()),
-        );
+        return [
+            'create'      => ['create', ['data' => (object) ['foo' => 'bar']]],
+            'update'      => ['update', ['id' => 'identifier', 'data' => (object) ['foo' => 'bar']]],
+            'replaceList' => ['replaceList', ['data' => [(object) ['foo' => 'bar']]]],
+            'patchList'   => ['patchList', ['data' => [(object) ['foo' => 'bar']]]],
+            'patch'       => ['patch', ['id' => 'identifier', 'data' => (object) ['foo' => 'bar']]],
+            'delete'      => ['delete', ['id' => 'identifier']],
+            'deleteList'  => ['deleteList', ['data' => ['foo' => 'bar']]],
+            'fetch'       => ['fetch', ['id' => 'identifier']],
+            'fetchAll'    => ['fetchAll', []],
+        ];
     }
 
     /**
@@ -108,7 +108,7 @@ class AbstractResourceListenerTest extends TestCase
      */
     public function testDispatchShouldPassWhitelistedQueryParamsToFetchAllMethod()
     {
-        $queryParams = new Parameters(array('foo' => 'bar'));
+        $queryParams = new Parameters(['foo' => 'bar']);
         $event = new ResourceEvent();
         $event->setName('fetchAll');
         $event->setQueryParams($queryParams);

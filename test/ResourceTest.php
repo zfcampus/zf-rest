@@ -10,6 +10,7 @@ use ArrayIterator;
 use PHPUnit_Framework_TestCase as TestCase;
 use stdClass;
 use Zend\EventManager\EventManager;
+use Zend\Http\Response;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\ArrayObject;
 use Zend\Stdlib\Parameters;
@@ -30,23 +31,23 @@ class ResourceTest extends TestCase
 
     public function testEventManagerIdentifiersAreAsExpected()
     {
-        $expected = array(
+        $expected = [
             'ZF\Rest\Resource',
             'ZF\Rest\ResourceInterface',
-        );
+        ];
         $identifiers = $this->events->getIdentifiers();
         $this->assertEquals(array_values($expected), array_values($identifiers));
     }
 
     public function badData()
     {
-        return array(
-            'null'   => array(null),
-            'bool'   => array(true),
-            'int'    => array(1),
-            'float'  => array(1.0),
-            'string' => array('data'),
-        );
+        return [
+            'null'   => [null],
+            'bool'   => [true],
+            'int'    => [1],
+            'float'  => [1.0],
+            'string' => ['data'],
+        ];
     }
 
     /**
@@ -76,7 +77,7 @@ class ResourceTest extends TestCase
     {
         $this->resource->setEventParam('world', 'hello');
 
-        $params = array('hello' => 'world');
+        $params = ['hello' => 'world'];
 
         $this->resource->setEventParams($params);
 
@@ -93,7 +94,7 @@ class ResourceTest extends TestCase
             return $object;
         });
 
-        $test = $this->resource->create(array());
+        $test = $this->resource->create([]);
         $this->assertSame($object, $test);
     }
 
@@ -131,7 +132,7 @@ class ResourceTest extends TestCase
             return $object;
         });
 
-        $test = $this->resource->update('foo', array());
+        $test = $this->resource->update('foo', []);
         $this->assertSame($object, $test);
     }
 
@@ -155,7 +156,7 @@ class ResourceTest extends TestCase
      */
     public function testReplaceListRaisesExceptionWithInvalidData($data)
     {
-        $this->setExpectedException('ZF\Rest\Exception\InvalidArgumentException');
+        $this->setExpectedException('ZF\Rest\Exception\InvalidArgumentException', 'Data', 400);
         $this->resource->replaceList($data);
     }
 
@@ -164,18 +165,18 @@ class ResourceTest extends TestCase
         $this->events->attach('replaceList', function ($e) {
             return;
         });
-        $object = array(new stdClass);
+        $object = [new stdClass];
         $this->events->attach('replaceList', function ($e) use ($object) {
             return $object;
         });
 
-        $test = $this->resource->replaceList(array(array()));
+        $test = $this->resource->replaceList([[]]);
         $this->assertSame($object, $test);
     }
 
     public function testReplaceListReturnsDataIfLastListenerDoesNotReturnResource()
     {
-        $data = array(new stdClass);
+        $data = [new stdClass];
         $object = new stdClass;
         $this->events->attach('replaceList', function ($e) use ($object) {
             return $object;
@@ -207,7 +208,7 @@ class ResourceTest extends TestCase
             return $object;
         });
 
-        $test = $this->resource->patch('foo', array());
+        $test = $this->resource->patch('foo', []);
         $this->assertSame($object, $test);
     }
 
@@ -235,7 +236,7 @@ class ResourceTest extends TestCase
             return true;
         });
 
-        $test = $this->resource->delete('foo', array());
+        $test = $this->resource->delete('foo', []);
         $this->assertTrue($test);
     }
 
@@ -254,13 +255,13 @@ class ResourceTest extends TestCase
 
     public function badDeleteCollections()
     {
-        return array(
-            'true'     => array(true),
-            'int'      => array(1),
-            'float'    => array(1.1),
-            'string'   => array('string'),
-            'stdClass' => array(new stdClass),
-        );
+        return [
+            'true'     => [true],
+            'int'      => [1],
+            'float'    => [1.1],
+            'string'   => ['string'],
+            'stdClass' => [new stdClass],
+        ];
     }
 
     /**
@@ -281,7 +282,7 @@ class ResourceTest extends TestCase
             return true;
         });
 
-        $test = $this->resource->deleteList(array());
+        $test = $this->resource->deleteList([]);
         $this->assertTrue($test);
     }
 
@@ -294,7 +295,7 @@ class ResourceTest extends TestCase
             return new stdClass;
         });
 
-        $test = $this->resource->deleteList(array());
+        $test = $this->resource->deleteList([]);
         $this->assertFalse($test);
     }
 
@@ -326,13 +327,13 @@ class ResourceTest extends TestCase
 
     public function invalidCollection()
     {
-        return array(
-            'null'     => array(null),
-            'bool'     => array(true),
-            'int'      => array(1),
-            'float'    => array(1.0),
-            'string'   => array('data'),
-        );
+        return [
+            'null'     => [null],
+            'bool'     => [true],
+            'int'      => [1],
+            'float'    => [1.0],
+            'string'   => ['data'],
+        ];
     }
 
     /**
@@ -345,7 +346,7 @@ class ResourceTest extends TestCase
             return $return;
         });
         $test = $this->resource->fetchAll();
-        $this->assertEquals(array(), $test);
+        $this->assertEquals([], $test);
     }
 
     public function testFetchAllReturnsResultOfLastListener()
@@ -353,7 +354,7 @@ class ResourceTest extends TestCase
         $this->events->attach('fetchAll', function ($e) {
             return true;
         });
-        $object = new ArrayIterator(array());
+        $object = new ArrayIterator([]);
         $this->events->attach('fetchAll', function ($e) use ($object) {
             return $object;
         });
@@ -366,25 +367,25 @@ class ResourceTest extends TestCase
     {
         $id = 'resource_id';
 
-        $resource = array(
+        $resource = [
             'id'  => $id,
             'foo' => 'foo',
             'bar' => 'bar',
-        );
+        ];
 
-        $collection = array($resource);
+        $collection = [$resource];
 
-        return array(
-            'create' => array('create', array($resource), false),
-            'update' => array('update', array($id, $resource), true),
-            'replaceList' => array('replaceList', array($collection), false),
-            'patch' => array('patch', array($id, $resource), true),
-            'patchList' => array('patchList', array($collection), false),
-            'delete' => array('delete', array($id), true),
-            'deleteList' => array('deleteList', array($collection), false),
-            'fetch' => array('fetch', array($id), true),
-            'fetchAll' => array('fetchAll', array(), false),
-        );
+        return [
+            'create' => ['create', [$resource], false],
+            'update' => ['update', [$id, $resource], true],
+            'replaceList' => ['replaceList', [$collection], false],
+            'patch' => ['patch', [$id, $resource], true],
+            'patchList' => ['patchList', [$collection], false],
+            'delete' => ['delete', [$id], true],
+            'deleteList' => ['deleteList', [$collection], false],
+            'fetch' => ['fetch', [$id], true],
+            'fetchAll' => ['fetchAll', [], false],
+        ];
     }
 
     /**
@@ -402,7 +403,7 @@ class ResourceTest extends TestCase
             $called = true;
         }, 0);
 
-        call_user_func_array(array($this->resource, $eventName), $args);
+        call_user_func_array([$this->resource, $eventName], $args);
 
         $this->assertFalse($called);
     }
@@ -412,14 +413,14 @@ class ResourceTest extends TestCase
      */
     public function testEventParametersAreInjectedIntoEventWhenTriggered($eventName, $args, $idIsPresent)
     {
-        $test = (object) array();
+        $test = (object) [];
         $this->events->attach($eventName, function ($e) use ($test) {
             $test->event = $e;
         });
         $this->resource->setEventParam('id', 'OVERWRITTEN');
         $this->resource->setEventParam('parent_id', 'parent_id');
 
-        call_user_func_array(array($this->resource, $eventName), $args);
+        call_user_func_array([$this->resource, $eventName], $args);
 
         $this->assertObjectHasAttribute('event', $test);
         $e = $test->event;
@@ -438,16 +439,16 @@ class ResourceTest extends TestCase
      */
     public function testComposedQueryParametersAndRouteMatchesAreInjectedIntoEvent($eventName, $args)
     {
-        $test = (object) array();
+        $test = (object) [];
         $this->events->attach($eventName, function ($e) use ($test) {
             $test->event = $e;
         });
-        $matches     = new RouteMatch(array());
+        $matches     = new RouteMatch([]);
         $queryParams = new Parameters();
         $this->resource->setRouteMatch($matches);
         $this->resource->setQueryParams($queryParams);
 
-        call_user_func_array(array($this->resource, $eventName), $args);
+        call_user_func_array([$this->resource, $eventName], $args);
 
         $this->assertObjectHasAttribute('event', $test);
         $e = $test->event;
@@ -461,10 +462,10 @@ class ResourceTest extends TestCase
     {
         return array_merge(
             $this->badData(),
-            array(
-                'object'    => array(new StdClass),
-                'notnested' => array(array(null)),
-            )
+            [
+                'object'    => [new StdClass],
+                'notnested' => [[null]],
+            ]
         );
     }
 
@@ -473,7 +474,7 @@ class ResourceTest extends TestCase
      */
     public function testPatchListListRaisesExceptionWithInvalidData($data)
     {
-        $this->setExpectedException('ZF\Rest\Exception\InvalidArgumentException');
+        $this->setExpectedException('ZF\Rest\Exception\InvalidArgumentException', 'Data', 400);
         $this->resource->patchList($data);
     }
 
@@ -482,18 +483,18 @@ class ResourceTest extends TestCase
         $this->events->attach('patchList', function ($e) {
             return;
         });
-        $object = array(new stdClass);
+        $object = [new stdClass];
         $this->events->attach('patchList', function ($e) use ($object) {
             return $object;
         });
 
-        $test = $this->resource->patchList(array(array()));
+        $test = $this->resource->patchList([[]]);
         $this->assertSame($object, $test);
     }
 
     public function testPatchListReturnsDataIfLastListenerDoesNotReturnResource()
     {
-        $data = array(new stdClass);
+        $data = [new stdClass];
         $object = new stdClass;
         $this->events->attach('patchList', function ($e) use ($object) {
             return $object;
@@ -511,11 +512,44 @@ class ResourceTest extends TestCase
      */
     public function testFetchAllShouldAllowReturningArbitraryObjects()
     {
-        $return = (object) array('foo' => 'bar');
+        $return = (object) ['foo' => 'bar'];
         $this->events->attach('fetchAll', function ($e) use ($return) {
             return $return;
         });
         $test = $this->resource->fetchAll();
         $this->assertSame($return, $test);
+    }
+
+    public function actions()
+    {
+        return [
+            'get-list'    => ['fetchAll', [null]],
+            'get'         => ['fetch', [1]],
+            'post'        => ['create', [[]]],
+            'put-list'    => ['replaceList', [[]]],
+            'put'         => ['update', [1, []]],
+            'patch-list'  => ['patchList', [[]]],
+            'patch'       => ['patch', [1, []]],
+            'delete-list' => ['deleteList', [[]]],
+            'delete'      => ['delete', [1]],
+        ];
+    }
+
+    /**
+     * @group 68
+     * @dataProvider actions
+     */
+    public function testAllowsReturningResponsesReturnedFromResources($action, $argv)
+    {
+        $response = new Response();
+        $response->setStatusCode(418);
+
+        $events = $this->resource->getEventManager();
+        $events->attach($action, function ($e) use ($response) {
+            return $response;
+        });
+
+        $result = call_user_func_array([$this->resource, $action], $argv);
+        $this->assertSame($response, $result);
     }
 }

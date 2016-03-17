@@ -18,7 +18,7 @@ class OptionsListenerFactory implements FactoryInterface
      */
     public function createService(ServiceLocatorInterface $services)
     {
-        $config = array();
+        $config = [];
         if ($services->has('Config')) {
             $allConfig = $services->get('Config');
             if (array_key_exists('zf-rest', $allConfig)

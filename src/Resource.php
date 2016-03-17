@@ -10,6 +10,7 @@ use ArrayObject;
 use Traversable;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\EventManagerInterface;
+use Zend\Http\Response;
 use Zend\InputFilter\InputFilterInterface;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
@@ -44,7 +45,7 @@ class Resource implements ResourceInterface
     /**
      * @var array
      */
-    protected $params = array();
+    protected $params = [];
 
     /**
      * @var null|Parameters
@@ -149,8 +150,7 @@ class Resource implements ResourceInterface
     /**
      * @param string $name
      * @param mixed  $value
-     *
-     * @return mixed
+     * @return self
      */
     public function setEventParam($name, $value)
     {
@@ -161,7 +161,6 @@ class Resource implements ResourceInterface
     /**
      * @param mixed $name
      * @param mixed $default
-     *
      * @return mixed
      */
     public function getEventParam($name, $default = null)
@@ -180,15 +179,15 @@ class Resource implements ResourceInterface
      * the resource interface.
      *
      * @param  EventManagerInterface $events
-     * @return Resource
+     * @return self
      */
     public function setEventManager(EventManagerInterface $events)
     {
-        $events->addIdentifiers(array(
+        $events->addIdentifiers([
             get_class($this),
             __CLASS__,
             'ZF\Rest\ResourceInterface',
-        ));
+        ]);
         $this->events = $events;
         return $this;
     }
@@ -235,13 +234,7 @@ class Resource implements ResourceInterface
             ));
         }
 
-        $events  = $this->getEventManager();
-        $event   = $this->prepareEvent(__FUNCTION__, array('data' => $data));
-        $results = $events->trigger($event, function ($result) {
-            return ($result instanceof ApiProblem
-                || $result instanceof ApiProblemResponse
-            );
-        });
+        $results = $this->triggerEvent(__FUNCTION__, ['data' => $data]);
         $last    = $results->last();
         if (!is_array($last) && !is_object($last)) {
             return $data;
@@ -278,13 +271,7 @@ class Resource implements ResourceInterface
             ));
         }
 
-        $events  = $this->getEventManager();
-        $event   = $this->prepareEvent(__FUNCTION__, compact('id', 'data'));
-        $results = $events->trigger($event, function ($result) {
-            return ($result instanceof ApiProblem
-                || $result instanceof ApiProblemResponse
-            );
-        });
+        $results = $this->triggerEvent(__FUNCTION__, compact('id', 'data'));
         $last    = $results->last();
         if (!is_array($last) && !is_object($last)) {
             return $data;
@@ -310,35 +297,31 @@ class Resource implements ResourceInterface
      */
     public function replaceList($data)
     {
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Data provided to replaceList must be either a multi-dimensional array '
                 . 'or array of objects; received "%s"',
                 gettype($data)
-            ));
+            ), 400);
         }
+
         array_walk($data, function ($value, $key) use (&$data) {
             if (is_array($value)) {
                 $data[$key] = (object) $value;
                 return;
             }
 
-            if (!is_object($value)) {
+            if (! is_object($value)) {
                 throw new Exception\InvalidArgumentException(sprintf(
                     'Data provided to replaceList must contain only arrays or objects; received "%s"',
                     gettype($value)
-                ));
+                ), 400);
             }
         });
-        $events  = $this->getEventManager();
-        $event   = $this->prepareEvent(__FUNCTION__, array('data' => $data));
-        $results = $events->trigger($event, function ($result) {
-            return ($result instanceof ApiProblem
-                || $result instanceof ApiProblemResponse
-            );
-        });
+
+        $results = $this->triggerEvent(__FUNCTION__, ['data' => $data]);
         $last    = $results->last();
-        if (!is_array($last) && !is_object($last)) {
+        if (! is_array($last) && ! is_object($last)) {
             return $data;
         }
         return $last;
@@ -369,18 +352,12 @@ class Resource implements ResourceInterface
         }
         if (!is_object($data)) {
             throw new Exception\InvalidArgumentException(sprintf(
-                'Data provided to create must be either an array or object; received "%s"',
+                'Data provided to patch must be either an array or object; received "%s"',
                 gettype($data)
             ));
         }
 
-        $events  = $this->getEventManager();
-        $event   = $this->prepareEvent(__FUNCTION__, compact('id', 'data'));
-        $results = $events->trigger($event, function ($result) {
-            return ($result instanceof ApiProblem
-                || $result instanceof ApiProblemResponse
-            );
-        });
+        $results = $this->triggerEvent(__FUNCTION__, compact('id', 'data'));
         $last    = $results->last();
         if (!is_array($last) && !is_object($last)) {
             return $data;
@@ -408,11 +385,11 @@ class Resource implements ResourceInterface
      */
     public function patchList($data)
     {
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Data provided to patchList must be either a multidimensional array or array of objects; received "%s"',
                 gettype($data)
-            ));
+            ), 400);
         }
 
         $original = $data;
@@ -422,24 +399,18 @@ class Resource implements ResourceInterface
                 return;
             }
 
-            if (!is_object($value)) {
+            if (! is_object($value)) {
                 throw new Exception\InvalidArgumentException(sprintf(
                     'Data provided to patchList must contain only arrays or objects; received "%s"',
                     gettype($value)
-                ));
+                ), 400);
             }
         });
 
-        $data     = new ArrayObject($data);
-        $events   = $this->getEventManager();
-        $event    = $this->prepareEvent(__FUNCTION__, array('data' => $data));
-        $results  = $events->trigger($event, function ($result) {
-            return ($result instanceof ApiProblem
-                || $result instanceof ApiProblemResponse
-            );
-        });
-        $last     = $results->last();
-        if (!is_array($last) && !is_object($last)) {
+        $data    = new ArrayObject($data);
+        $results = $this->triggerEvent(__FUNCTION__, ['data' => $data]);
+        $last    = $results->last();
+        if (! is_array($last) && !is_object($last)) {
             return $original;
         }
         return $last;
@@ -457,15 +428,13 @@ class Resource implements ResourceInterface
      */
     public function delete($id)
     {
-        $events  = $this->getEventManager();
-        $event   = $this->prepareEvent(__FUNCTION__, array('id' => $id));
-        $results = $events->trigger($event, function ($result) {
-            return ($result instanceof ApiProblem
-                || $result instanceof ApiProblemResponse
-            );
-        });
+        $results = $this->triggerEvent(__FUNCTION__, ['id' => $id]);
         $last    = $results->last();
-        if (!is_bool($last) && (!$last instanceof ApiProblem) && (!$last instanceof ApiProblemResponse)) {
+        if (!is_bool($last)
+            && ! $last instanceof ApiProblem
+            && ! $last instanceof ApiProblemResponse
+            && ! $last instanceof Response
+        ) {
             return false;
         }
         return $last;
@@ -488,15 +457,14 @@ class Resource implements ResourceInterface
                 gettype($data)
             ));
         }
-        $events  = $this->getEventManager();
-        $event   = $this->prepareEvent(__FUNCTION__, array('data' => $data));
-        $results = $events->trigger($event, function ($result) {
-            return ($result instanceof ApiProblem
-                || $result instanceof ApiProblemResponse
-            );
-        });
+
+        $results = $this->triggerEvent(__FUNCTION__, ['data' => $data]);
         $last    = $results->last();
-        if (!is_bool($last) && (!$last instanceof ApiProblem) && (!$last instanceof ApiProblemResponse)) {
+        if (! is_bool($last)
+            && ! $last instanceof ApiProblem
+            && ! $last instanceof ApiProblemResponse
+            && ! $last instanceof Response
+        ) {
             return false;
         }
         return $last;
@@ -515,13 +483,7 @@ class Resource implements ResourceInterface
      */
     public function fetch($id)
     {
-        $events  = $this->getEventManager();
-        $event   = $this->prepareEvent(__FUNCTION__, array('id' => $id));
-        $results = $events->trigger($event, function ($result) {
-            return ($result instanceof ApiProblem
-                || $result instanceof ApiProblemResponse
-            );
-        });
+        $results = $this->triggerEvent(__FUNCTION__, ['id' => $id]);
         $last    = $results->last();
         if (!is_array($last) && !is_object($last)) {
             return false;
@@ -544,14 +506,8 @@ class Resource implements ResourceInterface
      */
     public function fetchAll()
     {
-        $events  = $this->getEventManager();
         $params  = func_get_args();
-        $event   = $this->prepareEvent(__FUNCTION__, $params);
-        $results = $events->trigger($event, function ($result) {
-            return ($result instanceof ApiProblem
-                || $result instanceof ApiProblemResponse
-            );
-        });
+        $results = $this->triggerEvent(__FUNCTION__, $params);
         $last    = $results->last();
         if (! is_array($last)
             && ! $last instanceof HalCollection
@@ -559,9 +515,27 @@ class Resource implements ResourceInterface
             && ! $last instanceof ApiProblemResponse
             && ! is_object($last)
         ) {
-            return array();
+            return [];
         }
         return $last;
+    }
+
+    /**
+     * @param  string $name
+     * @param  array $args
+     * @return \Zend\EventManager\ResponseCollection
+     */
+    protected function triggerEvent($name, array $args)
+    {
+        $events  = $this->getEventManager();
+        $event   = $this->prepareEvent($name, $args);
+
+        return $events->trigger($event, function ($result) {
+            return ($result instanceof ApiProblem
+                || $result instanceof ApiProblemResponse
+                || $result instanceof Response
+            );
+        });
     }
 
     /**
@@ -573,8 +547,9 @@ class Resource implements ResourceInterface
      *
      * If an input filter is composed, this, too, is injected into the event.
      *
+     * @param  string $name
      * @param  array $args
-     * @return ArrayObject
+     * @return ResourceEvent
      */
     protected function prepareEvent($name, array $args)
     {
@@ -583,6 +558,7 @@ class Resource implements ResourceInterface
         $event->setInputFilter($this->getInputFilter());
         $event->setQueryParams($this->getQueryParams());
         $event->setRouteMatch($this->getRouteMatch());
+
         return $event;
     }
 
@@ -602,6 +578,7 @@ class Resource implements ResourceInterface
         if (empty($params)) {
             return $params;
         }
+
         return $this->getEventManager()->prepareArgs($params);
     }
 }

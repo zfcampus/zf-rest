@@ -26,7 +26,7 @@ class RestControllerFactory implements AbstractFactoryInterface
      * Cache of canCreateServiceWithName lookups
      * @var array
      */
-    protected $lookupCache = array();
+    protected $lookupCache = [];
 
     /**
      * Determine if we can create a service with name
@@ -114,7 +114,7 @@ class RestControllerFactory implements AbstractFactoryInterface
             ));
         }
 
-        $resourceIdentifiers = array(get_class($listener));
+        $resourceIdentifiers = [get_class($listener)];
         if (isset($config['resource_identifiers'])) {
             if (!is_array($config['resource_identifiers'])) {
                 $config['resource_identifiers'] = (array) $config['resource_identifiers'];
@@ -203,7 +203,7 @@ class RestControllerFactory implements AbstractFactoryInterface
                         }
 
                         $query  = $request->getQuery();
-                        $params = new Parameters(array());
+                        $params = new Parameters([]);
                         foreach ($query as $key => $value) {
                             if (! in_array($key, $whitelist)) {
                                 continue;
@@ -231,9 +231,9 @@ class RestControllerFactory implements AbstractFactoryInterface
 
                         // Set collection route options with the captured query whitelist, to
                         // ensure paginated links are generated correctly
-                        $collection->setCollectionRouteOptions(array(
+                        $collection->setCollectionRouteOptions([
                             'query' => $params,
-                        ));
+                        ]);
 
                         // If no self link defined, set the options in the collection and return
                         $links = $collection->getLinks();
@@ -251,9 +251,9 @@ class RestControllerFactory implements AbstractFactoryInterface
                         // the self link's route options
                         $self    = $links->get('self');
                         $options = $self->getRouteOptions();
-                        $self->setRouteOptions(array_merge($options, array(
+                        $self->setRouteOptions(array_merge($options, [
                             'query' => $params,
-                        )));
+                        ]));
                     });
                     break;
 
@@ -268,7 +268,7 @@ class RestControllerFactory implements AbstractFactoryInterface
                 case 'route_identifier_name':
                     $controller->setIdentifierName($value);
                     break;
-                    
+
                 case 'min_page_size':
                     $controller->setMinPageSize($value);
                     break;
