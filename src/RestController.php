@@ -965,7 +965,7 @@ class RestController extends AbstractRestfulController
     protected function createHalEntity($entity)
     {
         if ($entity instanceof HalEntity &&
-            ($entity->getLinks()->has('self') || ! $entity->id)
+            ($entity->getLinks()->has('self') || ! $entity->getId())
         ) {
             return $entity;
         }

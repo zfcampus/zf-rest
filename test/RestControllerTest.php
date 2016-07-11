@@ -190,7 +190,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->create([]);
         $this->assertInstanceOf('ZF\Hal\Entity', $result);
-        $this->assertEquals($entity, $result->entity);
+        $this->assertEquals($entity, $result->getEntity());
         return $this->controller->getResponse();
     }
 
@@ -275,7 +275,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->get('foo');
         $this->assertInstanceOf('ZF\Hal\Entity', $result);
-        $this->assertEquals($entity, $result->entity);
+        $this->assertEquals($entity, $result->getEntity());
     }
 
     public function testReturnsHalCollectionForNonPaginatedList()
@@ -384,7 +384,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->head('foo');
         $this->assertInstanceOf('ZF\Hal\Entity', $result);
-        $this->assertEquals($entity, $result->entity);
+        $this->assertEquals($entity, $result->getEntity());
     }
 
     public function testOptionsReturnsEmptyResponseWithAllowHeaderPopulatedForCollection()
@@ -472,7 +472,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->patch('foo', $entity);
         $this->assertInstanceOf('ZF\Hal\Entity', $result);
-        $this->assertEquals($entity, $result->entity);
+        $this->assertEquals($entity, $result->getEntity());
     }
 
     public function testUpdateReturnsProblemResultOnUpdateException()
@@ -494,7 +494,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->update('foo', $entity);
         $this->assertInstanceOf('ZF\Hal\Entity', $result);
-        $this->assertEquals($entity, $result->entity);
+        $this->assertEquals($entity, $result->getEntity());
     }
 
     public function testReplaceListReturnsProblemResultOnUpdateException()
@@ -1499,7 +1499,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->getList();
         $this->assertInstanceOf('ZF\Hal\Entity', $result);
-        $this->assertSame($entity, $result->entity);
+        $this->assertSame($entity, $result->getEntity());
     }
 
     public function methods()
