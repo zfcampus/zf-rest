@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file, in reverse 
 - [#99](https://github.com/zfcampus/zf-rest/pull/99) adds support for v3
   releases of Zend Framework components, while retaining compatibility for v2
   releases.
+- [#96](https://github.com/zfcampus/zf-rest/pull/96) adds a `Content-Location`
+  header to responses returned from `RestController::create()`, per
+  [RFC 7231](https://tools.ietf.org/html/rfc7231#section-3.1.4.2).
 
 ### Deprecated
 

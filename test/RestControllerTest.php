@@ -230,10 +230,21 @@ class RestControllerTest extends TestCase
     /**
      * @depends testCreateReturnsHalEntityOnSuccess
      */
-    public function testSuccessfulCreationWithEntityIdentifierSetsResponseLocationheader($response)
+    public function testSuccessfulCreationWithEntityIdentifierSetsResponseLocationHeader($response)
     {
         $headers = $response->getHeaders();
         $this->assertTrue($headers->has('Location'));
+    }
+
+    /**
+     * @group 95
+     * @group 96
+     * @depends testCreateReturnsHalEntityOnSuccess
+     */
+    public function testSuccessfulCreationWithEntityIdentifierSetsResponseContentLocationHeader($response)
+    {
+        $headers = $response->getHeaders();
+        $this->assertTrue($headers->has('Content-Location'));
     }
 
     public function testFalseFromDeleteEntityReturnsProblemApiResult()
@@ -1796,6 +1807,25 @@ class RestControllerTest extends TestCase
 
         $headers = $response->getHeaders();
         $this->assertTrue($headers->has('Location'));
-        $this->assertNotContains('true', $headers->get('Location')->getFieldValue());
+
+        $location = $headers->get('Location')->getFieldValue();
+        $this->assertContains('http://localhost.localdomain/resource/foo', $location);
+        $this->assertNotContains('true', $location);
+
+        return $headers;
+    }
+
+    /**
+     * @group 95
+     * @group 96
+     * @depends testLocationHeaderGeneratedDuringCreateContainsOnlyLinkHref
+     */
+    public function testContentLocationHeaderIsGeneratedOnlyFromLinkHref($headers)
+    {
+        $this->assertTrue($headers->has('Content-Location'));
+        $location = $headers->get('Content-Location')->getFieldValue();
+
+        $this->assertContains('http://localhost.localdomain/resource/foo', $location);
+        $this->assertNotContains('true', $location);
     }
 }
