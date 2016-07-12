@@ -6,12 +6,15 @@
 
 namespace ZF\Rest;
 
-use Zend\EventManager\AbstractListenerAggregate;
+use Zend\EventManager\ListenerAggregateInterface;
+use Zend\EventManager\ListenerAggregateTrait;
 use Zend\EventManager\EventManagerInterface;
 use ZF\ApiProblem\ApiProblem;
 
-abstract class AbstractResourceListener extends AbstractListenerAggregate
+abstract class AbstractResourceListener implements ListenerAggregateInterface
 {
+    use ListenerAggregateTrait;
+
     /**
      * @var ResourceEvent
      */
@@ -127,17 +130,17 @@ abstract class AbstractResourceListener extends AbstractListenerAggregate
      *
      * @param  EventManagerInterface $events
      */
-    public function attach(EventManagerInterface $events)
+    public function attach(EventManagerInterface $events, $priority = 1)
     {
-        $events->attach('create', [$this, 'dispatch']);
-        $events->attach('delete', [$this, 'dispatch']);
-        $events->attach('deleteList', [$this, 'dispatch']);
-        $events->attach('fetch', [$this, 'dispatch']);
-        $events->attach('fetchAll', [$this, 'dispatch']);
-        $events->attach('patch', [$this, 'dispatch']);
-        $events->attach('patchList', [$this, 'dispatch']);
-        $events->attach('replaceList', [$this, 'dispatch']);
-        $events->attach('update', [$this, 'dispatch']);
+        $this->listeners[] = $events->attach('create', [$this, 'dispatch']);
+        $this->listeners[] = $events->attach('delete', [$this, 'dispatch']);
+        $this->listeners[] = $events->attach('deleteList', [$this, 'dispatch']);
+        $this->listeners[] = $events->attach('fetch', [$this, 'dispatch']);
+        $this->listeners[] = $events->attach('fetchAll', [$this, 'dispatch']);
+        $this->listeners[] = $events->attach('patch', [$this, 'dispatch']);
+        $this->listeners[] = $events->attach('patchList', [$this, 'dispatch']);
+        $this->listeners[] = $events->attach('replaceList', [$this, 'dispatch']);
+        $this->listeners[] = $events->attach('update', [$this, 'dispatch']);
     }
 
     /**

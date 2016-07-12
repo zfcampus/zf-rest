@@ -7,10 +7,12 @@
 namespace ZF\Rest;
 
 use ArrayAccess;
+use InvalidArgumentException;
 use Zend\EventManager\Event;
-use Zend\EventManager\Exception\InvalidArgumentException;
+use Zend\EventManager\Exception\InvalidArgumentException as EventManagerInvalidArgumentException;
 use Zend\InputFilter\InputFilterInterface;
-use Zend\Mvc\Router\RouteMatch;
+use Zend\Mvc\Router\RouteMatch as V2RouteMatch;
+use Zend\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
 use Zend\Stdlib\RequestInterface;
 use ZF\MvcAuth\Identity\IdentityInterface;
@@ -51,7 +53,7 @@ class ResourceEvent extends Event
     public function setParams($params)
     {
         if (! is_array($params) && ! is_object($params)) {
-            throw new InvalidArgumentException(sprintf(
+            throw new EventManagerInvalidArgumentException(sprintf(
                 'Event parameters must be an array or object; received "%s"',
                 gettype($params)
             ));
@@ -160,17 +162,26 @@ class ResourceEvent extends Event
     }
 
     /**
-     * @param RouteMatch $matches
+     * @param RouteMatch|V2RouteMatch $matches
      * @return self
      */
-    public function setRouteMatch(RouteMatch $matches = null)
+    public function setRouteMatch($matches = null)
     {
+        if (null !== $matches && ! ($matches instanceof RouteMatch || $matches instanceof V2RouteMatch)) {
+            throw new InvalidArgumentException(sprintf(
+                '%s expects a null or %s or %s instances; received %s',
+                __METHOD__,
+                RouteMatch::class,
+                V2RouteMatch::class,
+                (is_object($matches) ? get_class($matches) : gettype($matches))
+            ));
+        }
         $this->routeMatch = $matches;
         return $this;
     }
 
     /**
-     * @return null|RouteMatch
+     * @return null|RouteMatch|V2RouteMatch
      */
     public function getRouteMatch()
     {

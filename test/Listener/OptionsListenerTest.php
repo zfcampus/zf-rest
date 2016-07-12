@@ -8,28 +8,31 @@ namespace ZFTest\Rest\Listener;
 
 use PHPUnit_Framework_TestCase as TestCase;
 use Zend\EventManager\EventManager;
+use Zend\EventManager\Test\EventListenerIntrospectionTrait;
 use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\Mvc\MvcEvent;
-use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Request as StdlibRequest;
 use ZF\Rest\Listener\OptionsListener;
+use ZFTest\Rest\RouteMatchFactoryTrait;
 
 class OptionsListenerTest extends TestCase
 {
+    use EventListenerIntrospectionTrait;
+    use RouteMatchFactoryTrait;
+
     public function testListenerRegistersAtExpectedPriority()
     {
         $listener = new OptionsListener([]);
         $events   = new EventManager();
         $listener->attach($events);
-        $listeners = $events->getListeners('route');
-        $this->assertEquals(1, count($listeners));
-        foreach ($listeners as $test) {
-            break;
-        }
-        $this->assertInstanceOf('Zend\Stdlib\CallbackHandler', $test);
-        $this->assertEquals([$listener, 'onRoute'], $test->getCallback());
-        $this->assertEquals(-100, $test->getMetadatum('priority'));
+
+        $this->assertListenerAtPriority(
+            [$listener, 'onRoute'],
+            -100,
+            'route',
+            $events
+        );
     }
 
     public function seedListenerConfig()
@@ -181,7 +184,7 @@ class OptionsListenerTest extends TestCase
         $listener = new OptionsListener($this->seedListenerConfig());
         $request  = new Request();
         $request->setMethod($method);
-        $matches  = new RouteMatch($matchParams);
+        $matches  = $this->createRouteMatch($matchParams);
         $mvcEvent = new MvcEvent();
         $mvcEvent->setRequest($request);
         $mvcEvent->setRouteMatch($matches);
@@ -197,7 +200,7 @@ class OptionsListenerTest extends TestCase
     {
         $listener = new OptionsListener($this->seedListenerConfig());
         $request  = new StdlibRequest();
-        $matches  = new RouteMatch($matchParams);
+        $matches  = $this->createRouteMatch($matchParams);
         $mvcEvent = new MvcEvent();
         $mvcEvent->setRequest($request);
         $mvcEvent->setRouteMatch($matches);
@@ -226,7 +229,7 @@ class OptionsListenerTest extends TestCase
         $listener = new OptionsListener($this->seedListenerConfig());
         $request  = new Request();
         $request->setMethod('GET');
-        $matches  = new RouteMatch([]);
+        $matches  = $this->createRouteMatch([]);
         $mvcEvent = new MvcEvent();
         $mvcEvent->setRequest($request);
         $mvcEvent->setResponse(new Response());
@@ -238,7 +241,7 @@ class OptionsListenerTest extends TestCase
     {
         $listener = new OptionsListener($this->seedListenerConfig());
         $request  = new Request('GET');
-        $matches  = new RouteMatch([
+        $matches  = $this->createRouteMatch([
             'controller' => 'controller-without-config',
         ]);
         $mvcEvent = new MvcEvent();
@@ -258,7 +261,7 @@ class OptionsListenerTest extends TestCase
         $listener = new OptionsListener($this->seedListenerConfig());
         $request  = new Request();
         $request->setMethod($method);
-        $matches  = new RouteMatch($matchParams);
+        $matches  = $this->createRouteMatch($matchParams);
         $mvcEvent = new MvcEvent();
         $mvcEvent->setRequest($request);
         $mvcEvent->setRouteMatch($matches);
