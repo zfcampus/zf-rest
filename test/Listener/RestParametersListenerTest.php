@@ -70,7 +70,9 @@ class RestParametersListenerTest extends TestCase
         $this->listener->attachShared($sharedEventManager);
 
         // Vary identifiers based on zend-eventmanager version
-        $identifiers = method_exists($sharedEventManager, 'getEvents') ? RestController::class : [RestController::class];
+        $identifiers = method_exists($sharedEventManager, 'getEvents')
+            ? RestController::class
+            : [RestController::class];
         $listeners = $sharedEventManager->getListeners($identifiers, MvcEvent::EVENT_DISPATCH);
 
         $this->assertEquals(1, count($listeners));
@@ -84,7 +86,9 @@ class RestParametersListenerTest extends TestCase
         $this->listener->detachShared($sharedEventManager);
 
         // Vary identifiers based on zend-eventmanager version
-        $identifiers = method_exists($sharedEventManager, 'getEvents') ? RestController::class : [RestController::class];
+        $identifiers = method_exists($sharedEventManager, 'getEvents')
+            ? RestController::class
+            : [RestController::class];
         $listeners = $sharedEventManager->getListeners($identifiers, MvcEvent::EVENT_DISPATCH);
 
         $this->assertEquals(0, count($listeners));
