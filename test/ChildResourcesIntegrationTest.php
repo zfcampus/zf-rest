@@ -70,11 +70,15 @@ class ChildResourcesIntegrationTest extends TestCase
         $helpers->setService('url', $urlHelper);
         $helpers->setService('serverUrl', $serverUrlHelper);
         $helpers->setService('hal', $linksHelper);
-        $helpers->setAlias('Hal', 'hal');
+        if (method_exists($helpers, 'configure')) {
+            $helpers->setAlias('Hal', 'hal');
+        }
 
         $this->plugins = $plugins = new ControllerPluginManager($services);
         $plugins->setService('hal', $linksHelper);
-        $plugins->setAlias('Hal', 'hal');
+        if (method_exists($plugins, 'configure')) {
+            $plugins->setAlias('Hal', 'hal');
+        }
     }
 
     public function setupRenderer()

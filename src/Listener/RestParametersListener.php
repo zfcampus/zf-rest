@@ -20,11 +20,6 @@ class RestParametersListener implements ListenerAggregateInterface
     /**
      * @var \Zend\Stdlib\CallbackHandler[]
      */
-    protected $listeners = [];
-
-    /**
-     * @var \Zend\Stdlib\CallbackHandler[]
-     */
     protected $sharedListeners = [];
 
     /**

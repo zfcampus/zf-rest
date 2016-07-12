@@ -79,7 +79,9 @@ class CollectionIntegrationTest extends TestCase
         $helpers->setService('url', $urlHelper);
         $helpers->setService('serverUrl', $serverUrlHelper);
         $helpers->setService('hal', $linksHelper);
-        $helpers->setAlias('Hal', 'hal');
+        if (method_exists($helpers, 'configure')) {
+            $helpers->setAlias('Hal', 'hal');
+        }
     }
 
     public function setUpRenderer()
@@ -166,7 +168,9 @@ class CollectionIntegrationTest extends TestCase
     {
         $plugins = new ControllerPluginManager($this->prophesize(ContainerInterface::class)->reveal());
         $plugins->setService('hal', $this->linksHelper);
-        $plugins->setAlias('Hal', 'hal');
+        if (method_exists($plugins, 'configure')) {
+            $plugins->setAlias('Hal', 'hal');
+        }
         $controller->setPluginManager($plugins);
 
         $viewModelSelector = $plugins->get('AcceptableViewModelSelector');
@@ -324,7 +328,9 @@ class CollectionIntegrationTest extends TestCase
 
         $plugins = $services->get('ControllerPluginManager');
         $plugins->setService('hal', $this->linksHelper);
-        $plugins->setAlias('Hal', 'hal');
+        if (method_exists($plugins, 'configure')) {
+            $plugins->setAlias('Hal', 'hal');
+        }
 
         return $services;
     }

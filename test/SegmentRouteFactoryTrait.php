@@ -6,7 +6,7 @@
 
 namespace ZFTest\Rest;
 
-use Zend\Mvc\Router\Http\SegmentRoute as V2SegmentRoute;
+use Zend\Mvc\Router\Http\Segment as V2SegmentRoute;
 use Zend\Router\Http\Segment as SegmentRoute;
 
 trait SegmentRouteFactoryTrait
