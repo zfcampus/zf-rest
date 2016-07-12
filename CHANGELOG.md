@@ -23,3 +23,6 @@ All notable changes to this project will be documented in this file, in reverse 
 - [#70](https://github.com/zfcampus/zf-rest/pull/70) updates how the
   `RestController` retrieves the identifier from `ZF\Hal\Entity` instances to
   use the new `getId()` method introduced in zf-hal 1.4.
+- [#94](https://github.com/zfcampus/zf-rest/pull/94) updates the
+  `RestController` to return Problem Details with a status of 400 if the
+  page size requested by the client is below zero.
