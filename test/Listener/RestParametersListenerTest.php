@@ -6,28 +6,31 @@
 
 namespace ZFTest\Rest\Listener;
 
+use PHPUnit_Framework_TestCase as TestCase;
 use Zend\EventManager\SharedEventManager;
+use Zend\Http\PhpEnvironment\Request;
+use Zend\Mvc\Controller\AbstractRestfulController;
+use Zend\Mvc\MvcEvent;
+use Zend\Stdlib\Parameters;
 use ZF\Rest\Listener\RestParametersListener;
 use ZF\Rest\Resource;
 use ZF\Rest\RestController;
-use PHPUnit_Framework_TestCase as TestCase;
-use Zend\Http\PhpEnvironment\Request;
-use Zend\Mvc\MvcEvent;
-use Zend\Mvc\Router\RouteMatch;
-use Zend\Stdlib\Parameters;
+use ZFTest\Rest\RouteMatchFactoryTrait;
 
 /**
  * @subpackage UnitTest
  */
 class RestParametersListenerTest extends TestCase
 {
+    use RouteMatchFactoryTrait;
+
     public function setUp()
     {
         $this->resource   = $resource   = new Resource();
         $this->controller = $controller = new RestController();
         $controller->setResource($resource);
 
-        $this->matches    = $matches    = new RouteMatch([]);
+        $this->matches    = $matches    = $this->createRouteMatch([]);
         $this->query      = $query      = new Parameters();
         $this->request    = $request    = new Request();
         $request->setQuery($query);
@@ -42,7 +45,7 @@ class RestParametersListenerTest extends TestCase
 
     public function testIgnoresNonRestControllers()
     {
-        $controller = $this->getMock('Zend\Mvc\Controller\AbstractRestfulController');
+        $controller = $this->getMockBuilder(AbstractRestfulController::class)->getMock();
         $this->event->setTarget($controller);
         $this->listener->onDispatch($this->event);
         $this->assertNull($this->resource->getRouteMatch());
@@ -64,22 +67,26 @@ class RestParametersListenerTest extends TestCase
     public function testAttachSharedAttachOneListenerOnEventDispatch()
     {
         $sharedEventManager = new SharedEventManager();
-        $sharedEventManager->attachAggregate($this->listener);
+        $this->listener->attachShared($sharedEventManager);
 
-        $listener = $sharedEventManager->getListeners('ZF\Rest\RestController', MvcEvent::EVENT_DISPATCH);
+        // Vary identifiers based on zend-eventmanager version
+        $identifiers = method_exists($sharedEventManager, 'getEvents') ? RestController::class : [RestController::class];
+        $listeners = $sharedEventManager->getListeners($identifiers, MvcEvent::EVENT_DISPATCH);
 
-        $this->assertEquals(1, $listener->count());
+        $this->assertEquals(1, count($listeners));
     }
 
     public function testDetachSharedDetachAttachedListener()
     {
         $sharedEventManager = new SharedEventManager();
-        $sharedEventManager->attachAggregate($this->listener);
+        $this->listener->attachShared($sharedEventManager);
 
-        $sharedEventManager->detachAggregate($this->listener);
+        $this->listener->detachShared($sharedEventManager);
 
-        $listener = $sharedEventManager->getListeners('ZF\Rest\RestController', MvcEvent::EVENT_DISPATCH);
+        // Vary identifiers based on zend-eventmanager version
+        $identifiers = method_exists($sharedEventManager, 'getEvents') ? RestController::class : [RestController::class];
+        $listeners = $sharedEventManager->getListeners($identifiers, MvcEvent::EVENT_DISPATCH);
 
-        $this->assertEquals(0, $listener->count());
+        $this->assertEquals(0, count($listeners));
     }
 }

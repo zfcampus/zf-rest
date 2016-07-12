@@ -6,6 +6,7 @@
 
 namespace ZF\Rest\Factory;
 
+use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use ZF\Rest\Listener\OptionsListener;
@@ -13,20 +14,51 @@ use ZF\Rest\Listener\OptionsListener;
 class OptionsListenerFactory implements FactoryInterface
 {
     /**
-     * @param ServiceLocatorInterface $services
+     * Create and return an OptionsListener instance.
+     *
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param null|array $options
      * @return OptionsListener
      */
-    public function createService(ServiceLocatorInterface $services)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config = [];
-        if ($services->has('Config')) {
-            $allConfig = $services->get('Config');
-            if (array_key_exists('zf-rest', $allConfig)
-                && is_array($allConfig['zf-rest'])
-            ) {
-                $config = $allConfig['zf-rest'];
-            }
+        return new OptionsListener($this->getConfig($container));
+    }
+
+    /**
+     * Create and return an OptionsListener instance (v2).
+     *
+     * Provided for backwards compatibility; proxies to __invoke().
+     *
+     * @param ServiceLocatorInterface $container
+     * @return OptionsListener
+     */
+    public function createService(ServiceLocatorInterface $container)
+    {
+        return $this($container, OptionsListener::class);
+    }
+
+    /**
+     * Retrieve zf-rest config from the container, if available.
+     *
+     * @param ContainerInterface $container
+     * @return array
+     */
+    private function getConfig(ContainerInterface $container)
+    {
+        if (! $container->has('config')) {
+            return [];
         }
-        return new OptionsListener($config);
+
+        $config = $container->get('config');
+
+        if (! array_key_exists('zf-rest', $config)
+            || ! is_array($config['zf-rest'])
+        ) {
+            return [];
+        }
+
+        return $config['zf-rest'];
     }
 }

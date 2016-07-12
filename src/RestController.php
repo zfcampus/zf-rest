@@ -368,6 +368,8 @@ class RestController extends AbstractRestfulController
 
         try {
             $value = $this->getResource()->create($data);
+        } catch (\Throwable $e) {
+            return $this->createApiProblemFromException($e);
         } catch (\Exception $e) {
             return $this->createApiProblemFromException($e);
         }
@@ -423,6 +425,8 @@ class RestController extends AbstractRestfulController
 
         try {
             $result = $this->getResource()->delete($id);
+        } catch (\Throwable $e) {
+            return $this->createApiProblemFromException($e);
         } catch (\Exception $e) {
             return $this->createApiProblemFromException($e);
         }
@@ -454,6 +458,8 @@ class RestController extends AbstractRestfulController
 
         try {
             $result = $this->getResource()->deleteList($data);
+        } catch (\Throwable $e) {
+            return $this->createApiProblemFromException($e);
         } catch (\Exception $e) {
             return $this->createApiProblemFromException($e);
         }
@@ -486,6 +492,8 @@ class RestController extends AbstractRestfulController
 
         try {
             $entity = $this->getResource()->fetch($id);
+        } catch (\Throwable $e) {
+            return $this->createApiProblemFromException($e);
         } catch (\Exception $e) {
             return $this->createApiProblemFromException($e);
         }
@@ -519,6 +527,8 @@ class RestController extends AbstractRestfulController
 
         try {
             $collection = $this->getResource()->fetchAll();
+        } catch (\Throwable $e) {
+            return $this->createApiProblemFromException($e);
         } catch (\Exception $e) {
             return $this->createApiProblemFromException($e);
         }
@@ -630,6 +640,8 @@ class RestController extends AbstractRestfulController
 
         try {
             $entity = $this->getResource()->patch($id, $data);
+        } catch (\Throwable $e) {
+            return $this->createApiProblemFromException($e);
         } catch (\Exception $e) {
             return $this->createApiProblemFromException($e);
         }
@@ -665,6 +677,8 @@ class RestController extends AbstractRestfulController
 
         try {
             $entity = $this->getResource()->update($id, $data);
+        } catch (\Throwable $e) {
+            return $this->createApiProblemFromException($e);
         } catch (\Exception $e) {
             return $this->createApiProblemFromException($e);
         }
@@ -699,6 +713,8 @@ class RestController extends AbstractRestfulController
 
         try {
             $collection = $this->getResource()->patchList($data);
+        } catch (\Throwable $e) {
+            return $this->createApiProblemFromException($e);
         } catch (\Exception $e) {
             return $this->createApiProblemFromException($e);
         }
@@ -732,6 +748,8 @@ class RestController extends AbstractRestfulController
             $collection = $this->getResource()->replaceList($data);
         } catch (Exception\InvalidArgumentException $e) {
             return new ApiProblem(400, $e->getMessage());
+        } catch (\Throwable $e) {
+            return $this->createApiProblemFromException($e);
         } catch (\Exception $e) {
             return $this->createApiProblemFromException($e);
         }
@@ -964,8 +982,8 @@ class RestController extends AbstractRestfulController
      */
     protected function createHalEntity($entity)
     {
-        if ($entity instanceof HalEntity &&
-            ($entity->getLinks()->has('self') || ! $entity->getId())
+        if ($entity instanceof HalEntity
+            && ($entity->getLinks()->has('self') || ! $entity->getId())
         ) {
             return $entity;
         }

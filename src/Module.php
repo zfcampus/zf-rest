@@ -34,9 +34,9 @@ class Module
         $services     = $app->getServiceManager();
         $events       = $app->getEventManager();
 
-        $events->attachAggregate($services->get('ZF\Rest\OptionsListener'));
+        $services->get('ZF\Rest\OptionsListener')->attach($events);
 
         $sharedEvents = $events->getSharedManager();
-        $sharedEvents->attachAggregate($services->get('ZF\Rest\RestParametersListener'));
+        $services->get('ZF\Rest\RestParametersListener')->attachShared($sharedEvents);
     }
 }

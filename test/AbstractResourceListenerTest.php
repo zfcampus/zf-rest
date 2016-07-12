@@ -30,7 +30,7 @@ class AbstractResourceListenerTest extends TestCase
         $this->resource->setEventManager($events);
 
         $this->listener = new TestAsset\TestResourceListener($this);
-        $events->attach($this->listener);
+        $this->listener->attach($events);
     }
 
     public function events()

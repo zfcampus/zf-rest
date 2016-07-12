@@ -9,16 +9,17 @@ namespace ZFTest\Rest;
 use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Http\Request as HttpRequest;
 use Zend\InputFilter\InputFilter;
-use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
 use ZF\MvcAuth\Identity\GuestIdentity;
 use ZF\Rest\ResourceEvent;
 
 class ResourceEventTest extends TestCase
 {
+    use RouteMatchFactoryTrait;
+
     public function setUp()
     {
-        $this->matches = new RouteMatch([
+        $this->matches = $this->createRouteMatch([
             'foo' => 'bar',
             'baz' => 'inga',
         ]);

@@ -9,14 +9,14 @@ namespace ZF\Rest\Listener;
 use ZF\Rest\RestController;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateInterface;
+use Zend\EventManager\ListenerAggregateTrait;
 use Zend\EventManager\SharedEventManagerInterface;
-use Zend\EventManager\SharedListenerAggregateInterface;
 use Zend\Mvc\MvcEvent;
 
-class RestParametersListener implements
-    ListenerAggregateInterface,
-    SharedListenerAggregateInterface
+class RestParametersListener implements ListenerAggregateInterface
 {
+    use ListenerAggregateTrait;
+
     /**
      * @var \Zend\Stdlib\CallbackHandler[]
      */
@@ -30,21 +30,9 @@ class RestParametersListener implements
     /**
      * @param EventManagerInterface $events
      */
-    public function attach(EventManagerInterface $events)
+    public function attach(EventManagerInterface $events, $priority = 1)
     {
         $this->listeners[] = $events->attach(MvcEvent::EVENT_DISPATCH, [$this, 'onDispatch'], 100);
-    }
-
-    /**
-     * @param EventManagerInterface $events
-     */
-    public function detach(EventManagerInterface $events)
-    {
-        foreach ($this->listeners as $index => $listener) {
-            if ($events->detach($listener)) {
-                unset($this->listeners[$index]);
-            }
-        }
     }
 
     /**
@@ -52,12 +40,18 @@ class RestParametersListener implements
      */
     public function attachShared(SharedEventManagerInterface $events)
     {
-        $this->sharedListeners[] = $events->attach(
-            'ZF\Rest\RestController',
+        $listener = $events->attach(
+            RestController::class,
             MvcEvent::EVENT_DISPATCH,
             [$this, 'onDispatch'],
             100
         );
+
+        if (! $listener) {
+            $listener = [$this, 'onDispatch'];
+        }
+
+        $this->sharedListeners[] = $listener;
     }
 
     /**
@@ -65,9 +59,19 @@ class RestParametersListener implements
      */
     public function detachShared(SharedEventManagerInterface $events)
     {
+        $eventManagerVersion = method_exists($events, 'getEvents') ? 2 : 3;
         foreach ($this->sharedListeners as $index => $listener) {
-            if ($events->detach('ZF\Rest\RestController', $listener)) {
-                unset($this->sharedListeners[$index]);
+            switch ($eventManagerVersion) {
+                case 2:
+                    if ($events->detach(RestController::class, $listener)) {
+                        unset($this->sharedListeners[$index]);
+                    }
+                    break;
+                case 3:
+                    if ($events->detach($listener, RestController::class, MvcEvent::EVENT_DISPATCH)) {
+                        unset($this->sharedListeners[$index]);
+                    }
+                    break;
             }
         }
     }

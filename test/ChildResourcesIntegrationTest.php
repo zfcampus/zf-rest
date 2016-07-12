@@ -6,11 +6,11 @@
 
 namespace ZFTest\Rest;
 
+use Interop\Container\ContainerInterface;
 use PHPUnit_Framework_TestCase as TestCase;
 use ReflectionObject;
 use Zend\Http\Request;
 use Zend\Mvc\Controller\PluginManager as ControllerPluginManager;
-use Zend\Mvc\Router\Http\TreeRouteStack;
 use Zend\View\HelperPluginManager;
 use Zend\View\Helper\ServerUrl as ServerUrlHelper;
 use Zend\View\Helper\Url as UrlHelper;
@@ -20,6 +20,7 @@ use ZF\Hal\Entity as HalEntity;
 use ZF\Hal\Extractor\LinkCollectionExtractor;
 use ZF\Hal\Extractor\LinkExtractor;
 use ZF\Hal\Link\Link;
+use ZF\Hal\Link\LinkUrlBuilder;
 use ZF\Hal\Plugin\Hal as HalHelper;
 use ZF\Hal\View\HalJsonModel;
 use ZF\Hal\View\HalJsonRenderer;
@@ -31,6 +32,9 @@ use ZF\Rest\RestController;
  */
 class ChildResourcesIntegrationTest extends TestCase
 {
+    use RouteMatchFactoryTrait;
+    use TreeRouteStackFactoryTrait;
+
     public function setUp()
     {
         $this->setupRouter();
@@ -44,6 +48,8 @@ class ChildResourcesIntegrationTest extends TestCase
             $this->setupRouter();
         }
 
+        $services = $this->prophesize(ContainerInterface::class)->reveal();
+
         $urlHelper = new UrlHelper();
         $urlHelper->setRouter($this->router);
 
@@ -51,21 +57,24 @@ class ChildResourcesIntegrationTest extends TestCase
         $serverUrlHelper->setScheme('http');
         $serverUrlHelper->setHost('localhost.localdomain');
 
-        $linksHelper = new HalHelper();
-        $linksHelper->setUrlHelper($urlHelper);
-        $linksHelper->setServerUrlHelper($serverUrlHelper);
+        $linkUrlBuilder = new LinkUrlBuilder($serverUrlHelper, $urlHelper);
 
-        $linkExtractor = new LinkExtractor($serverUrlHelper, $urlHelper);
+        $linksHelper = new HalHelper();
+        $linksHelper->setLinkUrlBuilder($linkUrlBuilder);
+
+        $linkExtractor = new LinkExtractor($linkUrlBuilder);
         $linkCollectionExtractor = new LinkCollectionExtractor($linkExtractor);
         $linksHelper->setLinkCollectionExtractor($linkCollectionExtractor);
 
-        $this->helpers = $helpers = new HelperPluginManager();
+        $this->helpers = $helpers = new HelperPluginManager($services);
         $helpers->setService('url', $urlHelper);
         $helpers->setService('serverUrl', $serverUrlHelper);
         $helpers->setService('hal', $linksHelper);
+        $helpers->setAlias('Hal', 'hal');
 
-        $this->plugins = $plugins = new ControllerPluginManager();
+        $this->plugins = $plugins = new ControllerPluginManager($services);
         $plugins->setService('hal', $linksHelper);
+        $plugins->setAlias('Hal', 'hal');
     }
 
     public function setupRenderer()
@@ -102,7 +111,7 @@ class ChildResourcesIntegrationTest extends TestCase
                 ],
             ],
         ];
-        $this->router = $router = new TreeRouteStack();
+        $this->router = $router = $this->createTreeRouteStack();
         $router->addRoutes($routes);
     }
 
@@ -187,7 +196,7 @@ class ChildResourcesIntegrationTest extends TestCase
                 ],
             ],
         ];
-        $this->router = $router = new TreeRouteStack();
+        $this->router = $router = $this->createTreeRouteStack();
         $router->addRoutes($routes);
         $this->helpers->get('url')->setRouter($router);
     }
@@ -215,7 +224,7 @@ class ChildResourcesIntegrationTest extends TestCase
         $request = new Request();
         $request->setUri($uri);
         $matches = $this->router->match($request);
-        $this->assertInstanceOf('Zend\Mvc\Router\RouteMatch', $matches);
+        $this->assertInstanceOf($this->getRouteMatchClass(), $matches);
         $this->assertEquals('anakin', $matches->getParam('id'));
         $this->assertEquals('luke', $matches->getParam('child_id'));
         $this->assertEquals('parent/child', $matches->getMatchedRouteName());
@@ -266,7 +275,7 @@ class ChildResourcesIntegrationTest extends TestCase
         $request = new Request();
         $request->setUri($uri);
         $matches = $this->router->match($request);
-        $this->assertInstanceOf('Zend\Mvc\Router\RouteMatch', $matches);
+        $this->assertInstanceOf($this->getRouteMatchClass(), $matches);
         $this->assertEquals('anakin', $matches->getParam('id'));
         $this->assertNull($matches->getParam('child_id'));
         $this->assertEquals('parent/child', $matches->getMatchedRouteName());

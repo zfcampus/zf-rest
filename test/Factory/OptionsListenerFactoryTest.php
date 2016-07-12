@@ -10,6 +10,7 @@ use PHPUnit_Framework_TestCase as TestCase;
 use ReflectionObject;
 use Zend\ServiceManager\ServiceManager;
 use ZF\Rest\Factory\OptionsListenerFactory;
+use ZF\Rest\Listener\OptionsListener;
 
 class OptionsListenerFactoryTest extends TestCase
 {
@@ -37,11 +38,11 @@ class OptionsListenerFactoryTest extends TestCase
     public function testFactoryCreatesOptionsListenerFromRestConfiguration()
     {
         $config = $this->seedConfigService();
-        $this->services->setService('Config', $config);
+        $this->services->setService('config', $config);
 
         $listener = $this->factory->createService($this->services);
 
-        $this->assertInstanceOf('ZF\Rest\Listener\OptionsListener', $listener);
+        $this->assertInstanceOf(OptionsListener::class, $listener);
 
         $r = new ReflectionObject($listener);
         $p = $r->getProperty('config');
