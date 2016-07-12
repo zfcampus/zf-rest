@@ -30,7 +30,7 @@ All notable changes to this project will be documented in this file, in reverse 
   `RestController` to return Problem Details with a status of 400 if the
   page size requested by the client is below zero.
 
-## 1.2.1 - TBD
+## 1.2.1 - 2016-07-12
 
 ### Added
 
