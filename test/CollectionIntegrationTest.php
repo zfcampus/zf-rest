@@ -7,6 +7,7 @@
 namespace ZFTest\Rest;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use ReflectionMethod;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Http\PhpEnvironment\Response;
 use Zend\Mvc\Controller\ControllerManager;
@@ -249,12 +250,27 @@ class CollectionIntegrationTest extends TestCase
         }
     }
 
+    public function createControllerManager(ServiceManager $container)
+    {
+        $r = new ReflectionMethod(ControllerManager::class, '__construct');
+        $args = $r->getParameters();
+        $first = array_shift($args);
+
+        if ($first->getName() === 'configuration') {
+            $controllers = new ControllerManager();
+            $controllers->setServiceLocator($container);
+            return $controllers;
+        }
+
+        return new ControllerManager($container);
+    }
+
     public function getServiceManager()
     {
-        $controllers = new ControllerManager();
+        $services    = new ServiceManager();
+        $controllers = $this->createControllerManager($services);
         $controllers->addAbstractFactory('ZF\Rest\Factory\RestControllerFactory');
 
-        $services    = new ServiceManager();
         $services->setService('Zend\ServiceManager\ServiceLocatorInterface', $services);
         $services->setService('ControllerLoader', $controllers);
         $services->setService('Config', [
