@@ -2,11 +2,13 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 1.3.1 - TBD
+## 1.3.1 - 2016-07-12
 
 ### Added
 
-- Nothing.
+- [#100](https://github.com/zfcampus/zf-rest/pull/100) adds configuration to the
+  `composer.json` to allow zend-component-installer to auto-inject the
+  `ZF\Rest` module into application configuration during installation.
 
 ### Deprecated
 
