@@ -26,3 +26,24 @@ All notable changes to this project will be documented in this file, in reverse 
 - [#94](https://github.com/zfcampus/zf-rest/pull/94) updates the
   `RestController` to return Problem Details with a status of 400 if the
   page size requested by the client is below zero.
+
+## 1.2.1 - TBD
+
+### Added
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#97](https://github.com/zfcampus/zf-rest/pull/97) fixes `Location` header
+  generation in the `RestController::create()` method to only use the `href`
+  property of the relational link; previously, if you'd defined additional
+  properties, these were also incorrectly serialized in the generated link.
