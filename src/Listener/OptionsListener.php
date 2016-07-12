@@ -6,14 +6,17 @@
 
 namespace ZF\Rest\Listener;
 
-use Zend\EventManager\AbstractListenerAggregate;
+use Zend\EventManager\ListenerAggregateInterface;
+use Zend\EventManager\ListenerAggregateTrait;
 use Zend\EventManager\EventManagerInterface;
 use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\Mvc\MvcEvent;
 
-class OptionsListener extends AbstractListenerAggregate
+class OptionsListener implements ListenerAggregateInterface
 {
+    use ListenerAggregateTrait;
+
     /**
      * @var array
      */
@@ -30,7 +33,7 @@ class OptionsListener extends AbstractListenerAggregate
     /**
      * @param  EventManagerInterface $events
      */
-    public function attach(EventManagerInterface $events)
+    public function attach(EventManagerInterface $events, $priority = 1)
     {
         $this->listeners[] = $events->attach(MvcEvent::EVENT_ROUTE, [$this, 'onRoute'], -100);
     }

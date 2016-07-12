@@ -8,25 +8,17 @@ namespace ZFTest\Rest\TestAsset;
 
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateInterface;
+use Zend\EventManager\ListenerAggregateTrait;
 
 class CollectionIntegrationListener implements ListenerAggregateInterface
 {
+    use ListenerAggregateTrait;
+
     public $collection;
 
-    protected $listeners = [];
-
-    public function attach(EventManagerInterface $events)
+    public function attach(EventManagerInterface $events, $priority = 1)
     {
         $this->listeners[] = $events->attach('fetchAll', [$this, 'onFetchAll']);
-    }
-
-    public function detach(EventManagerInterface $events)
-    {
-        foreach ($this->listeners as $index => $listener) {
-            if ($events->detach($listener)) {
-                unset($this->listeners[$index]);
-            }
-        }
     }
 
     public function setCollection($collection)

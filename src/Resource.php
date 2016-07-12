@@ -7,12 +7,14 @@
 namespace ZF\Rest;
 
 use ArrayObject;
+use InvalidArgumentException;
 use Traversable;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\EventManagerInterface;
 use Zend\Http\Response;
 use Zend\InputFilter\InputFilterInterface;
-use Zend\Mvc\Router\RouteMatch;
+use Zend\Mvc\Router\RouteMatch as V2RouteMatch;
+use Zend\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
 use ZF\ApiProblem\ApiProblem;
 use ZF\ApiProblem\ApiProblemResponse;
@@ -53,7 +55,7 @@ class Resource implements ResourceInterface
     protected $queryParams;
 
     /**
-     * @var null|RouteMatch
+     * @var null|RouteMatch|V2RouteMatch
      */
     protected $routeMatch;
 
@@ -130,17 +132,26 @@ class Resource implements ResourceInterface
     }
 
     /**
-     * @param RouteMatch $matches
+     * @param RouteMatch|V2RouteMatch $matches
      * @return self
      */
-    public function setRouteMatch(RouteMatch $matches)
+    public function setRouteMatch($matches)
     {
+        if (! ($matches instanceof RouteMatch || $matches instanceof V2RouteMatch)) {
+            throw new InvalidArgumentException(sprintf(
+                '%s expects a %s or %s instance; received %s',
+                __METHOD__,
+                RouteMatch::class,
+                V2RouteMatch::class,
+                (is_object($matches) ? get_class($matches) : gettype($matches))
+            ));
+        }
         $this->routeMatch = $matches;
         return $this;
     }
 
     /**
-     * @return null|RouteMatch
+     * @return null|RouteMatch|V2RouteMatch
      */
     public function getRouteMatch()
     {
@@ -527,15 +538,12 @@ class Resource implements ResourceInterface
      */
     protected function triggerEvent($name, array $args)
     {
-        $events  = $this->getEventManager();
-        $event   = $this->prepareEvent($name, $args);
-
-        return $events->trigger($event, function ($result) {
+        return $this->getEventManager()->triggerEventUntil(function ($result) {
             return ($result instanceof ApiProblem
                 || $result instanceof ApiProblemResponse
                 || $result instanceof Response
             );
-        });
+        }, $this->prepareEvent($name, $args));
     }
 
     /**

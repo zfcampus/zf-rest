@@ -6,16 +6,17 @@
 
 namespace ZF\Rest\Factory;
 
+use Interop\Container\ContainerInterface;
 use Zend\EventManager\Event;
-use Zend\Stdlib\Parameters;
-use ZF\Hal\Collection;
-use ZF\Rest\Resource;
-use ZF\Rest\RestController;
 use Zend\EventManager\ListenerAggregateInterface;
 use Zend\ServiceManager\AbstractFactoryInterface;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\Stdlib\Parameters;
+use ZF\Hal\Collection;
+use ZF\Rest\Resource;
+use ZF\Rest\RestController;
 
 /**
  * Class RestControllerFactory
@@ -29,38 +30,37 @@ class RestControllerFactory implements AbstractFactoryInterface
     protected $lookupCache = [];
 
     /**
-     * Determine if we can create a service with name
+     * Determine if we can create a service with name (v2).
      *
-     * @param ServiceLocatorInterface $controllers
-     * @param string                  $name
-     * @param string                  $requestedName
+     * Provided for backwards compatibility; proxies to canCreate().
+     *
+     * @param ContainerInterface $controllers
+     * @param string $requestedName
      * @return bool
      */
-    public function canCreateServiceWithName(ServiceLocatorInterface $controllers, $name, $requestedName)
+    public function canCreate(ContainerInterface $container, $requestedName)
     {
         if (array_key_exists($requestedName, $this->lookupCache)) {
             return $this->lookupCache[$requestedName];
         }
 
-        $services = $controllers->getServiceLocator();
-
-        if (!$services->has('Config') || !$services->has('EventManager')) {
+        if (! $container->has('config') || ! $container->has('EventManager')) {
             // Config and EventManager are required
             return false;
         }
 
-        $config = $services->get('Config');
-        if (!isset($config['zf-rest'])
-            || !is_array($config['zf-rest'])
+        $config = $container->get('config');
+        if (! isset($config['zf-rest'])
+            || ! is_array($config['zf-rest'])
         ) {
             $this->lookupCache[$requestedName] = false;
             return false;
         }
         $config = $config['zf-rest'];
 
-        if (!isset($config[$requestedName])
-            || !isset($config[$requestedName]['listener'])
-            || !isset($config[$requestedName]['route_name'])
+        if (! isset($config[$requestedName])
+            || ! isset($config[$requestedName]['listener'])
+            || ! isset($config[$requestedName]['route_name'])
         ) {
             // Configuration, and specifically the listener and route_name
             // keys, is required
@@ -68,8 +68,8 @@ class RestControllerFactory implements AbstractFactoryInterface
             return false;
         }
 
-        if (!$services->has($config[$requestedName]['listener'])
-            && !class_exists($config[$requestedName]['listener'])
+        if (! $container->has($config[$requestedName]['listener'])
+            && ! class_exists($config[$requestedName]['listener'])
         ) {
             // Service referenced by listener key is required
             $this->lookupCache[$requestedName] = false;
@@ -85,27 +85,42 @@ class RestControllerFactory implements AbstractFactoryInterface
     }
 
     /**
-     * Create service with name
+     * Determine if we can create a service with name (v2).
+     *
+     * Provided for backwards compatibility; proxies to canCreate().
      *
      * @param ServiceLocatorInterface $controllers
-     * @param string                  $name
-     * @param string                  $requestedName
+     * @param string $name
+     * @param string $requestedName
+     * @return bool
+     */
+    public function canCreateServiceWithName(ServiceLocatorInterface $controllers, $name, $requestedName)
+    {
+        $container = $controllers->getServiceLocator() ?: $controllers;
+        return $this->canCreate($container, $requestedName);
+    }
+
+    /**
+     * Create named controller instance
+     *
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param null|array $options
      * @return RestController
      * @throws ServiceNotCreatedException if listener specified is not a ListenerAggregate
      */
-    public function createServiceWithName(ServiceLocatorInterface $controllers, $name, $requestedName)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $services = $controllers->getServiceLocator();
-        $config   = $services->get('Config');
-        $config   = $config['zf-rest'][$requestedName];
+        $config = $container->get('config');
+        $config = $config['zf-rest'][$requestedName];
 
-        if ($services->has($config['listener'])) {
-            $listener = $services->get($config['listener']);
+        if ($container->has($config['listener'])) {
+            $listener = $container->get($config['listener']);
         } else {
             $listener = new $config['listener'];
         }
 
-        if (!$listener instanceof ListenerAggregateInterface) {
+        if (! $listener instanceof ListenerAggregateInterface) {
             throw new ServiceNotCreatedException(sprintf(
                 '%s expects that the "listener" reference a service that implements '
                 . 'Zend\EventManager\ListenerAggregateInterface; received %s',
@@ -116,15 +131,15 @@ class RestControllerFactory implements AbstractFactoryInterface
 
         $resourceIdentifiers = [get_class($listener)];
         if (isset($config['resource_identifiers'])) {
-            if (!is_array($config['resource_identifiers'])) {
+            if (! is_array($config['resource_identifiers'])) {
                 $config['resource_identifiers'] = (array) $config['resource_identifiers'];
             }
             $resourceIdentifiers = array_merge($resourceIdentifiers, $config['resource_identifiers']);
         }
 
-        $events = $services->get('EventManager');
-        $events->attach($listener);
+        $events = $container->get('EventManager');
         $events->setIdentifiers($resourceIdentifiers);
+        $listener->attach($events);
 
         $resource = new Resource();
         $resource->setEventManager($events);
@@ -137,13 +152,14 @@ class RestControllerFactory implements AbstractFactoryInterface
         $controllerClass = isset($config['controller_class']) ? $config['controller_class'] : 'ZF\Rest\RestController';
         $controller      = new $controllerClass($identifier);
 
-        if (!$controller instanceof RestController) {
+        if (! $controller instanceof RestController) {
             throw new ServiceNotCreatedException(sprintf(
                 '"%s" must be an implementation of ZF\Rest\RestController',
                 $controllerClass
             ));
         }
 
+        $controller->setEventManager($container->get('EventManager'));
         $controller->setResource($resource);
         $this->setControllerOptions($config, $controller);
 
@@ -159,10 +175,27 @@ class RestControllerFactory implements AbstractFactoryInterface
     }
 
     /**
+     * Create named controller instance (v2).
+     *
+     * Provided for backwards compatibility; proxies to __invoke().
+     *
+     * @param ServiceLocatorInterface $controllers
+     * @param string $name
+     * @param string $requestedName
+     * @return RestController
+     * @throws ServiceNotCreatedException if listener specified is not a ListenerAggregate
+     */
+    public function createServiceWithName(ServiceLocatorInterface $controllers, $name, $requestedName)
+    {
+        $container = $controllers->getServiceLocator() ?: $controllers;
+        return $this($container, $requestedName);
+    }
+
+    /**
      * Loop through configuration to discover and set controller options.
      *
-     * @param  array $config
-     * @param  RestController $controller
+     * @param array $config
+     * @param RestController $controller
      */
     protected function setControllerOptions(array $config, RestController $controller)
     {
@@ -180,7 +213,7 @@ class RestControllerFactory implements AbstractFactoryInterface
                     if (is_string($value)) {
                         $value = (array) $value;
                     }
-                    if (!is_array($value)) {
+                    if (! is_array($value)) {
                         break;
                     }
 

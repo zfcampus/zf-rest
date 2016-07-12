@@ -11,7 +11,6 @@ use PHPUnit_Framework_TestCase as TestCase;
 use stdClass;
 use Zend\EventManager\EventManager;
 use Zend\Http\Response;
-use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\ArrayObject;
 use Zend\Stdlib\Parameters;
 use ZF\ApiProblem\ApiProblem;
@@ -22,6 +21,8 @@ use ZF\Rest\Resource;
  */
 class ResourceTest extends TestCase
 {
+    use RouteMatchFactoryTrait;
+
     public function setUp()
     {
         $this->events   = new EventManager;
@@ -443,7 +444,7 @@ class ResourceTest extends TestCase
         $this->events->attach($eventName, function ($e) use ($test) {
             $test->event = $e;
         });
-        $matches     = new RouteMatch([]);
+        $matches     = $this->createRouteMatch([]);
         $queryParams = new Parameters();
         $this->resource->setRouteMatch($matches);
         $this->resource->setQueryParams($queryParams);

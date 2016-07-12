@@ -6,6 +6,7 @@
 
 namespace ZFTest\Rest;
 
+use Interop\Container\ContainerInterface;
 use PHPUnit_Framework_TestCase as TestCase;
 use ReflectionMethod;
 use ReflectionObject;
@@ -16,9 +17,6 @@ use Zend\Http\Response;
 use Zend\InputFilter\InputFilter;
 use Zend\Mvc\Controller\PluginManager;
 use Zend\Mvc\MvcEvent;
-use Zend\Mvc\Router\Http\Segment;
-use Zend\Mvc\Router\RouteMatch;
-use Zend\Mvc\Router\SimpleRouteStack;
 use Zend\Paginator\Adapter\ArrayAdapter as ArrayPaginator;
 use Zend\Paginator\Paginator;
 use Zend\Stdlib\Parameters;
@@ -32,7 +30,9 @@ use ZF\Hal\Entity as HalEntity;
 use ZF\Hal\Extractor\LinkCollectionExtractor;
 use ZF\Hal\Extractor\LinkExtractor;
 use ZF\Hal\Link\Link;
+use ZF\Hal\Link\LinkUrlBuilder;
 use ZF\Hal\Plugin\Hal as HalHelper;
+use ZF\MvcAuth\Identity\IdentityInterface;
 use ZF\Rest\Exception;
 use ZF\Rest\Resource;
 use ZF\Rest\RestController;
@@ -42,20 +42,24 @@ use ZF\Rest\RestController;
  */
 class RestControllerTest extends TestCase
 {
+    use RouteMatchFactoryTrait;
+    use SimpleRouteStackFactoryTrait;
+    use SegmentRouteFactoryTrait;
+
     public function setUp()
     {
         $this->controller = $controller = new RestController();
 
-        $this->router = $router = new SimpleRouteStack();
-        $route = new Segment('/resource[/[:id]]');
+        $this->router = $router = $this->createSimpleRouteStack();
+        $route = $this->createSegmentRoute('/resource[/[:id]]');
         $router->addRoute('resource', $route);
         $this->event = $event = new MvcEvent();
         $event->setRouter($router);
-        $event->setRouteMatch(new RouteMatch([]));
+        $event->setRouteMatch($this->createRouteMatch([]));
         $controller->setEvent($event);
         $controller->setRoute('resource');
 
-        $pluginManager = new PluginManager();
+        $pluginManager = new PluginManager($this->prophesize(ContainerInterface::class)->reveal());
         $pluginManager->setService('bodyParams', new BodyParams());
         $controller->setPluginManager($pluginManager);
 
@@ -66,11 +70,12 @@ class RestControllerTest extends TestCase
         $serverUrlHelper->setScheme('http');
         $serverUrlHelper->setHost('localhost.localdomain');
 
-        $linksHelper = new HalHelper();
-        $linksHelper->setUrlHelper($urlHelper);
-        $linksHelper->setServerUrlHelper($serverUrlHelper);
+        $linkUrlBuilder = new LinkUrlBuilder($serverUrlHelper, $urlHelper);
 
-        $linkExtractor = new LinkExtractor($serverUrlHelper, $urlHelper);
+        $linksHelper = new HalHelper();
+        $linksHelper->setLinkUrlBuilder($linkUrlBuilder);
+
+        $linkExtractor = new LinkExtractor($linkUrlBuilder);
         $linkCollectionExtractor = new LinkCollectionExtractor($linkExtractor);
         $linksHelper->setLinkCollectionExtractor($linkCollectionExtractor);
 
@@ -104,6 +109,34 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->getList();
         $this->assertProblemApiResult(416, "Page size is out of range, maximum page size is 2", $result);
+    }
+
+    public function testReturnsErrorResponseWhenPageSizeInNotPositive()
+    {
+        $items = [
+            ['id' => 'foo', 'bar' => 'baz'],
+            ['id' => 'bar', 'bar' => 'baz'],
+            ['id' => 'baz', 'bar' => 'baz'],
+        ];
+        $adapter   = new ArrayPaginator($items);
+        $paginator = new Paginator($adapter);
+        $this->resource->getEventManager()->attach('fetchAll', function ($e) use ($paginator) {
+            return $paginator;
+        });
+
+        $request = $this->controller->getRequest();
+        $this->controller->setPageSizeParam('page_size');
+        $request->setQuery(new Parameters([
+            'page'      => 1,
+            'page_size' => 0,
+        ]));
+
+        $result = $this->controller->getList();
+        $this->assertProblemApiResult(
+            400,
+            'size must be a positive integer or -1 (to disable pagination); received "0"',
+            $result
+        );
     }
 
     public function testReturnsErrorResponseWhenPageSizeBelowMin()
@@ -190,17 +223,28 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->create([]);
         $this->assertInstanceOf('ZF\Hal\Entity', $result);
-        $this->assertEquals($entity, $result->entity);
+        $this->assertEquals($entity, $result->getEntity());
         return $this->controller->getResponse();
     }
 
     /**
      * @depends testCreateReturnsHalEntityOnSuccess
      */
-    public function testSuccessfulCreationWithEntityIdentifierSetsResponseLocationheader($response)
+    public function testSuccessfulCreationWithEntityIdentifierSetsResponseLocationHeader($response)
     {
         $headers = $response->getHeaders();
         $this->assertTrue($headers->has('Location'));
+    }
+
+    /**
+     * @group 95
+     * @group 96
+     * @depends testCreateReturnsHalEntityOnSuccess
+     */
+    public function testSuccessfulCreationWithEntityIdentifierSetsResponseContentLocationHeader($response)
+    {
+        $headers = $response->getHeaders();
+        $this->assertTrue($headers->has('Content-Location'));
     }
 
     public function testFalseFromDeleteEntityReturnsProblemApiResult()
@@ -275,7 +319,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->get('foo');
         $this->assertInstanceOf('ZF\Hal\Entity', $result);
-        $this->assertEquals($entity, $result->entity);
+        $this->assertEquals($entity, $result->getEntity());
     }
 
     public function testReturnsHalCollectionForNonPaginatedList()
@@ -384,7 +428,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->head('foo');
         $this->assertInstanceOf('ZF\Hal\Entity', $result);
-        $this->assertEquals($entity, $result->entity);
+        $this->assertEquals($entity, $result->getEntity());
     }
 
     public function testOptionsReturnsEmptyResponseWithAllowHeaderPopulatedForCollection()
@@ -472,7 +516,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->patch('foo', $entity);
         $this->assertInstanceOf('ZF\Hal\Entity', $result);
-        $this->assertEquals($entity, $result->entity);
+        $this->assertEquals($entity, $result->getEntity());
     }
 
     public function testUpdateReturnsProblemResultOnUpdateException()
@@ -494,7 +538,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->update('foo', $entity);
         $this->assertInstanceOf('ZF\Hal\Entity', $result);
-        $this->assertEquals($entity, $result->entity);
+        $this->assertEquals($entity, $result->getEntity());
     }
 
     public function testReplaceListReturnsProblemResultOnUpdateException()
@@ -585,9 +629,17 @@ class RestControllerTest extends TestCase
     public function testPassingIdentifierToConstructorAllowsListeningOnThatIdentifier()
     {
         $controller   = new RestController('MyNamespace\Controller\Foo');
-        $events       = new EventManager();
         $sharedEvents = new SharedEventManager();
-        $events->setSharedManager($sharedEvents);
+
+        if (method_exists($sharedEvents, 'getEvents')) {
+            // v2 initialization
+            $events = new EventManager();
+            $events->setSharedManager($sharedEvents);
+        } else {
+            // v3 initialization
+            $events = new EventManager($sharedEvents);
+        }
+
         $controller->setEventManager($events);
 
         $test = new stdClass;
@@ -1461,7 +1513,7 @@ class RestControllerTest extends TestCase
      */
     public function testInjectsIdentityFromMvcEventIntoResourceEvent()
     {
-        $identity = $this->getMock('ZF\MvcAuth\Identity\IdentityInterface');
+        $identity = $this->getMockBuilder(IdentityInterface::class)->getMock();
         $this->event->setParam('ZF\MvcAuth\Identity', $identity);
         $resource = $this->controller->getResource();
         $this->assertSame($identity, $resource->getIdentity());
@@ -1499,7 +1551,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->getList();
         $this->assertInstanceOf('ZF\Hal\Entity', $result);
-        $this->assertSame($entity, $result->entity);
+        $this->assertSame($entity, $result->getEntity());
     }
 
     public function methods()
@@ -1567,7 +1619,7 @@ class RestControllerTest extends TestCase
         ];
         $halCollection = new HalCollection($collection);
 
-        $resource = $this->getMockBuilder('ZF\Rest\Resource')->getMock();
+        $resource = $this->getMockBuilder(Resource::class)->getMock();
         $resource
             ->expects($this->once())
             ->method('create')
@@ -1604,7 +1656,7 @@ class RestControllerTest extends TestCase
         ];
         $halEntity = new HalEntity($entity, 1);
 
-        $resource = $this->getMockBuilder('ZF\Rest\Resource')->getMock();
+        $resource = $this->getMockBuilder(Resource::class)->getMock();
         $resource
             ->expects($this->once())
             ->method('create')
@@ -1755,6 +1807,25 @@ class RestControllerTest extends TestCase
 
         $headers = $response->getHeaders();
         $this->assertTrue($headers->has('Location'));
-        $this->assertNotContains('true', $headers->get('Location')->getFieldValue());
+
+        $location = $headers->get('Location')->getFieldValue();
+        $this->assertContains('http://localhost.localdomain/resource/foo', $location);
+        $this->assertNotContains('true', $location);
+
+        return $headers;
+    }
+
+    /**
+     * @group 95
+     * @group 96
+     * @depends testLocationHeaderGeneratedDuringCreateContainsOnlyLinkHref
+     */
+    public function testContentLocationHeaderIsGeneratedOnlyFromLinkHref($headers)
+    {
+        $this->assertTrue($headers->has('Content-Location'));
+        $location = $headers->get('Content-Location')->getFieldValue();
+
+        $this->assertContains('http://localhost.localdomain/resource/foo', $location);
+        $this->assertNotContains('true', $location);
     }
 }

@@ -20,11 +20,10 @@ class RestControllerFactoryTest extends TestCase
         $this->factory     = $factory     = new RestControllerFactory();
 
         $controllers->addAbstractFactory($factory);
-        $controllers->setServiceLocator($services);
 
         $services->setService('Zend\ServiceManager\ServiceLocatorInterface', $services);
-        $services->setService('Config', $this->getConfig());
-        $services->setService('ControllerLoader', $controllers);
+        $services->setService('config', $this->getConfig());
+        $services->setService('ControllerManager', $controllers);
         $services->setFactory('ControllerPluginManager', 'Zend\Mvc\Service\ControllerPluginManagerFactory');
         $services->setInvokableClass('EventManager', 'Zend\EventManager\EventManager');
         $services->setInvokableClass('SharedEventManager', 'Zend\EventManager\SharedEventManager');
@@ -52,10 +51,10 @@ class RestControllerFactoryTest extends TestCase
 
     public function testWillInstantiateAlternateRestControllerWhenSpecified()
     {
-        $config = $this->services->get('Config');
+        $config = $this->services->get('config');
         $config['zf-rest']['ApiController']['controller_class'] = 'ZFTest\Rest\Factory\TestAsset\CustomController';
         $this->services->setAllowOverride(true);
-        $this->services->setService('Config', $config);
+        $this->services->setService('config', $config);
         $controller = $this->controllers->get('ApiController');
         $this->assertInstanceOf('ZFTest\Rest\Factory\TestAsset\CustomController', $controller);
     }
@@ -73,10 +72,10 @@ class RestControllerFactoryTest extends TestCase
 
     public function testControllerEventManagerIdentifiersAreAsSpecified()
     {
-        $config = $this->services->get('Config');
+        $config = $this->services->get('config');
         $config['zf-rest']['ApiController']['identifier'] = 'ZFTest\Rest\Factory\TestAsset\ExtraControllerListener';
         $this->services->setAllowOverride(true);
-        $this->services->setService('Config', $config);
+        $this->services->setService('config', $config);
 
         $controller = $this->controllers->get('ApiController');
         $events = $controller->getEventManager();
@@ -105,11 +104,11 @@ class RestControllerFactoryTest extends TestCase
 
     public function testResourceEventManagerIdentifiersAreAsSpecifiedString()
     {
-        $config = $this->services->get('Config');
+        $config = $this->services->get('config');
         $config['zf-rest']['ApiController']['resource_identifiers'] =
             'ZFTest\Rest\Factory\TestAsset\ExtraResourceListener';
         $this->services->setAllowOverride(true);
-        $this->services->setService('Config', $config);
+        $this->services->setService('config', $config);
 
         $controller = $this->controllers->get('ApiController');
         $resource = $controller->getResource();
@@ -128,13 +127,13 @@ class RestControllerFactoryTest extends TestCase
 
     public function testResourceEventManagerIdentifiersAreAsSpecifiedArray()
     {
-        $config = $this->services->get('Config');
+        $config = $this->services->get('config');
         $config['zf-rest']['ApiController']['resource_identifiers'] = [
             'ZFTest\Rest\Factory\TestAsset\ExtraResourceListener1',
             'ZFTest\Rest\Factory\TestAsset\ExtraResourceListener2',
         ];
         $this->services->setAllowOverride(true);
-        $this->services->setService('Config', $config);
+        $this->services->setService('config', $config);
 
         $controller = $this->controllers->get('ApiController');
         $resource = $controller->getResource();
