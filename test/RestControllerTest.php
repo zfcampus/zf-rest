@@ -132,7 +132,11 @@ class RestControllerTest extends TestCase
         ]));
 
         $result = $this->controller->getList();
-        $this->assertProblemApiResult(400, 'size must be a positive integer or -1 (to disable pagination); received "0"', $result);
+        $this->assertProblemApiResult(
+            400,
+            'size must be a positive integer or -1 (to disable pagination); received "0"',
+            $result
+        );
     }
 
     public function testReturnsErrorResponseWhenPageSizeBelowMin()

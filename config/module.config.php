@@ -6,6 +6,7 @@
 
 return [
     'zf-rest' => [
+        // @codingStandardsIgnoreStart
         // 'Name of virtual controller' => [
         //     'collection_http_methods'    => [
         //         /* array of HTTP methods that are allowed on collections */
@@ -30,6 +31,7 @@ return [
         //     'route_name'                 => 'Name of the route that will map to this controller',
         // ],
         // repeat for each controller you want to define
+        // @codingStandardsIgnoreEnd
     ],
 
     'service_manager' => [
