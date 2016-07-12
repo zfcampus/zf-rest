@@ -6,6 +6,9 @@
 
 namespace ZF\Rest;
 
+use Zend\Loader\StandardAutoloader;
+use Zend\Mvc\MvcEvent;
+
 /**
  * ZF2 module
  */
@@ -26,13 +29,13 @@ class Module
      *
      * Attaches a listener to the RestController dispatch event.
      *
-     * @param  \Zend\Mvc\MvcEvent $e
+     * @param  MvcEvent $e
      */
-    public function onBootstrap($e)
+    public function onBootstrap(MvcEvent $e)
     {
-        $app          = $e->getTarget();
-        $services     = $app->getServiceManager();
-        $events       = $app->getEventManager();
+        $app      = $e->getTarget();
+        $services = $app->getServiceManager();
+        $events   = $app->getEventManager();
 
         $services->get('ZF\Rest\OptionsListener')->attach($events);
 
