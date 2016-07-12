@@ -1731,4 +1731,30 @@ class RestControllerTest extends TestCase
         $this->assertEquals(5, $halCollection->getPageSize());
         $this->assertEquals(3, $halCollection->getPage());
     }
+
+    /**
+     * @group 97
+     */
+    public function testLocationHeaderGeneratedDuringCreateContainsOnlyLinkHref()
+    {
+        $self = new Link('self');
+        $self->setUrl('http://localhost.localdomain/resource/foo');
+        $self->setProps(['vary' => 'true']);
+
+        $entity = new HalEntity(['id' => 'foo', 'bar' => 'baz'], 'foo');
+        $links = $entity->getLinks();
+        $links->add($self, true);
+
+        $this->resource->getEventManager()->attach('create', function ($e) use ($entity) {
+            return $entity;
+        });
+
+        $result = $this->controller->create([]);
+        $this->assertSame($entity, $result);
+        $response = $this->controller->getResponse();
+
+        $headers = $response->getHeaders();
+        $this->assertTrue($headers->has('Location'));
+        $this->assertNotContains('true', $headers->get('Location')->getFieldValue());
+    }
 }

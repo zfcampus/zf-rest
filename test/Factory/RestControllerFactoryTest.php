@@ -16,7 +16,7 @@ class RestControllerFactoryTest extends TestCase
     public function setUp()
     {
         $this->services    = $services    = new ServiceManager();
-        $this->controllers = $controllers = new ControllerManager();
+        $this->controllers = $controllers = new ControllerManager($this->services);
         $this->factory     = $factory     = new RestControllerFactory();
 
         $controllers->addAbstractFactory($factory);
