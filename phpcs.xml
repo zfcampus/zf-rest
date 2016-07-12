@@ -19,5 +19,4 @@
     <file>config</file>
     <file>src</file>
     <file>test</file>
-    <file>Module.php</file>
 </ruleset>
