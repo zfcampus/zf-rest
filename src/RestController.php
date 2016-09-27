@@ -981,7 +981,7 @@ class RestController extends AbstractRestfulController
     private function createApiProblemFromException(Exception $exception)
     {
         return new ApiProblem(
-            $this->getHttpStatusCode($exception->getCode()),
+            $this->validateHttpStatusCode($exception->getCode()),
             $exception->getMessage()
         );
     }
@@ -993,7 +993,7 @@ class RestController extends AbstractRestfulController
     private function createApiProblemFromThrowable(Throwable $throwable)
     {
         return new ApiProblem(
-            $this->getHttpStatusCode($throwable->getCode()),
+            $this->validateHttpStatusCode($throwable->getCode()),
             $throwable->getMessage()
         );
     }
@@ -1004,7 +1004,7 @@ class RestController extends AbstractRestfulController
      * @param int|string $code
      * @return int
      */
-    private function getHttpStatusCode($code)
+    private function validateHttpStatusCode($code)
     {
         if (!is_int($code)
             || $code < 100
