@@ -44,7 +44,7 @@ class ChildResourcesIntegrationTest extends TestCase
 
     public function setupHelpers()
     {
-        if (!$this->router) {
+        if (! $this->router) {
             $this->setupRouter();
         }
 
@@ -83,7 +83,7 @@ class ChildResourcesIntegrationTest extends TestCase
 
     public function setupRenderer()
     {
-        if (!$this->helpers) {
+        if (! $this->helpers) {
             $this->setupHelpers();
         }
         $this->renderer = $renderer = new HalJsonRenderer(new ApiProblemRenderer());
@@ -129,7 +129,7 @@ class ChildResourcesIntegrationTest extends TestCase
 
         $link = new Link('self');
         $link->setRoute('parent');
-        $link->setRouteParams(['parent'=> 'anakin']);
+        $link->setRouteParams(['parent' => 'anakin']);
         $resource->getLinks()->add($link);
 
         return $resource;
@@ -145,7 +145,7 @@ class ChildResourcesIntegrationTest extends TestCase
 
         $link = new Link('self');
         $link->setRoute('parent/child');
-        $link->setRouteParams(['child'=> $id]);
+        $link->setRouteParams(['child' => $id]);
         $resource->getLinks()->add($link);
 
         return $resource;
