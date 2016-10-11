@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 1.3.3 - TBD
+## 1.3.3 - 2016-10-11
 
 ### Added
 
@@ -18,7 +18,8 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- Nothing.
+- Updates the `composer.json` to have a minimum supported zf-api-problem version
+  of 1.2.2; this is necessary for the fixes in #103 and #105 to work correctly.
 
 ## 1.3.2 - 2016-10-11
 
