@@ -750,7 +750,7 @@ class RestController extends AbstractRestfulController
 
         try {
             $collection = $this->getResource()->replaceList($data);
-        } catch (\InvalidArgumentException $e) {
+        } catch (Exception\InvalidArgumentException $e) {
             return new ApiProblem(400, $e->getMessage());
         } catch (Throwable $e) {
             return $this->createApiProblem($e);
