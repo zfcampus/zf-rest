@@ -371,9 +371,9 @@ class RestController extends AbstractRestfulController
         try {
             $value = $this->getResource()->create($data);
         } catch (Throwable $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         } catch (Exception $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         }
 
         if ($this->isPreparedResponse($value)) {
@@ -430,9 +430,9 @@ class RestController extends AbstractRestfulController
         try {
             $result = $this->getResource()->delete($id);
         } catch (Throwable $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         } catch (Exception $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         }
 
         $result = $result ?: new ApiProblem(422, 'Unable to delete entity.');
@@ -463,9 +463,9 @@ class RestController extends AbstractRestfulController
         try {
             $result = $this->getResource()->deleteList($data);
         } catch (Throwable $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         } catch (Exception $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         }
 
         $result = $result ?: new ApiProblem(422, 'Unable to delete collection.');
@@ -497,9 +497,9 @@ class RestController extends AbstractRestfulController
         try {
             $entity = $this->getResource()->fetch($id);
         } catch (Throwable $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         } catch (Exception $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         }
 
         $entity = $entity ?: new ApiProblem(404, 'Entity not found.');
@@ -532,9 +532,9 @@ class RestController extends AbstractRestfulController
         try {
             $collection = $this->getResource()->fetchAll();
         } catch (Throwable $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         } catch (Exception $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         }
 
         if ($this->isPreparedResponse($collection)) {
@@ -645,9 +645,9 @@ class RestController extends AbstractRestfulController
         try {
             $entity = $this->getResource()->patch($id, $data);
         } catch (Throwable $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         } catch (Exception $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         }
 
         if ($this->isPreparedResponse($entity)) {
@@ -682,9 +682,9 @@ class RestController extends AbstractRestfulController
         try {
             $entity = $this->getResource()->update($id, $data);
         } catch (Throwable $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         } catch (Exception $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         }
 
         if ($this->isPreparedResponse($entity)) {
@@ -718,9 +718,9 @@ class RestController extends AbstractRestfulController
         try {
             $collection = $this->getResource()->patchList($data);
         } catch (Throwable $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         } catch (Exception $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         }
 
         if ($this->isPreparedResponse($collection)) {
@@ -753,9 +753,9 @@ class RestController extends AbstractRestfulController
         } catch (Exception\InvalidArgumentException $e) {
             return new ApiProblem(400, $e->getMessage());
         } catch (Throwable $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         } catch (Exception $e) {
-            return $this->createApiProblem($e);
+            return $this->createApiProblemFromException($e);
         }
 
         if ($this->isPreparedResponse($collection)) {
@@ -809,6 +809,33 @@ class RestController extends AbstractRestfulController
         $allow->disallowMethods(array_keys($allMethods));
         $allow->allowMethods($methods);
         return $allow;
+    }
+
+    /**
+     * @param Exception|Throwable $e
+     * @return ApiProblem
+     */
+    protected function createApiProblemFromException($e)
+    {
+        return new ApiProblem($this->getHttpStatusCodeFromException($e), $e);
+    }
+
+    /**
+     * Ensure we have a valid HTTP status code for an ApiProblem
+     *
+     * @param Exception|Throwable $e
+     * @return int
+     */
+    protected function getHttpStatusCodeFromException($e)
+    {
+        $code = $e->getCode();
+        if (! is_int($code)
+            || $code < 100
+            || $code >= 600
+        ) {
+            return 500;
+        }
+        return $code;
     }
 
     /**
@@ -972,35 +999,5 @@ class RestController extends AbstractRestfulController
             $this->route,
             $this->getRouteIdentifierName()
         );
-    }
-
-    /**
-     * @param Exception|Throwable $error
-     * @return ApiProblem
-     */
-    private function createApiProblem($error)
-    {
-        return new ApiProblem(
-            $this->validateHttpStatusCode($error->getCode()),
-            $error->getMessage()
-        );
-    }
-
-    /**
-     * Ensure we have a valid HTTP status code for an ApiProblem
-     *
-     * @param int|string $code
-     * @return int
-     */
-    private function validateHttpStatusCode($code)
-    {
-        if (!is_int($code)
-            || $code < 100
-            || $code >= 600
-        ) {
-            return 500;
-        }
-
-        return $code;
     }
 }
