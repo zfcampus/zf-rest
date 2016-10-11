@@ -32,7 +32,7 @@
         "zendframework/zend-mvc": "^2.7.9 || ^3.0.2",
         "zendframework/zend-paginator": "^2.7",
         "zendframework/zend-stdlib": "^2.7.7 || ^3.0.1",
-        "zfcampus/zf-api-problem": "^1.2.1",
+        "zfcampus/zf-api-problem": "^1.2.2",
         "zfcampus/zf-content-negotiation": "^1.2.1",
         "zfcampus/zf-hal": "^1.4",
         "zfcampus/zf-mvc-auth": "^1.4"
