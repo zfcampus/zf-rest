@@ -212,7 +212,7 @@ class Resource implements ResourceInterface
      */
     public function getEventManager()
     {
-        if (!$this->events) {
+        if (! $this->events) {
             $this->setEventManager(new EventManager());
         }
         return $this->events;
@@ -238,7 +238,7 @@ class Resource implements ResourceInterface
         if (is_array($data)) {
             $data = (object) $data;
         }
-        if (!is_object($data)) {
+        if (! is_object($data)) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Data provided to create must be either an array or object; received "%s"',
                 gettype($data)
@@ -247,7 +247,7 @@ class Resource implements ResourceInterface
 
         $results = $this->triggerEvent(__FUNCTION__, ['data' => $data]);
         $last    = $results->last();
-        if (!is_array($last) && !is_object($last)) {
+        if (! is_array($last) && ! is_object($last)) {
             return $data;
         }
         return $last;
@@ -275,7 +275,7 @@ class Resource implements ResourceInterface
         if (is_array($data)) {
             $data = (object) $data;
         }
-        if (!is_object($data)) {
+        if (! is_object($data)) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Data provided to update must be either an array or object; received "%s"',
                 gettype($data)
@@ -284,7 +284,7 @@ class Resource implements ResourceInterface
 
         $results = $this->triggerEvent(__FUNCTION__, compact('id', 'data'));
         $last    = $results->last();
-        if (!is_array($last) && !is_object($last)) {
+        if (! is_array($last) && ! is_object($last)) {
             return $data;
         }
         return $last;
@@ -361,7 +361,7 @@ class Resource implements ResourceInterface
         if (is_array($data)) {
             $data = (object) $data;
         }
-        if (!is_object($data)) {
+        if (! is_object($data)) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Data provided to patch must be either an array or object; received "%s"',
                 gettype($data)
@@ -370,7 +370,7 @@ class Resource implements ResourceInterface
 
         $results = $this->triggerEvent(__FUNCTION__, compact('id', 'data'));
         $last    = $results->last();
-        if (!is_array($last) && !is_object($last)) {
+        if (! is_array($last) && ! is_object($last)) {
             return $data;
         }
         return $last;
@@ -421,7 +421,7 @@ class Resource implements ResourceInterface
         $data    = new ArrayObject($data);
         $results = $this->triggerEvent(__FUNCTION__, ['data' => $data]);
         $last    = $results->last();
-        if (! is_array($last) && !is_object($last)) {
+        if (! is_array($last) && ! is_object($last)) {
             return $original;
         }
         return $last;
@@ -441,7 +441,7 @@ class Resource implements ResourceInterface
     {
         $results = $this->triggerEvent(__FUNCTION__, ['id' => $id]);
         $last    = $results->last();
-        if (!is_bool($last)
+        if (! is_bool($last)
             && ! $last instanceof ApiProblem
             && ! $last instanceof ApiProblemResponse
             && ! $last instanceof Response
@@ -460,7 +460,7 @@ class Resource implements ResourceInterface
     public function deleteList($data = null)
     {
         if ($data
-            && (!is_array($data) && !$data instanceof Traversable)
+            && (! is_array($data) && ! $data instanceof Traversable)
         ) {
             throw new Exception\InvalidArgumentException(sprintf(
                 '%s expects a null argument, or an array/Traversable of items and/or ids; received %s',
@@ -496,7 +496,7 @@ class Resource implements ResourceInterface
     {
         $results = $this->triggerEvent(__FUNCTION__, ['id' => $id]);
         $last    = $results->last();
-        if (!is_array($last) && !is_object($last)) {
+        if (! is_array($last) && ! is_object($last)) {
             return false;
         }
         return $last;

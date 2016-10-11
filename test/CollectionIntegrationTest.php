@@ -231,7 +231,7 @@ class CollectionIntegrationTest extends TestCase
         $this->controller->getEventManager()->attach('getList.post', function ($e) {
             $request    = $e->getTarget()->getRequest();
             $query = $request->getQuery('query', false);
-            if (!$query) {
+            if (! $query) {
                 return;
             }
 
