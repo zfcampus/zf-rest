@@ -36,7 +36,10 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- Nothing.
+- [#103](https://github.com/zfcampus/zf-rest/pull/103) and
+  [#105](https://github.com/zfcampus/zf-rest/pull/105) fix an issue with
+  providing a `Throwable` in order to create an `ApiProblem` from within a
+  `RestController`.
 
 ## 1.3.1 - 2016-07-12
 
