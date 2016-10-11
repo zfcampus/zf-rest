@@ -371,9 +371,9 @@ class RestController extends AbstractRestfulController
         try {
             $value = $this->getResource()->create($data);
         } catch (Throwable $e) {
-            return $this->createApiProblemFromThrowable($e);
+            return $this->createApiProblem($e);
         } catch (Exception $e) {
-            return $this->createApiProblemFromException($e);
+            return $this->createApiProblem($e);
         }
 
         if ($this->isPreparedResponse($value)) {
@@ -430,9 +430,9 @@ class RestController extends AbstractRestfulController
         try {
             $result = $this->getResource()->delete($id);
         } catch (Throwable $e) {
-            return $this->createApiProblemFromThrowable($e);
+            return $this->createApiProblem($e);
         } catch (Exception $e) {
-            return $this->createApiProblemFromException($e);
+            return $this->createApiProblem($e);
         }
 
         $result = $result ?: new ApiProblem(422, 'Unable to delete entity.');
@@ -463,9 +463,9 @@ class RestController extends AbstractRestfulController
         try {
             $result = $this->getResource()->deleteList($data);
         } catch (Throwable $e) {
-            return $this->createApiProblemFromThrowable($e);
+            return $this->createApiProblem($e);
         } catch (Exception $e) {
-            return $this->createApiProblemFromException($e);
+            return $this->createApiProblem($e);
         }
 
         $result = $result ?: new ApiProblem(422, 'Unable to delete collection.');
@@ -497,9 +497,9 @@ class RestController extends AbstractRestfulController
         try {
             $entity = $this->getResource()->fetch($id);
         } catch (Throwable $e) {
-            return $this->createApiProblemFromThrowable($e);
+            return $this->createApiProblem($e);
         } catch (Exception $e) {
-            return $this->createApiProblemFromException($e);
+            return $this->createApiProblem($e);
         }
 
         $entity = $entity ?: new ApiProblem(404, 'Entity not found.');
@@ -522,7 +522,7 @@ class RestController extends AbstractRestfulController
     /**
      * Return collection of entities
      *
-     * @return Response|HalCollection
+     * @return Response|HalCollection|ApiProblem
      */
     public function getList()
     {
@@ -532,9 +532,9 @@ class RestController extends AbstractRestfulController
         try {
             $collection = $this->getResource()->fetchAll();
         } catch (Throwable $e) {
-            return $this->createApiProblemFromThrowable($e);
+            return $this->createApiProblem($e);
         } catch (Exception $e) {
-            return $this->createApiProblemFromException($e);
+            return $this->createApiProblem($e);
         }
 
         if ($this->isPreparedResponse($collection)) {
@@ -645,9 +645,9 @@ class RestController extends AbstractRestfulController
         try {
             $entity = $this->getResource()->patch($id, $data);
         } catch (Throwable $e) {
-            return $this->createApiProblemFromThrowable($e);
+            return $this->createApiProblem($e);
         } catch (Exception $e) {
-            return $this->createApiProblemFromException($e);
+            return $this->createApiProblem($e);
         }
 
         if ($this->isPreparedResponse($entity)) {
@@ -682,9 +682,9 @@ class RestController extends AbstractRestfulController
         try {
             $entity = $this->getResource()->update($id, $data);
         } catch (Throwable $e) {
-            return $this->createApiProblemFromThrowable($e);
+            return $this->createApiProblem($e);
         } catch (Exception $e) {
-            return $this->createApiProblemFromException($e);
+            return $this->createApiProblem($e);
         }
 
         if ($this->isPreparedResponse($entity)) {
@@ -708,7 +708,7 @@ class RestController extends AbstractRestfulController
      * a collection, i.e. create and/or update multiple entities in a collection.
      *
      * @param array $data
-     * @return array
+     * @return array|ApiProblem
      */
     public function patchList($data)
     {
@@ -718,9 +718,9 @@ class RestController extends AbstractRestfulController
         try {
             $collection = $this->getResource()->patchList($data);
         } catch (Throwable $e) {
-            return $this->createApiProblemFromThrowable($e);
+            return $this->createApiProblem($e);
         } catch (Exception $e) {
-            return $this->createApiProblemFromException($e);
+            return $this->createApiProblem($e);
         }
 
         if ($this->isPreparedResponse($collection)) {
@@ -741,7 +741,7 @@ class RestController extends AbstractRestfulController
      * Update an existing collection of entities
      *
      * @param array $data
-     * @return array
+     * @return array|ApiProblem
      */
     public function replaceList($data)
     {
@@ -750,12 +750,12 @@ class RestController extends AbstractRestfulController
 
         try {
             $collection = $this->getResource()->replaceList($data);
-        } catch (Exception\InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException $e) {
             return new ApiProblem(400, $e->getMessage());
         } catch (Throwable $e) {
-            return $this->createApiProblemFromThrowable($e);
+            return $this->createApiProblem($e);
         } catch (Exception $e) {
-            return $this->createApiProblemFromException($e);
+            return $this->createApiProblem($e);
         }
 
         if ($this->isPreparedResponse($collection)) {
@@ -975,26 +975,14 @@ class RestController extends AbstractRestfulController
     }
 
     /**
-     * @param Exception $exception
+     * @param Exception|Throwable $error
      * @return ApiProblem
      */
-    private function createApiProblemFromException(Exception $exception)
+    private function createApiProblem($error)
     {
         return new ApiProblem(
-            $this->validateHttpStatusCode($exception->getCode()),
-            $exception->getMessage()
-        );
-    }
-
-    /**
-     * @param Throwable $throwable
-     * @return ApiProblem
-     */
-    private function createApiProblemFromThrowable(Throwable $throwable)
-    {
-        return new ApiProblem(
-            $this->validateHttpStatusCode($throwable->getCode()),
-            $throwable->getMessage()
+            $this->validateHttpStatusCode($error->getCode()),
+            $error->getMessage()
         );
     }
 
