@@ -45,24 +45,24 @@ class OptionsListener implements ListenerAggregateInterface
     public function onRoute(MvcEvent $event)
     {
         $request = $event->getRequest();
-        if (!$request instanceof Request) {
+        if (! $request instanceof Request) {
             // Not an HTTP request? nothing to do
             return;
         }
 
         $matches = $event->getRouteMatch();
-        if (!$matches) {
+        if (! $matches) {
             // No matches, nothing to do
             return;
         }
 
         $controller = $matches->getParam('controller', false);
-        if (!$controller) {
+        if (! $controller) {
             // No controller in the matches, nothing to do
             return;
         }
 
-        if (!array_key_exists($controller, $this->config)) {
+        if (! array_key_exists($controller, $this->config)) {
             // No matching controller in our configuration, nothing to do
             return;
         }
