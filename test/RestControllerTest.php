@@ -1834,9 +1834,14 @@ class RestControllerTest extends TestCase
      *
      * @param string $method
      * @param string $event
+     * @param array $argv
      */
     public function testErrorInMethodReturnsApiProblem($method, $event, $argv)
     {
+        if (version_compare(PHP_VERSION, '7.0', 'lt')) {
+            $this->markTestSkipped('This test only runs on 7.0 and up');
+        }
+
         $this->resource->getEventManager()->attach($event, function ($e) {
             throw new \Error('error: failed');
         });
@@ -1850,6 +1855,7 @@ class RestControllerTest extends TestCase
      *
      * @param string $method
      * @param string $event
+     * @param array $argv
      */
     public function testExceptionInMethodReturnsApiProblem($method, $event, $argv)
     {
