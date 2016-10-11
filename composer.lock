@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "904187fb58d0d6fd35a95eed41e8f618",
-    "content-hash": "dcad6a6cf62c291cd304330c80487da0",
+    "hash": "eb1ba53a7017514731410dde3ef88a46",
+    "content-hash": "cd0d2d22bde614dd5d593e39e5c07b00",
     "packages": [
         {
             "name": "bshaffer/oauth2-server-php",
@@ -1364,16 +1364,16 @@
         },
         {
             "name": "zfcampus/zf-api-problem",
-            "version": "1.2.1",
+            "version": "1.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zfcampus/zf-api-problem.git",
-                "reference": "3d2cb9f91aace74d4ca00d865d1ed95b593c6187"
+                "reference": "783067e20328a82d35eb20a3fb876121da80c89d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zfcampus/zf-api-problem/zipball/3d2cb9f91aace74d4ca00d865d1ed95b593c6187",
-                "reference": "3d2cb9f91aace74d4ca00d865d1ed95b593c6187",
+                "url": "https://api.github.com/repos/zfcampus/zf-api-problem/zipball/783067e20328a82d35eb20a3fb876121da80c89d",
+                "reference": "783067e20328a82d35eb20a3fb876121da80c89d",
                 "shasum": ""
             },
             "require": {
@@ -1387,7 +1387,7 @@
             },
             "require-dev": {
                 "phpunit/phpunit": "^4.8",
-                "squizlabs/php_codesniffer": "^2.3.1"
+                "squizlabs/php_codesniffer": "^2.7"
             },
             "type": "library",
             "extra": {
@@ -1417,7 +1417,7 @@
                 "zend",
                 "zf2"
             ],
-            "time": "2016-07-07 13:52:00"
+            "time": "2016-10-11 20:38:29"
         },
         {
             "name": "zfcampus/zf-content-negotiation",
