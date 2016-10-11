@@ -1828,4 +1828,36 @@ class RestControllerTest extends TestCase
         $this->assertContains('http://localhost.localdomain/resource/foo', $location);
         $this->assertNotContains('true', $location);
     }
+
+    /**
+     * @dataProvider methods
+     *
+     * @param string $method
+     * @param string $event
+     */
+    public function testErrorInMethodReturnsApiProblem($method, $event, $argv)
+    {
+        $this->resource->getEventManager()->attach($event, function ($e) {
+            throw new \Error('error: failed');
+        });
+
+        $result = call_user_func_array([$this->controller, $method], $argv);
+        $this->assertProblemApiResult(500, 'error: failed', $result);
+    }
+
+    /**
+     * @dataProvider methods
+     *
+     * @param string $method
+     * @param string $event
+     */
+    public function testExceptionInMethodReturnsApiProblem($method, $event, $argv)
+    {
+        $this->resource->getEventManager()->attach($event, function ($e) {
+            throw new \Exception('exception: failed');
+        });
+
+        $result = call_user_func_array([$this->controller, $method], $argv);
+        $this->assertProblemApiResult(500, 'exception: failed', $result);
+    }
 }
