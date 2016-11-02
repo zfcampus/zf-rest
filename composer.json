@@ -12,7 +12,6 @@
     ],
     "homepage": "http://apigility.org/",
     "support": {
-        "email": "apigility-users@zend.com",
         "irc": "irc://irc.freenode.net/apigility",
         "source": "https://github.com/zfcampus/zf-rest",
         "issues": "https://github.com/zfcampus/zf-rest/issues"
@@ -63,8 +62,10 @@
             "@cs-check",
             "@test"
         ],
+        "upload-coverage": "coveralls -v",
         "cs-check": "phpcs",
         "cs-fix": "phpcbf",
-        "test": "phpunit"
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-clover clover.xml"
     }
 }

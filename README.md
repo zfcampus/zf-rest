@@ -2,6 +2,7 @@ ZF REST
 =======
 
 [![Build Status](https://travis-ci.org/zfcampus/zf-rest.png)](https://travis-ci.org/zfcampus/zf-rest)
+[![Coverage Status](https://coveralls.io/repos/github/zfcampus/zf-rest/badge.svg)](https://coveralls.io/github/zfcampus/zf-rest)
 
 Introduction
 ------------
@@ -26,7 +27,7 @@ Installation
 
 Run the following `composer` command:
 
-```bash
+```console
 $ composer require zfcampus/zf-rest
 ```
 
