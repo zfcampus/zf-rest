@@ -37,7 +37,7 @@
         "zfcampus/zf-mvc-auth": "^1.4"
     },
     "require-dev": {
-        "phpunit/phpunit": "^4.8 || ^5.0",
+        "phpunit/phpunit": "^5.7.21 || ^6.3",
         "zendframework/zend-coding-standard": "~1.0.0",
         "zendframework/zend-escaper": "^2.5.2",
         "zendframework/zend-http": "^2.5.4",
