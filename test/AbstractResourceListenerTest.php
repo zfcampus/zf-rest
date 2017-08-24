@@ -17,8 +17,20 @@ use ZF\Rest\ResourceEvent;
  */
 class AbstractResourceListenerTest extends TestCase
 {
+    /** @var null|string */
     public $methodInvokedInListener;
+
+    /** @var null|string */
     public $paramsPassedToListener;
+
+    /** @var Resource */
+    private $resource;
+
+    /** @var EventManager */
+    private $events;
+
+    /** @var TestAsset\TestResourceListener */
+    private $listener;
 
     public function setUp()
     {
@@ -52,8 +64,11 @@ class AbstractResourceListenerTest extends TestCase
 
     /**
      * @dataProvider events
+     *
+     * @param string $method
+     * @param array $eventArgs
      */
-    public function testResourceMethodsAreInvokedWhenEventsAreTriggered($method, $eventArgs)
+    public function testResourceMethodsAreInvokedWhenEventsAreTriggered($method, array $eventArgs)
     {
         $this->methodInvokedInListener = null;
         $this->paramsPassedToListener  = null;
@@ -91,7 +106,7 @@ class AbstractResourceListenerTest extends TestCase
         $expectedMethod = get_class($this->listener) . '::' . $method;
         $expectedParams = array_values($eventArgs);
 
-        if ($method == 'patchList') {
+        if ($method === 'patchList') {
             $expectedParams = $this->paramsPassedToListener;
         }
 

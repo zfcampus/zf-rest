@@ -178,8 +178,11 @@ class OptionsListenerTest extends TestCase
 
     /**
      * @dataProvider validMethodsProvider
+     *
+     * @param string $method
+     * @param array $matchParams
      */
-    public function testListenerReturnsNullWhenMethodIsAllowedForCurrentRequest($method, $matchParams)
+    public function testListenerReturnsNullWhenMethodIsAllowedForCurrentRequest($method, array $matchParams)
     {
         $listener = new OptionsListener($this->seedListenerConfig());
         $request  = new Request();
@@ -195,8 +198,11 @@ class OptionsListenerTest extends TestCase
 
     /**
      * @dataProvider invalidMethodsProvider
+     *
+     * @param string $method
+     * @param array $matchParams
      */
-    public function testListenerReturnsNullIfNotAnHttpRequest($method, $matchParams)
+    public function testListenerReturnsNullIfNotAnHttpRequest($method, array $matchParams)
     {
         $listener = new OptionsListener($this->seedListenerConfig());
         $request  = new StdlibRequest();
@@ -211,8 +217,10 @@ class OptionsListenerTest extends TestCase
 
     /**
      * @dataProvider invalidMethodsProvider
+     *
+     * @param string $method
      */
-    public function testListenerReturnsNullIfNoRouteMatches($method, $matchParams, $expectedAllow)
+    public function testListenerReturnsNullIfNoRouteMatches($method)
     {
         $listener = new OptionsListener($this->seedListenerConfig());
         $request  = new Request();
@@ -252,11 +260,15 @@ class OptionsListenerTest extends TestCase
 
     /**
      * @dataProvider invalidMethodsProvider
+     *
+     * @param string $method
+     * @param array $matchParams
+     * @param array $expectedAllow
      */
     public function testListenerReturns405ResponseWithAllowHeaderForInvalidRequestMethod(
         $method,
-        $matchParams,
-        $expectedAllow
+        array $matchParams,
+        array $expectedAllow
     ) {
         $listener = new OptionsListener($this->seedListenerConfig());
         $request  = new Request();
@@ -268,7 +280,7 @@ class OptionsListenerTest extends TestCase
         $mvcEvent->setResponse(new Response());
 
         $result = $listener->onRoute($mvcEvent);
-        $this->assertInstanceOf('Zend\Http\Response', $result);
+        $this->assertInstanceOf(Response::class, $result);
         $this->assertEquals(405, $result->getStatusCode());
         $headers = $result->getHeaders();
         $this->assertTrue($headers->has('Allow'));

@@ -11,6 +11,8 @@ use Zend\EventManager\SharedEventManager;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Mvc\Controller\AbstractRestfulController;
 use Zend\Mvc\MvcEvent;
+use Zend\Mvc\Router\RouteMatch as V2RouteMatch;
+use Zend\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
 use ZF\Rest\Listener\RestParametersListener;
 use ZF\Rest\Resource;
@@ -24,6 +26,27 @@ class RestParametersListenerTest extends TestCase
 {
     use RouteMatchFactoryTrait;
 
+    /** @var Resource */
+    private $resource;
+
+    /** @var RestController */
+    private $controller;
+
+    /** @var RouteMatch|V2RouteMatch */
+    private $matches;
+
+    /** @var Parameters */
+    private $query;
+
+    /** @var Request */
+    private $request;
+
+    /** @var MvcEvent */
+    private $event;
+
+    /** @var RestParametersListener */
+    private $listener;
+
     public function setUp()
     {
         $this->resource   = $resource   = new Resource();
@@ -35,7 +58,7 @@ class RestParametersListenerTest extends TestCase
         $this->request    = $request    = new Request();
         $request->setQuery($query);
 
-        $this->event    = new MvcEvent();
+        $this->event = new MvcEvent();
         $this->event->setTarget($controller);
         $this->event->setRouteMatch($matches);
         $this->event->setRequest($request);
@@ -75,7 +98,7 @@ class RestParametersListenerTest extends TestCase
             : [RestController::class];
         $listeners = $sharedEventManager->getListeners($identifiers, MvcEvent::EVENT_DISPATCH);
 
-        $this->assertEquals(1, count($listeners));
+        $this->assertCount(1, $listeners);
     }
 
     public function testDetachSharedDetachAttachedListener()
@@ -91,6 +114,6 @@ class RestParametersListenerTest extends TestCase
             : [RestController::class];
         $listeners = $sharedEventManager->getListeners($identifiers, MvcEvent::EVENT_DISPATCH);
 
-        $this->assertEquals(0, count($listeners));
+        $this->assertCount(0, $listeners);
     }
 }

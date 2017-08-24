@@ -14,6 +14,12 @@ use ZF\Rest\Listener\OptionsListener;
 
 class OptionsListenerFactoryTest extends TestCase
 {
+    /** @var ServiceManager */
+    private $services;
+
+    /** @var OptionsListenerFactory */
+    private $factory;
+
     public function setUp()
     {
         $this->services = new ServiceManager();
