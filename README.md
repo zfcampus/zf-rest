@@ -1,7 +1,8 @@
 ZF REST
 =======
 
-[![Build Status](https://travis-ci.org/zfcampus/zf-rest.png)](https://travis-ci.org/zfcampus/zf-rest)
+[![Build Status](https://secure.travis-ci.org/zfcampus/zf-rest.svg?branch=master)](https://secure.travis-ci.org/zfcampus/zf-rest)
+[![Coverage Status](https://coveralls.io/repos/github/zfcampus/zf-rest/badge.svg?branch=master)](https://coveralls.io/github/zfcampus/zf-rest?branch=master)
 
 Introduction
 ------------
@@ -27,14 +28,14 @@ Installation
 Run the following `composer` command:
 
 ```console
-$ composer require "zfcampus/zf-rest:~1.0-dev"
+$ composer require zfcampus/zf-rest
 ```
 
 Alternately, manually add the following to your `composer.json`, in the `require` section:
 
 ```javascript
 "require": {
-    "zfcampus/zf-rest": "~1.0-dev"
+    "zfcampus/zf-rest": "^1.3"
 }
 ```
 
@@ -44,18 +45,23 @@ Finally, add the module name to your project's `config/application.config.php` u
 key:
 
 ```php
-return array(
+return [
     /* ... */
-    'modules' => array(
+    'modules' => [
         /* ... */
         'ZF\Rest',
-    ),
+    ],
     /* ... */
-);
+];
 ```
 
+> ### zf-component-installer
+>
+> If you use [zf-component-installer](https://github.com/zendframework/zf-component-installer),
+> that plugin will install zf-rest as a module for you.
+
 Configuration
--------------
+=============
 
 ### User Configuration
 
@@ -143,56 +149,56 @@ of service attacks on your API.
 #### User configuration example:
 
 ```php
-'AddressBook\\V1\\Rest\\Contact\\Controller' => array(
+'AddressBook\\V1\\Rest\\Contact\\Controller' => [
     'listener' => 'AddressBook\\V1\\Rest\\Contact\\ContactResource',
     'route_name' => 'address-book.rest.contact',
     'route_identifier_name' => 'contact_id',
     'collection_name' => 'contact',
-    'entity_http_methods' => array(
+    'entity_http_methods' => [
         0 => 'GET',
         1 => 'PATCH',
         2 => 'PUT',
         3 => 'DELETE',
-    ),
-    'collection_http_methods' => array(
+    ],
+    'collection_http_methods' => [
         0 => 'GET',
         1 => 'POST',
-    ),
-    'collection_query_whitelist' => array(),
+    ],
+    'collection_query_whitelist' => [],
     'page_size' => 25,
     'page_size_param' => null,
     'entity_class' => 'AddressBook\\V1\\Rest\\Contact\\ContactEntity',
     'collection_class' => 'AddressBook\\V1\\Rest\\Contact\\ContactCollection',
     'service_name' => 'Contact',
-),
+],
 ```
 
 ### System Configuration
 
 The `zf-rest` module provides the following configuration to ensure it operates properly in a Zend
-Framework 2 application.
+Framework application.
 
 ```php
-'service_manager' => array(
-    'invokables' => array(
+'service_manager' => [
+    'invokables' => [
         'ZF\Rest\RestParametersListener' => 'ZF\Rest\Listener\RestParametersListener',
-    ),
-    'factories' => array(
+    ],
+    'factories' => [
         'ZF\Rest\OptionsListener' => 'ZF\Rest\Factory\OptionsListenerFactory',
-    ),
-),
+    ],
+],
 
-'controllers' => array(
-    'abstract_factories' => array(
-        'ZF\Rest\Factory\RestControllerFactory'
-    )
-),
+'controllers' => [
+    'abstract_factories' => [
+        'ZF\Rest\Factory\RestControllerFactory',
+    ],
+],
 
-'view_manager' => array(
+'view_manager' => [
     // Enable this in your application configuration in order to get full
     // exception stack traces in your API-Problem responses.
     'display_exceptions' => false,
-),
+],
 ```
 
 ZF2 Events
@@ -233,7 +239,7 @@ The following methods are called during `dispatch()`, depending on the HTTP meth
 - `delete($id)` - Triggered by a `DELETE` request to a resource *entity*.
 - `deleteList($data)` - Triggered by a `DELETE` request to a resource *collection*.
 - `fetch($id)` - Triggered by a `GET` request to a resource *entity*.
-- `fetchAll($params = array())` - Triggered by a `GET` request to a resource *collection*.
+- `fetchAll($params = [])` - Triggered by a `GET` request to a resource *collection*.
 - `patch($id, $data)` - Triggered by a `PATCH` request to resource *entity*.
 - `patchList($data)` - Triggered by a `PATCH` request to a resource *collection*.
 - `update($id, $data)` - Triggered by a `PUT` request to a resource *entity*.

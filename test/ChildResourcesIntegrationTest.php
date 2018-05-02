@@ -1,22 +1,27 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2017 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZFTest\Rest;
 
 use Interop\Container\ContainerInterface;
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
 use ReflectionObject;
+use stdClass;
 use Zend\Http\Request;
 use Zend\Mvc\Controller\PluginManager as ControllerPluginManager;
+use Zend\Mvc\Router\Http\TreeRouteStack as V2TreeRouteStack;
+use Zend\Router\Http\TreeRouteStack;
 use Zend\View\HelperPluginManager;
 use Zend\View\Helper\ServerUrl as ServerUrlHelper;
 use Zend\View\Helper\Url as UrlHelper;
 use ZF\ApiProblem\View\ApiProblemRenderer;
 use ZF\Hal\Collection as HalCollection;
+use ZF\Hal\Collection;
 use ZF\Hal\Entity as HalEntity;
+use ZF\Hal\Entity;
 use ZF\Hal\Extractor\LinkCollectionExtractor;
 use ZF\Hal\Extractor\LinkExtractor;
 use ZF\Hal\Link\Link;
@@ -34,6 +39,27 @@ class ChildResourcesIntegrationTest extends TestCase
 {
     use RouteMatchFactoryTrait;
     use TreeRouteStackFactoryTrait;
+
+    /** @var stdClass */
+    private $parent;
+
+    /** @var stdClass */
+    private $child;
+
+    /** @var array */
+    private $collection;
+
+    /** @var TreeRouteStack|V2TreeRouteStack */
+    private $router;
+
+    /** @var HelperPluginManager */
+    private $helpers;
+
+    /** @var HalJsonRenderer */
+    private $renderer;
+
+    /** @var ControllerPluginManager */
+    private $plugins;
 
     public function setUp()
     {
@@ -241,7 +267,7 @@ class ChildResourcesIntegrationTest extends TestCase
         $this->assertEquals('luke', $id);
 
         $result = $controller->get('luke');
-        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $this->assertInstanceOf(Entity::class, $result);
         $self = $result->getLinks()->get('self');
         $params = $self->getRouteParams();
         $this->assertArrayHasKey('child_id', $params);
@@ -288,7 +314,7 @@ class ChildResourcesIntegrationTest extends TestCase
         $this->helpers->get('url')->setRouteMatch($matches);
 
         $result = $controller->getList();
-        $this->assertInstanceOf('ZF\Hal\Collection', $result);
+        $this->assertInstanceOf(Collection::class, $result);
 
         // Now, what happens if we render this?
         $model = new HalJsonModel();
@@ -309,7 +335,7 @@ class ChildResourcesIntegrationTest extends TestCase
             $this->assertObjectHasAttribute('_links', $child);
             $this->assertObjectHasAttribute('self', $child->_links);
             $this->assertObjectHasAttribute('href', $child->_links->self);
-            $this->assertRegexp(
+            $this->assertRegExp(
                 '#^http://localhost.localdomain/api/parent/anakin/child/[^/]+$#',
                 $child->_links->self->href
             );

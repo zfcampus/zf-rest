@@ -2,9 +2,13 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 1.3.4 - TBD
+## 1.4.0 - 2018-05-02
 
 ### Added
+
+- [#107](https://github.com/zfcampus/zf-rest/pull/107) adds support for PHP 7.2.
+
+### Changed
 
 - Nothing.
 
@@ -14,7 +18,7 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Removed
 
-- Nothing.
+- [#107](https://github.com/zfcampus/zf-rest/pull/107) removes support for HHVM.
 
 ### Fixed
 

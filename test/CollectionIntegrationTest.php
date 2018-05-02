@@ -1,13 +1,13 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2017 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZFTest\Rest;
 
 use Interop\Container\ContainerInterface;
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\SharedEventManager;
 use Zend\Http\PhpEnvironment\Request;
@@ -15,10 +15,12 @@ use Zend\Http\PhpEnvironment\Response;
 use Zend\Mvc\Controller\ControllerManager;
 use Zend\Mvc\Controller\PluginManager as ControllerPluginManager;
 use Zend\Mvc\MvcEvent;
+use Zend\Mvc\Router\Http\TreeRouteStack as V2TreeRouteStack;
 use Zend\Mvc\Router\RouteMatch as V2RouteMatch;
-use Zend\Mvc\Service\EventManagerFactory;
+use Zend\Mvc\Service\ControllerPluginManagerFactory;
 use Zend\Paginator\Adapter\ArrayAdapter as ArrayPaginator;
 use Zend\Paginator\Paginator;
+use Zend\Router\Http\TreeRouteStack;
 use Zend\Router\RouteMatch;
 use Zend\ServiceManager\Factory\InvokableFactory;
 use Zend\ServiceManager\ServiceManager;
@@ -33,7 +35,9 @@ use ZF\Hal\Extractor\LinkCollectionExtractor;
 use ZF\Hal\Extractor\LinkExtractor;
 use ZF\Hal\Link\LinkUrlBuilder;
 use ZF\Hal\Plugin\Hal as HalHelper;
+use ZF\Hal\View\HalJsonModel;
 use ZF\Hal\View\HalJsonRenderer;
+use ZF\Rest\Factory\RestControllerFactory;
 use ZF\Rest\Resource;
 use ZF\Rest\RestController;
 
@@ -44,6 +48,33 @@ class CollectionIntegrationTest extends TestCase
 {
     use TreeRouteStackFactoryTrait;
 
+    /** @var HalHelper */
+    private $linksHelper;
+
+    /** @var HelperPluginManager */
+    private $helpers;
+
+    /** @var HalJsonRenderer */
+    private $renderer;
+
+    /** @var TreeRouteStack|V2TreeRouteStack */
+    private $router;
+
+    /** @var Request */
+    private $request;
+
+    /** @var Response */
+    private $response;
+
+    /** @var RouteMatch|V2RouteMatch */
+    private $matches;
+
+    /** @var TestAsset\CollectionIntegrationListener */
+    private $listeners;
+
+    /** @var RestController */
+    private $controller;
+
     public function setUp()
     {
         $this->setUpRenderer();
@@ -52,10 +83,10 @@ class CollectionIntegrationTest extends TestCase
 
     public function setUpHelpers()
     {
-        if (isset($this->helpers)) {
+        if ($this->helpers) {
             return;
         }
-        $this->setupRouter();
+        $this->setUpRouter();
 
         $urlHelper = new UrlHelper();
         $urlHelper->setRouter($this->router);
@@ -86,14 +117,14 @@ class CollectionIntegrationTest extends TestCase
 
     public function setUpRenderer()
     {
-        $this->setupHelpers();
+        $this->setUpHelpers();
         $this->renderer = $renderer = new HalJsonRenderer(new ApiProblemRenderer());
         $renderer->setHelperPluginManager($this->helpers);
     }
 
     public function setUpRouter()
     {
-        if (isset($this->router)) {
+        if ($this->router) {
             return;
         }
 
@@ -124,10 +155,10 @@ class CollectionIntegrationTest extends TestCase
     public function setUpCollection()
     {
         $collection = [];
-        for ($i = 1; $i <= 10; $i += 1) {
+        for ($i = 1; $i <= 10; $i++) {
             $collection[] = (object) [
                 'id'   => $i,
-                'name' => "$i of 10",
+                'name' => sprintf('%d of 10', $i),
             ];
         }
 
@@ -138,7 +169,7 @@ class CollectionIntegrationTest extends TestCase
 
     public function setUpListeners()
     {
-        if (isset($this->listeners)) {
+        if ($this->listeners) {
             return;
         }
 
@@ -178,7 +209,7 @@ class CollectionIntegrationTest extends TestCase
             'controllers' => [],
             'selectors'  => [
                 'HalJson' => [
-                    'ZF\Hal\View\HalJsonModel' => [
+                    HalJsonModel::class => [
                         'application/json',
                     ],
                 ],
@@ -189,7 +220,7 @@ class CollectionIntegrationTest extends TestCase
 
     public function setUpRequest()
     {
-        if (isset($this->request)) {
+        if ($this->request) {
             return;
         }
 
@@ -209,9 +240,10 @@ class CollectionIntegrationTest extends TestCase
 
     public function setUpResponse()
     {
-        if (isset($this->response)) {
+        if ($this->response) {
             return;
         }
+
         $this->response = new Response();
     }
 
@@ -243,7 +275,7 @@ class CollectionIntegrationTest extends TestCase
             ]);
         });
         $result = $this->controller->dispatch($this->request, $this->response);
-        $this->assertInstanceOf('ZF\Hal\View\HalJsonModel', $result);
+        $this->assertInstanceOf(HalJsonModel::class, $result);
 
         $json = $this->renderer->render($result);
         $payload = json_decode($json, true);
@@ -302,7 +334,7 @@ class CollectionIntegrationTest extends TestCase
 
         $services->setFactory(
             'ControllerPluginManager',
-            'Zend\Mvc\Service\ControllerPluginManagerFactory'
+            ControllerPluginManagerFactory::class
         );
 
         $collection = $this->setUpCollection();
@@ -323,7 +355,7 @@ class CollectionIntegrationTest extends TestCase
         });
 
         $controllers = new ControllerManager($services);
-        $controllers->addAbstractFactory('ZF\Rest\Factory\RestControllerFactory');
+        $controllers->addAbstractFactory(RestControllerFactory::class);
         $services->setService('ControllerManager', $controllers);
 
         $plugins = $services->get('ControllerPluginManager');
@@ -343,7 +375,7 @@ class CollectionIntegrationTest extends TestCase
         $this->setUpContentNegotiation($controller);
 
         $result = $controller->dispatch($this->request, $this->response);
-        $this->assertInstanceOf('ZF\Hal\View\HalJsonModel', $result);
+        $this->assertInstanceOf(HalJsonModel::class, $result);
 
         $json = $this->renderer->render($result);
         $payload = json_decode($json, true);
@@ -383,7 +415,7 @@ class CollectionIntegrationTest extends TestCase
         $this->assertInstanceOf(Resource::class, $resource);
         $params = $resource->getQueryParams();
 
-        $this->assertInstanceOf('Zend\Stdlib\Parameters', $params);
+        $this->assertInstanceOf(Parameters::class, $params);
         $this->assertSame('foo', $params->get('query'));
         $this->assertFalse($params->offsetExists('bar'));
     }
