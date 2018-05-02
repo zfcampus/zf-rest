@@ -34,7 +34,7 @@ class RestControllerFactory implements AbstractFactoryInterface
      *
      * Provided for backwards compatibility; proxies to canCreate().
      *
-     * @param ContainerInterface $controllers
+     * @param ContainerInterface $container
      * @param string $requestedName
      * @return bool
      */
