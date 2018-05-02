@@ -1,7 +1,7 @@
 ZF REST
 =======
 
-[![Build Status](https://travis-ci.org/zfcampus/zf-rest.svg?branch=master)](https://travis-ci.org/zfcampus/zf-rest)
+[![Build Status](https://secure.travis-ci.org/zfcampus/zf-rest.svg?branch=master)](https://secure.travis-ci.org/zfcampus/zf-rest)
 [![Coverage Status](https://coveralls.io/repos/github/zfcampus/zf-rest/badge.svg?branch=master)](https://coveralls.io/github/zfcampus/zf-rest?branch=master)
 
 Introduction
