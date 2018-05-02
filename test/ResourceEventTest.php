@@ -1,14 +1,16 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2017 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZFTest\Rest;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
 use Zend\Http\Request as HttpRequest;
 use Zend\InputFilter\InputFilter;
+use Zend\Mvc\Router\RouteMatch as V2RouteMatch;
+use Zend\Router\RouteMatch;
 use Zend\Stdlib\Parameters;
 use ZF\MvcAuth\Identity\GuestIdentity;
 use ZF\Rest\ResourceEvent;
@@ -16,6 +18,15 @@ use ZF\Rest\ResourceEvent;
 class ResourceEventTest extends TestCase
 {
     use RouteMatchFactoryTrait;
+
+    /** @var RouteMatch|V2RouteMatch */
+    private $matches;
+
+    /** @var Parameters */
+    private $query;
+
+    /** @var ResourceEvent */
+    private $event;
 
     public function setUp()
     {
@@ -70,6 +81,8 @@ class ResourceEventTest extends TestCase
 
     /**
      * @depends testRouteMatchIsMutable
+     *
+     * @param ResourceEvent $event
      */
     public function testRouteMatchIsNullable(ResourceEvent $event)
     {
@@ -79,6 +92,8 @@ class ResourceEventTest extends TestCase
 
     /**
      * @depends testQueryParamsAreMutable
+     *
+     * @param ResourceEvent $event
      */
     public function testQueryParamsAreNullable(ResourceEvent $event)
     {
@@ -88,6 +103,8 @@ class ResourceEventTest extends TestCase
 
     /**
      * @depends testRequestIsMutable
+     *
+     * @param ResourceEvent $event
      */
     public function testRequestIsNullable(ResourceEvent $event)
     {

@@ -1,32 +1,42 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2017 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZFTest\Rest;
 
 use Interop\Container\ContainerInterface;
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use ReflectionObject;
 use stdClass;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\SharedEventManager;
+use Zend\Http\Headers;
 use Zend\Http\Response;
 use Zend\InputFilter\InputFilter;
 use Zend\Mvc\Controller\PluginManager;
 use Zend\Mvc\MvcEvent;
+use Zend\Mvc\Router\SimpleRouteStack as V2SimpleRouteStack;
 use Zend\Paginator\Adapter\ArrayAdapter as ArrayPaginator;
 use Zend\Paginator\Paginator;
+use Zend\Router\SimpleRouteStack;
 use Zend\Stdlib\Parameters;
+use Zend\Stdlib\ResponseInterface;
 use Zend\View\Helper\ServerUrl as ServerUrlHelper;
 use Zend\View\Helper\Url as UrlHelper;
+use Zend\View\Model\ModelInterface;
 use ZF\ApiProblem\ApiProblem;
+use ZF\ApiProblem\ApiProblemResponse;
+use ZF\ApiProblem\Exception\DomainException;
 use ZF\ContentNegotiation\ControllerPlugin\BodyParams;
 use ZF\ContentNegotiation\ParameterDataContainer;
+use ZF\ContentNegotiation\ViewModel;
 use ZF\Hal\Collection as HalCollection;
+use ZF\Hal\Collection;
 use ZF\Hal\Entity as HalEntity;
+use ZF\Hal\Entity;
 use ZF\Hal\Extractor\LinkCollectionExtractor;
 use ZF\Hal\Extractor\LinkExtractor;
 use ZF\Hal\Link\Link;
@@ -35,6 +45,7 @@ use ZF\Hal\Plugin\Hal as HalHelper;
 use ZF\MvcAuth\Identity\IdentityInterface;
 use ZF\Rest\Exception;
 use ZF\Rest\Resource;
+use ZF\Rest\ResourceEvent;
 use ZF\Rest\RestController;
 
 /**
@@ -45,6 +56,18 @@ class RestControllerTest extends TestCase
     use RouteMatchFactoryTrait;
     use SimpleRouteStackFactoryTrait;
     use SegmentRouteFactoryTrait;
+
+    /** @var RestController */
+    private $controller;
+
+    /** @var SimpleRouteStack|V2SimpleRouteStack */
+    private $router;
+
+    /** @var MvcEvent */
+    private $event;
+
+    /** @var Resource */
+    private $resource;
 
     public function setUp()
     {
@@ -108,7 +131,7 @@ class RestControllerTest extends TestCase
         ]));
 
         $result = $this->controller->getList();
-        $this->assertProblemApiResult(416, "Page size is out of range, maximum page size is 2", $result);
+        $this->assertProblemApiResult(416, 'Page size is out of range, maximum page size is 2', $result);
     }
 
     public function testReturnsErrorResponseWhenPageSizeInNotPositive()
@@ -161,7 +184,7 @@ class RestControllerTest extends TestCase
         ]));
 
         $result = $this->controller->getList();
-        $this->assertProblemApiResult(416, "Page size is out of range, minimum page size is 2", $result);
+        $this->assertProblemApiResult(416, 'Page size is out of range, minimum page size is 2', $result);
     }
 
     /**
@@ -171,7 +194,7 @@ class RestControllerTest extends TestCase
     {
         $request = $this->controller->getRequest();
         $request->setQuery(new Parameters([
-            'page'      => '1/',
+            'page' => '1/',
         ]));
 
         $result = $this->controller->getList();
@@ -180,7 +203,7 @@ class RestControllerTest extends TestCase
 
     public function assertProblemApiResult($expectedStatus, $expectedDetail, $result)
     {
-        $this->assertInstanceOf('ZF\ApiProblem\ApiProblem', $result);
+        $this->assertInstanceOf(ApiProblem::class, $result);
         $problem = $result->toArray();
         $this->assertEquals($expectedStatus, $problem['status']);
         $this->assertContains($expectedDetail, $problem['detail']);
@@ -208,7 +231,7 @@ class RestControllerTest extends TestCase
         });
 
         $result = $this->controller->create([]);
-        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $this->assertInstanceOf(Entity::class, $result);
         $response = $this->controller->getResponse();
         $headers  = $response->getHeaders();
         $this->assertFalse($headers->has('Location'));
@@ -222,15 +245,17 @@ class RestControllerTest extends TestCase
         });
 
         $result = $this->controller->create([]);
-        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $this->assertInstanceOf(Entity::class, $result);
         $this->assertEquals($entity, $result->getEntity());
         return $this->controller->getResponse();
     }
 
     /**
      * @depends testCreateReturnsHalEntityOnSuccess
+     *
+     * @param ResponseInterface $response
      */
-    public function testSuccessfulCreationWithEntityIdentifierSetsResponseLocationHeader($response)
+    public function testSuccessfulCreationWithEntityIdentifierSetsResponseLocationHeader(ResponseInterface $response)
     {
         $headers = $response->getHeaders();
         $this->assertTrue($headers->has('Location'));
@@ -239,10 +264,14 @@ class RestControllerTest extends TestCase
     /**
      * @group 95
      * @group 96
+     *
      * @depends testCreateReturnsHalEntityOnSuccess
+     *
+     * @param ResponseInterface $response
      */
-    public function testSuccessfulCreationWithEntityIdentifierSetsResponseContentLocationHeader($response)
-    {
+    public function testSuccessfulCreationWithEntityIdentifierSetsResponseContentLocationHeader(
+        ResponseInterface $response
+    ) {
         $headers = $response->getHeaders();
         $this->assertTrue($headers->has('Content-Location'));
     }
@@ -264,7 +293,7 @@ class RestControllerTest extends TestCase
         });
 
         $result = $this->controller->delete('foo');
-        $this->assertInstanceOf('Zend\Http\Response', $result);
+        $this->assertInstanceOf(Response::class, $result);
         $this->assertEquals(204, $result->getStatusCode());
     }
 
@@ -285,7 +314,7 @@ class RestControllerTest extends TestCase
         });
 
         $result = $this->controller->deleteList([1, 2, 3]);
-        $this->assertInstanceOf('Zend\Http\Response', $result);
+        $this->assertInstanceOf(Response::class, $result);
         $this->assertEquals(204, $result->getStatusCode());
     }
 
@@ -296,7 +325,7 @@ class RestControllerTest extends TestCase
         });
 
         $result = $this->controller->deleteList(null);
-        $this->assertInstanceOf('Zend\Http\Response', $result);
+        $this->assertInstanceOf(Response::class, $result);
         $this->assertEquals(204, $result->getStatusCode());
     }
 
@@ -318,7 +347,7 @@ class RestControllerTest extends TestCase
         });
 
         $result = $this->controller->get('foo');
-        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $this->assertInstanceOf(Entity::class, $result);
         $this->assertEquals($entity, $result->getEntity());
     }
 
@@ -332,7 +361,7 @@ class RestControllerTest extends TestCase
         });
 
         $result = $this->controller->getList();
-        $this->assertInstanceOf('ZF\Hal\Collection', $result);
+        $this->assertInstanceOf(Collection::class, $result);
         $this->assertEquals($items, $result->getCollection());
         return $result;
     }
@@ -355,7 +384,7 @@ class RestControllerTest extends TestCase
         $request->setQuery(new Parameters(['page' => 2]));
 
         $result = $this->controller->getList();
-        $this->assertInstanceOf('ZF\Hal\Collection', $result);
+        $this->assertInstanceOf(Collection::class, $result);
         $this->assertSame($paginator, $result->getCollection());
         $this->assertEquals(2, $result->getPage());
         $this->assertEquals(1, $result->getPageSize());
@@ -382,7 +411,7 @@ class RestControllerTest extends TestCase
         ]));
 
         $result = $this->controller->getList();
-        $this->assertInstanceOf('ZF\Hal\Collection', $result);
+        $this->assertInstanceOf(Collection::class, $result);
         $this->assertSame($paginator, $result->getCollection());
         $this->assertEquals(2, $result->getPage());
         $this->assertEquals(1, $result->getPageSize());
@@ -390,8 +419,10 @@ class RestControllerTest extends TestCase
 
     /**
      * @depends testReturnsHalCollectionForNonPaginatedList
+     *
+     * @param Collection $collection
      */
-    public function testHalCollectionReturnedIncludesRoutes($collection)
+    public function testHalCollectionReturnedIncludesRoutes(Collection $collection)
     {
         $this->assertEquals('resource', $collection->getCollectionRoute());
         $this->assertEquals('resource', $collection->getEntityRoute());
@@ -415,7 +446,7 @@ class RestControllerTest extends TestCase
         $request->setQuery(new Parameters(['page' => 2]));
 
         $result = $this->controller->head();
-        $this->assertInstanceOf('ZF\Hal\Collection', $result);
+        $this->assertInstanceOf(Collection::class, $result);
         $this->assertSame($paginator, $result->getCollection());
     }
 
@@ -427,7 +458,7 @@ class RestControllerTest extends TestCase
         });
 
         $result = $this->controller->head('foo');
-        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $this->assertInstanceOf(Entity::class, $result);
         $this->assertEquals($entity, $result->getEntity());
     }
 
@@ -440,7 +471,7 @@ class RestControllerTest extends TestCase
         sort($httpMethods);
 
         $result = $this->controller->options();
-        $this->assertInstanceOf('Zend\Http\Response', $result);
+        $this->assertInstanceOf(Response::class, $result);
         $this->assertEquals(204, $result->getStatusCode());
         $headers = $result->getHeaders();
         $this->assertTrue($headers->has('allow'));
@@ -462,7 +493,7 @@ class RestControllerTest extends TestCase
         $this->event->getRouteMatch()->setParam('id', 'foo');
 
         $result = $this->controller->options();
-        $this->assertInstanceOf('Zend\Http\Response', $result);
+        $this->assertInstanceOf(Response::class, $result);
         $this->assertEquals(204, $result->getStatusCode());
         $headers = $result->getHeaders();
         $this->assertTrue($headers->has('allow'));
@@ -486,7 +517,7 @@ class RestControllerTest extends TestCase
         $this->event->getRouteMatch()->setParam('user_id', 'foo');
 
         $result = $this->controller->options();
-        $this->assertInstanceOf('Zend\Http\Response', $result);
+        $this->assertInstanceOf(Response::class, $result);
         $this->assertEquals(204, $result->getStatusCode());
         $headers = $result->getHeaders();
         $this->assertTrue($headers->has('allow'));
@@ -515,7 +546,7 @@ class RestControllerTest extends TestCase
         });
 
         $result = $this->controller->patch('foo', $entity);
-        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $this->assertInstanceOf(Entity::class, $result);
         $this->assertEquals($entity, $result->getEntity());
     }
 
@@ -537,7 +568,7 @@ class RestControllerTest extends TestCase
         });
 
         $result = $this->controller->update('foo', $entity);
-        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $this->assertInstanceOf(Entity::class, $result);
         $this->assertEquals($entity, $result->getEntity());
     }
 
@@ -561,7 +592,7 @@ class RestControllerTest extends TestCase
         });
 
         $result = $this->controller->replaceList($items);
-        $this->assertInstanceOf('ZF\Hal\Collection', $result);
+        $this->assertInstanceOf(Collection::class, $result);
         return $result;
     }
 
@@ -577,7 +608,8 @@ class RestControllerTest extends TestCase
     public function testOnDispatchRaisesDomainExceptionOnMissingEntity()
     {
         $controller = new RestController();
-        $this->setExpectedException('ZF\ApiProblem\Exception\DomainException', 'No resource');
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('No resource');
         $controller->onDispatch($this->event);
     }
 
@@ -585,7 +617,8 @@ class RestControllerTest extends TestCase
     {
         $controller = new RestController();
         $controller->setResource($this->resource);
-        $this->setExpectedException('ZF\ApiProblem\Exception\DomainException', 'route');
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('route');
         $controller->onDispatch($this->event);
     }
 
@@ -604,7 +637,7 @@ class RestControllerTest extends TestCase
         $this->event->getRouteMatch()->setParam('id', 'foo');
 
         $result = $this->controller->onDispatch($this->event);
-        $this->assertInstanceof('Zend\View\Model\ModelInterface', $result);
+        $this->assertInstanceOf(ModelInterface::class, $result);
     }
 
     public function testValidMethodReturningHalOrApiValueCastsReturnToContentNegotiationViewModel()
@@ -623,7 +656,7 @@ class RestControllerTest extends TestCase
         $this->event->getRouteMatch()->setParam('id', 'foo');
 
         $result = $this->controller->onDispatch($this->event);
-        $this->assertInstanceof('ZF\ContentNegotiation\ViewModel', $result);
+        $this->assertInstanceOf(ViewModel::class, $result);
     }
 
     public function testPassingIdentifierToConstructorAllowsListeningOnThatIdentifier()
@@ -664,7 +697,7 @@ class RestControllerTest extends TestCase
         $this->controller->setCollectionName('resources');
 
         $result = $this->controller->getList();
-        $this->assertInstanceOf('ZF\Hal\Collection', $result);
+        $this->assertInstanceOf(Collection::class, $result);
         $this->assertEquals('resources', $result->getCollectionName());
     }
 
@@ -775,9 +808,9 @@ class RestControllerTest extends TestCase
     public function testDeleteTriggersPreAndPostEvents()
     {
         $test = (object) [
-            'pre'       => false,
+            'pre'     => false,
             'pre_id'  => false,
-            'post'      => false,
+            'post'    => false,
             'post_id' => false,
         ];
 
@@ -804,12 +837,12 @@ class RestControllerTest extends TestCase
     public function testDeleteListTriggersPreAndPostEvents()
     {
         $test = (object) [
-            'pre'       => false,
-            'post'      => false,
+            'pre'  => false,
+            'post' => false,
         ];
 
         $this->controller->getEventManager()->attach('deleteList.pre', function ($e) use ($test) {
-            $test->pre      = true;
+            $test->pre = true;
         });
         $this->controller->getEventManager()->attach('deleteList.post', function ($e) use ($test) {
             $test->post = true;
@@ -827,11 +860,11 @@ class RestControllerTest extends TestCase
     public function testGetTriggersPreAndPostEvents()
     {
         $test = (object) [
-            'pre'       => false,
-            'pre_id'    => false,
-            'post'      => false,
-            'post_id'   => false,
-            'entity'    => false,
+            'pre'     => false,
+            'pre_id'  => false,
+            'post'    => false,
+            'post_id' => false,
+            'entity'  => false,
         ];
 
         $this->controller->getEventManager()->attach('get.pre', function ($e) use ($test) {
@@ -839,9 +872,9 @@ class RestControllerTest extends TestCase
             $test->pre_id = $e->getParam('id');
         });
         $this->controller->getEventManager()->attach('get.post', function ($e) use ($test) {
-            $test->post = true;
+            $test->post    = true;
             $test->post_id = $e->getParam('id');
-            $test->entity = $e->getParam('entity');
+            $test->entity  = $e->getParam('entity');
         });
 
         $data   = ['id' => 'foo', 'data' => 'bar'];
@@ -925,7 +958,7 @@ class RestControllerTest extends TestCase
         ];
 
         $this->controller->getEventManager()->attach('getList.pre', function ($e) use ($test) {
-            $test->pre    = true;
+            $test->pre = true;
         });
         $this->controller->getEventManager()->attach('getList.post', function ($e) use ($test) {
             $test->post = true;
@@ -1075,16 +1108,15 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->dispatch($request, $this->controller->getResponse());
 
-        $this->assertInstanceOf('ZF\ApiProblem\ApiProblemResponse', $result);
+        $this->assertInstanceOf(ApiProblemResponse::class, $result);
         $this->assertSame($problem, $result->getApiProblem());
     }
 
-    /**
-     * @expectedException \ZF\ApiProblem\Exception\DomainException
-     */
     public function testGetResourceThrowsExceptionOnMissingResource()
     {
         $controller = new RestController();
+
+        $this->expectException(DomainException::class);
         $controller->getResource();
     }
 
@@ -1113,7 +1145,12 @@ class RestControllerTest extends TestCase
 
     /**
      * @group 36
+     *
      * @dataProvider eventsProducingApiProblems
+     *
+     * @param string $event
+     * @param string $method
+     * @param null|string $args
      */
     public function testExceptionDuringDeleteReturnsApiProblem($event, $method, $args)
     {
@@ -1320,14 +1357,16 @@ class RestControllerTest extends TestCase
         });
 
         $result = $this->controller->patchList($items);
-        $this->assertInstanceOf('ZF\Hal\Collection', $result);
+        $this->assertInstanceOf(Collection::class, $result);
         return $result;
     }
 
     /**
      * @depends testPatchListReturnsHalCollectionOnSuccess
+     *
+     * @param Collection $collection
      */
-    public function testPatchListReturnsHalCollectionWithRoutesInjected($collection)
+    public function testPatchListReturnsHalCollectionWithRoutesInjected(Collection $collection)
     {
         $this->assertEquals('resource', $collection->getCollectionRoute());
         $this->assertEquals('resource', $collection->getEntityRoute());
@@ -1469,6 +1508,12 @@ class RestControllerTest extends TestCase
 
     /**
      * @dataProvider validResourcePayloads
+     *
+     * @param string $method
+     * @param string $event
+     * @param null|string $id
+     * @param null|array $data
+     * @param bool|array $returnValue
      */
     public function testInjectsContentValidationInputFilterFromMvcEventIntoResourceEvent(
         $method,
@@ -1478,9 +1523,9 @@ class RestControllerTest extends TestCase
         $returnValue
     ) {
         $resourceEvent = null;
-        $this->resource->getEventManager()->attach($event, function ($e) use ($returnValue, & $resourceEvent) {
+        $this->resource->getEventManager()->attach($event, function ($e) use ($returnValue, &$resourceEvent) {
             $resourceEvent = $e;
-            return $resource;
+            return $returnValue;
         });
 
         $this->controller->setCollectionHttpMethods(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
@@ -1503,7 +1548,7 @@ class RestControllerTest extends TestCase
 
         $result = $this->controller->onDispatch($this->event);
 
-        $this->assertInstanceOf('ZF\Rest\ResourceEvent', $resourceEvent);
+        $this->assertInstanceOf(ResourceEvent::class, $resourceEvent);
         $this->assertSame($inputFilter, $resourceEvent->getInputFilter());
     }
 
@@ -1540,8 +1585,11 @@ class RestControllerTest extends TestCase
     }
 
     /**
-     * @dataProvider entitiesReturnedForCollections
      * @group 31
+     *
+     * @dataProvider entitiesReturnedForCollections
+     *
+     * @param stdClass $entity
      */
     public function testGetListAllowsReturningEntitiesInsteadOfCollections($entity)
     {
@@ -1550,7 +1598,7 @@ class RestControllerTest extends TestCase
         });
 
         $result = $this->controller->getList();
-        $this->assertInstanceOf('ZF\Hal\Entity', $result);
+        $this->assertInstanceOf(Entity::class, $result);
         $this->assertSame($entity, $result->getEntity());
     }
 
@@ -1571,9 +1619,14 @@ class RestControllerTest extends TestCase
 
     /**
      * @group 68
+     *
      * @dataProvider methods
+     *
+     * @param string $method
+     * @param string $event
+     * @param array $argv
      */
-    public function testAllowsReturningResponsesReturnedFromResources($method, $event, $argv)
+    public function testAllowsReturningResponsesReturnedFromResources($method, $event, array $argv)
     {
         $response = new Response();
         $response->setStatusCode(418);
@@ -1593,7 +1646,7 @@ class RestControllerTest extends TestCase
     public function testNonArrayToReplaceListReturnsApiProblem()
     {
         $response = $this->controller->replaceList(new stdClass());
-        $this->assertInstanceOf('ZF\ApiProblem\ApiProblem', $response);
+        $this->assertInstanceOf(ApiProblem::class, $response);
         $details = $response->toArray();
         $this->assertEquals(400, $details['status']);
     }
@@ -1818,9 +1871,12 @@ class RestControllerTest extends TestCase
     /**
      * @group 95
      * @group 96
+     *
      * @depends testLocationHeaderGeneratedDuringCreateContainsOnlyLinkHref
+     *
+     * @param Headers $headers
      */
-    public function testContentLocationHeaderIsGeneratedOnlyFromLinkHref($headers)
+    public function testContentLocationHeaderIsGeneratedOnlyFromLinkHref(Headers $headers)
     {
         $this->assertTrue($headers->has('Content-Location'));
         $location = $headers->get('Content-Location')->getFieldValue();
