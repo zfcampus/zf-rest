@@ -237,6 +237,12 @@ class RestControllerFactory implements AbstractFactoryInterface
 
                         $query  = $request->getQuery();
                         $params = new Parameters([]);
+
+                        // If a query Input Filter exists, use its keys as query whitelist
+                        // instead of admin query whitelist field
+                        if ($resource->getInputFilter()) {
+                            $whitelist = array_keys($resource->getInputFilter()->getInputs());
+                        }
                         foreach ($query as $key => $value) {
                             if (! in_array($key, $whitelist)) {
                                 continue;
