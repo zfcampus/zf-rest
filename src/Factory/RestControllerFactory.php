@@ -242,7 +242,8 @@ class RestControllerFactory implements AbstractFactoryInterface
                         if ($resource->getInputFilter()) {
                             $whitelist = array_unique(array_merge(
                                 $whitelist,
-                                array_keys($resource->getInputFilter()->getInputs())));
+                                array_keys($resource->getInputFilter()->getInputs())
+                            ));
                         }
                         foreach ($query as $key => $value) {
                             if (! in_array($key, $whitelist)) {
