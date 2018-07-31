@@ -12,6 +12,7 @@ use Zend\EventManager\EventManager;
 use Zend\EventManager\SharedEventManager;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Http\PhpEnvironment\Response;
+use Zend\InputFilter\InputFilter;
 use Zend\Mvc\Controller\ControllerManager;
 use Zend\Mvc\Controller\PluginManager as ControllerPluginManager;
 use Zend\Mvc\MvcEvent;
@@ -418,5 +419,29 @@ class CollectionIntegrationTest extends TestCase
         $this->assertInstanceOf(Parameters::class, $params);
         $this->assertSame('foo', $params->get('query'));
         $this->assertFalse($params->offsetExists('bar'));
+    }
+
+    public function testFactoryEnabledListenerMergeWhitelistedQueryParamsWithInputFilterKeys()
+    {
+        $services = $this->getServiceManager();
+        $controller = $services->get('ControllerManager')->get('Api\RestController');
+        $controller->setEvent($this->getEvent());
+        $inputFilter = new InputFilter();
+        $inputFilter->add([
+            'name' => 'bar',
+            'required' => false,
+            'allowEmpty' => true
+        ]);
+        $controller->getResource()->setInputFilter($inputFilter);
+        $this->setUpContentNegotiation($controller);
+
+        $controller->dispatch($this->request, $this->response);
+        $resource = $controller->getResource();
+
+        $this->assertInstanceOf(Resource::class, $resource);
+        $params = $resource->getQueryParams();
+
+        $this->assertSame('foo', $params->get('query'));
+        $this->assertSame('baz', $params->get('bar'));
     }
 }

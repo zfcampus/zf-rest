@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 1.4.1 - TBD
+## 1.5.0 - 2018-07-31
 
 ### Added
 
@@ -10,7 +10,8 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Changed
 
-- Nothing.
+- [#115](https://github.com/zfcampus/zf-rest/pull/115) modifies how the query whitelist is generated. If an input filter exists for a `GET` request,
+  the input names will be merged with the whitelist.
 
 ### Deprecated
 
