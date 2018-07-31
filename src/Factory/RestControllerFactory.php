@@ -237,6 +237,14 @@ class RestControllerFactory implements AbstractFactoryInterface
 
                         $query  = $request->getQuery();
                         $params = new Parameters([]);
+
+                        // If a query Input Filter exists, merge its keys with the query whitelist
+                        if ($resource->getInputFilter()) {
+                            $whitelist = array_unique(array_merge(
+                                $whitelist,
+                                array_keys($resource->getInputFilter()->getInputs())
+                            ));
+                        }
                         foreach ($query as $key => $value) {
                             if (! in_array($key, $whitelist)) {
                                 continue;

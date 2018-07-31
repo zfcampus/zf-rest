@@ -92,6 +92,9 @@ these parameters present in the request will also be used when generating links 
 
 Examples of query string arguments you may want to whitelist include "sort", "filter", etc.
 
+**Starting in 1.5.0**: if a input filter exists for the `GET` HTTP method, its
+keys will be merged with those from configuration.
+
 ##### Sub-key: `controller_class` (optional)
 
 An alternate controller class to use when creating the controller service; it **must** extend
