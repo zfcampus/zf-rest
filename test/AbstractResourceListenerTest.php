@@ -8,6 +8,7 @@ namespace ZFTest\Rest;
 
 use PHPUnit\Framework\TestCase;
 use Zend\EventManager\EventManager;
+use Zend\InputFilter\InputFilter;
 use Zend\Stdlib\Parameters;
 use ZF\Rest\Resource;
 use ZF\Rest\ResourceEvent;

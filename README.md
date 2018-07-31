@@ -92,6 +92,8 @@ these parameters present in the request will also be used when generating links 
 
 Examples of query string arguments you may want to whitelist include "sort", "filter", etc.
 
+Note that if an input filter exists for query params, its keys will be merge with those from configuration
+
 ##### Sub-key: `controller_class` (optional)
 
 An alternate controller class to use when creating the controller service; it **must** extend
