@@ -133,26 +133,4 @@ class AbstractResourceListenerTest extends TestCase
 
         $this->assertEquals($queryParams, $this->listener->testCase->paramsPassedToListener);
     }
-
-    /**
-     * @group 7
-     */
-    public function testDispatchShouldPassMergedWhiteListedQueryParamsWithInputFilterKeysToFetchAllMethod()
-    {
-        $queryParams = new Parameters(['foo' => 'bar', 'baz' => 'bat']);
-        $event = new ResourceEvent();
-        $event->setName('fetchAll');
-        $event->setQueryParams($queryParams);
-
-        $inputFilter = new InputFilter();
-        $inputFilter->add([
-            'name' => 'baz',
-            'required' => false,
-            'allowEmpty' => true
-        ]);
-        $event->setInputFilter($inputFilter);
-        $this->listener->dispatch($event);
-
-        $this->assertEquals($queryParams, $this->listener->testCase->paramsPassedToListener);
-    }
 }
