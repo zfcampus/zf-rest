@@ -1,6 +1,10 @@
 ZF REST
 =======
 
+> ## Repository abandoned 2019-12-31
+>
+> This repository has moved to laminas-api-tools/api-tools-rest.
+
 [![Build Status](https://secure.travis-ci.org/zfcampus/zf-rest.svg?branch=master)](https://secure.travis-ci.org/zfcampus/zf-rest)
 [![Coverage Status](https://coveralls.io/repos/github/zfcampus/zf-rest/badge.svg?branch=master)](https://coveralls.io/github/zfcampus/zf-rest?branch=master)
 
